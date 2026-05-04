@@ -16,6 +16,14 @@ export interface LoginResponse {
   roles?: string[]; // for backward compatibility/direct access
 }
 
+// this is new add 
+export interface SchoolFeature {
+  id: number;
+  is_enabled: boolean;
+  school: number;
+  feature: number;
+}
+
 export interface School {
   id?: number;
   name: string | null;
@@ -31,6 +39,8 @@ export interface School {
   created_at?: string | null;
   updated_at?: string | null;
   login_id?: number | null;
+  school_features?: SchoolFeature[]; // new add 
+  feature_ids?: number[];  // new add 
 }
 
 export interface CreateSchoolPayload {
@@ -42,6 +52,7 @@ export interface CreateSchoolPayload {
   state: string;
   country: string;
   pincode: string;
+  feature_ids: number[]; // new add
   is_active?: boolean;
 }
 
@@ -50,7 +61,7 @@ export interface CreateSchoolResponse {
   code?: string | null;
   name?: string | null;
   email?: string | null;
-  phone?: string | null;
+  phone?: string | null;  
   address?: string | null;
   city?: string | null;
   state?: string | null;
@@ -99,3 +110,4 @@ export interface CreateStaffPayload {
   salary: string;
   is_active: boolean;
 }
+

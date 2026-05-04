@@ -19,4 +19,6 @@ export const API_ENDPOINTS = {
     ASSIGN_CLASS: "/assignClass/",
     SEND_OTP: "/send-otp/",
     VERIFY_OTP: "/verify-otp/",
+    FEATURE: "/feature/",
 }
+

@@ -63,6 +63,7 @@ function Button({
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
       render={render}
+      nativeButton={!asChild} // add this after error 
       {...props}
     >
       {children}
