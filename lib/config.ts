@@ -20,5 +20,10 @@ export const API_ENDPOINTS = {
     SEND_OTP: "/send-otp/",
     VERIFY_OTP: "/verify-otp/",
     FEATURE: "/feature/",
+    GET_FEATURE: "/getfeature/",
+    GET_TEMP_USER_DATA: "/gettempuserdata/",
+    RAZOR_ORDER: "/razor/order/",
+    PAYMENT_VERIFY: "/payment/verify/",
+    
 }
 

@@ -30,6 +30,8 @@ export interface ConfiguredField {
   options: BuilderOption[]
   selected: boolean
   custom?: boolean
+  lockedType?: boolean;     
+  lockedRequired?: boolean;
 }
 
 export interface AdmissionFormFieldPayload {
@@ -38,8 +40,10 @@ export interface AdmissionFormFieldPayload {
   label: string
   field_type: BuilderFieldType
   required: boolean
+  is_required: boolean        // ← ADD THIS
   options?: BuilderOption[]
   order: number
+  map_to_student_field?: string | null  // ← ADD THIS
 }
 
 export interface AdmissionFormSectionPayload {
@@ -57,8 +61,8 @@ export interface AdmissionFormCreatePayload {
   unique_link: string
   fee_type: string
   sections: AdmissionFormSectionPayload[]
-  document_field: string[]
-  fee_structures: { class_name: number | string; amount: number }[]
+  document_fields: string[]         
+  fee_structures_input: { class_name: number; fee_amount: string }[] 
 }
 
 export interface AdmissionFormResponse extends AdmissionFormCreatePayload {
@@ -110,6 +114,7 @@ export const FIELD_TYPE_OPTIONS: BuilderOption[] = [
 ]
 
 export const PERSONAL_FIELD_TEMPLATES: FieldTemplate[] = [
+  { key: "aadhaar_number", label: "Aadhaar Number", type: "number" , required: true },
   { key: "student_full_name", label: "Student Full Name", type: "text", required: true },
   { key: "date_of_birth", label: "Date of Birth", type: "date", required: true },
   {
@@ -170,20 +175,20 @@ export const PERSONAL_FIELD_TEMPLATES: FieldTemplate[] = [
   },
   { key: "previous_school_name", label: "Previous School Name", type: "text" },
   { key: "previous_class", label: "Previous Class", type: "text" },
-  { key: "aadhaar_number", label: "Aadhaar Number", type: "text" },
+  { key: "aadhaar_number", label: "Aadhaar Number", type: "number" },
 ]
 
 export const DOCUMENT_FIELD_TEMPLATES: FieldTemplate[] = [
-  { key: "aadhaar_card_number", label: "Aadhaar Card Number", type: "text", required: true },
+  // { key: "aadhaar_card_number", label: "Aadhaar Card Number", type: "file", required: true },
   { key: "aadhaar_card_file", label: "Aadhaar Card File", type: "file", required: true },
-  { key: "birth_certificate_number", label: "Birth Certificate Number", type: "text", required: true },
+  { key: "birth_certificate_number", label: "Birth Certificate Number", type: "file", required: true },
   { key: "birth_certificate_file", label: "Birth Certificate File", type: "file", required: true },
-  { key: "school_leaving_certificate_number", label: "School Leaving Certificate Number", type: "text" },
+  { key: "school_leaving_certificate_number", label: "School Leaving Certificate Number", type: "file" },
   { key: "school_leaving_certificate_file", label: "School Leaving Certificate File", type: "file" },
   { key: "student_photo", label: "Student Photo", type: "file", required: true },
-  { key: "caste_certificate_number", label: "Caste Certificate Number", type: "text" },
+  { key: "caste_certificate_number", label: "Caste Certificate Number", type: "file" },
   { key: "caste_certificate_file", label: "Caste Certificate File", type: "file" },
-  { key: "income_certificate_number", label: "Income Certificate Number", type: "text" },
+  { key: "income_certificate_number", label: "Income Certificate Number", type: "file" },
   { key: "income_certificate_file", label: "Income Certificate File", type: "file" },
   {
     key: "address_proof_type",

@@ -112,6 +112,10 @@ const FIELD_ICONS: Record<string, any> = {
 function cloneField(field: ConfiguredField, index: number) {
   return {
     ...field,
+
+    // ADD THIS
+    lockedRequired: field.required,
+
     id: `${field.key}-${index}-${Math.random().toString(36).slice(2, 8)}`,
     options: field.options.map((option) => ({ ...option })),
   };
@@ -135,14 +139,27 @@ function createCustomField(
     key,
     label:
       section === "personal" ? "Additional Information" : "Additional Document",
-    type: "text",
-    required: false,
+    type: section === "documents" ? "file" : "text",
+    required: section === "documents",
     placeholder: "",
     options: [],
     selected: true,
     custom: true,
+    lockedType: section === "documents",
+    lockedRequired: false,
   };
 }
+
+const STUDENT_FIELD_MAPPING: Record<string, string> = {
+  student_full_name: "name",
+  surname: "surname",
+  father_name: "father_name",
+  mother_name: "mother_name",
+  date_of_birth: "date_of_birth",
+  mobile_number: "mobile",
+  applying_for_class: "school_class",
+  division: "division",
+};
 
 function toPayloadFields(
   fields: ConfiguredField[],
@@ -155,13 +172,23 @@ function toPayloadFields(
         ? field.options.filter((option) => option.label && option.value)
         : [];
       return {
-        ...(isSelect && validOptions.length > 0
-          ? { options: validOptions }
-          : {}),
         label: field.label.trim(),
+
         field_type: field.type,
+
         required: field.required,
+
+        is_required: field.required,
+
         order: index + 1,
+
+        map_to_student_field: STUDENT_FIELD_MAPPING[field.key] || null,
+
+        ...(field.key === "applying_for_class"
+          ? { options: null }
+          : field.type === "select" && validOptions.length > 0
+            ? { options: validOptions }
+            : {}),
       };
     });
 }
@@ -171,14 +198,19 @@ function FieldCard({
   onToggle,
   onChange,
   onRemove,
+  section,
+  classes,
 }: {
   field: ConfiguredField;
   onToggle: (checked: boolean) => void;
   onChange: (nextField: ConfiguredField) => void;
   onRemove?: () => void;
+  section?: "personal" | "documents";
+  classes: SchoolClass[];
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const IconComponent = FIELD_ICONS[field.type] || FileText;
+  const isDocumentField = section === "documents";
 
   const setOptionValue = (
     optionIndex: number,
@@ -208,17 +240,36 @@ function FieldCard({
   return (
     <Card
       className={cn(
-        "transition-all duration-200",
-        field.selected ? "border-primary/40 bg-primary/5" : "border-border",
+        "transition-all duration-300 rounded-2xl border shadow-sm hover:shadow-md hover:-translate-y-0.5",
+        field.selected
+          ? "border-indigo-300 bg-indigo-50/60 shadow-indigo-100"
+          : "border-border",
       )}
     >
       <CardHeader className="p-4">
         <div className="flex items-start gap-3">
-          <Checkbox
-            checked={field.selected}
-            onCheckedChange={(checked) => onToggle(Boolean(checked))}
-            className="mt-1"
-          />
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <Checkbox
+                    checked={field.selected}
+                    disabled={
+                      field.key === "applying_for_class" || field.lockedType
+                    }
+                    onCheckedChange={(checked) => onToggle(Boolean(checked))}
+                    className="mt-1"
+                  />
+                </div>
+              </TooltipTrigger>
+
+              {field.key === "applying_for_class" && (
+                <TooltipContent>
+                  This field is mandatory and cannot be deselected
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -243,7 +294,9 @@ function FieldCard({
                 Key: <code className="font-mono text-xs">{field.key}</code>
               </span>
               <span>•</span>
-              <span>Type: {field.type}</span>
+              <span>
+                Type: {field.key === "applying_for_class" ? "text" : field.type}
+              </span>
             </div>
           </div>
 
@@ -304,106 +357,123 @@ function FieldCard({
                       onChange({ ...field, label: e.target.value })
                     }
                     placeholder="Field Name"
-                    className="h-9"
+                    className="h-11 rounded-xl"
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-medium">Field Type</Label>
-                  <select
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus:ring-1 focus:ring-primary"
-                    value={field.type}
-                    onChange={(e) =>
-                      onChange({
-                        ...field,
-                        type: e.target.value as BuilderFieldType,
-                        options:
-                          e.target.value === "select" && !field.options.length
-                            ? [{ label: "", value: "" }]
-                            : field.options,
-                      })
-                    }
-                  >
-                    {FIELD_TYPE_OPTIONS.map((option, index) => (
-                      <option
-                        key={option.value || `field-option-${index}`}
-                        value={option.value}
-                      >
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+                {!isDocumentField && (
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium">Field Type</Label>
 
-              <div className="mt-4 flex items-center justify-between py-2">
-                <div>
-                  <Label className="text-sm font-medium">Required Field</Label>
-                  <p className="text-xs text-muted-foreground">
-                    Applicant must fill this field
-                  </p>
-                </div>
-                <Switch
-                  checked={field.required}
-                  onCheckedChange={(checked) =>
-                    onChange({ ...field, required: Boolean(checked) })
-                  }
-                />
-              </div>
-
-              {field.type === "select" && (
-                <div className="mt-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium">
-                      Dropdown Options
-                    </Label>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={addOption}
+                    <select
+                      className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm outline-none focus:ring-1 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-60"
+                      value={
+                        field.key === "applying_for_class" ? "text" : field.type
+                      }
+                      disabled={field.key === "applying_for_class"}
+                      onChange={(e) =>
+                        onChange({
+                          ...field,
+                          type: e.target.value as BuilderFieldType,
+                          options:
+                            e.target.value === "select" && !field.options.length
+                              ? [{ label: "", value: "" }]
+                              : field.options,
+                        })
+                      }
                     >
-                      <Plus className="mr-1 h-3 w-3" />
-                      Add Option
-                    </Button>
-                  </div>
-
-                  <div className="space-y-2">
-                    {field.options.map((option, index) => (
-                      <div
-                        key={`${option.value || "option"}-${index}`}
-                        className="flex gap-2"
-                      >
-                        <Input
-                          value={option.label}
-                          placeholder="Display Label"
-                          onChange={(e) =>
-                            setOptionValue(index, "label", e.target.value)
-                          }
-                          className="h-9"
-                        />
-                        <Input
+                      {FIELD_TYPE_OPTIONS.map((option, index) => (
+                        <option
+                          key={option.value || `field-option-${index}`}
                           value={option.value}
-                          placeholder="Value"
-                          onChange={(e) =>
-                            setOptionValue(index, "value", e.target.value)
-                          }
-                          className="h-9"
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeOption(index)}
-                          className="h-9 w-9 p-0"
                         >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                </div>
-              )}
+                )}
+
+                {!field.lockedRequired && !isDocumentField && (
+                  <div className="mt-4 flex items-center justify-between py-2">
+                    <div>
+                      <Label className="text-sm font-medium">
+                        Required Field
+                      </Label>
+
+                      <p className="text-xs text-muted-foreground">
+                        Applicant must fill this field
+                      </p>
+                    </div>
+
+                    <Switch
+                      checked={field.required}
+                      onCheckedChange={(checked) =>
+                        onChange({
+                          ...field,
+                          required: Boolean(checked),
+                        })
+                      }
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Show options for select fields (except applying_for_class) */}
+              {field.type === "select" &&
+                field.key !== "applying_for_class" && (
+                  <div className="mt-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-medium">
+                        Dropdown Options
+                      </Label>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={addOption}
+                      >
+                        <Plus className="mr-1 h-3 w-3" />
+                        Add Option
+                      </Button>
+                    </div>
+
+                    <div className="space-y-2">
+                      {field.options.map((option, index) => (
+                        <div
+                          key={`${option.value || "option"}-${index}`}
+                          className="flex gap-2"
+                        >
+                          <Input
+                            value={option.label}
+                            placeholder="Display Label"
+                            onChange={(e) =>
+                              setOptionValue(index, "label", e.target.value)
+                            }
+                            className="h-9"
+                          />
+                          <Input
+                            value={option.value}
+                            placeholder="Value"
+                            onChange={(e) =>
+                              setOptionValue(index, "value", e.target.value)
+                            }
+                            className="h-9"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeOption(index)}
+                            className="h-9 w-9 p-0"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
             </CardContent>
           </motion.div>
         )}
@@ -433,14 +503,39 @@ export default function PrincipalFormBuilder({
   //   ),
   // );
   // new add this for the dynamic section
-  const [sections, setSections] = useState([
+  type Section = {
+    id: number;
+    title: string;
+    order: number;
+    fields: ConfiguredField[];
+  };
+
+  const [sections, setSections] = useState<Section[]>([
     {
       id: Date.now(),
       title: "Student Information",
       order: 1,
-      fields: PERSONAL_FIELD_TEMPLATES.map((field, index) =>
-        cloneField(createConfiguredField(field), index),
-      ),
+      fields: PERSONAL_FIELD_TEMPLATES.map((field, index) => {
+        const configuredField = createConfiguredField(field);
+
+        // this for the checkbox
+        // if (configuredField.key === "applying_for_class") {
+        //   configuredField.options = [];
+        // }
+
+        // if (configuredField.key === "applying_for_class") {
+        //   configuredField.options = classes.map((cls) => ({
+        //     label: cls.school_class,
+        //     value: String(cls.id),
+        //   }));
+        // }
+
+        if (configuredField.key === "applying_for_class") {
+          configuredField.options = [];
+        }
+
+        return cloneField(configuredField, index);
+      }),
     },
   ]);
   const [documentFields, setDocumentFields] = useState(
@@ -462,6 +557,9 @@ export default function PrincipalFormBuilder({
   );
   const [classes, setClasses] = useState<SchoolClass[]>([]);
 
+  const [selectedClasses, setSelectedClasses] = useState<
+    { id: number; school_class: string }[]
+  >([]);
   useEffect(() => {
     async function fetchClasses() {
       try {
@@ -482,6 +580,40 @@ export default function PrincipalFormBuilder({
           });
 
           setClasses(sortedData);
+
+          // setSections((prev) =>
+          //   prev.map((section) => ({
+          //     ...section,
+          //     fields: section.fields.map((field) =>
+          //       field.key === "applying_for_class"
+          //         ? {
+          //             ...field,
+          //             options: sortedData.map((cls) => ({
+          //               label: cls.school_class,
+          //               value: String(cls.id),
+          //             })),
+          //           }
+          //         : field,
+          //     ),
+          //   })),
+          // );
+
+          setSections((prev) =>
+            prev.map((section) => ({
+              ...section,
+              fields: section.fields.map((field) =>
+                field.key === "applying_for_class"
+                  ? {
+                      ...field,
+                      options: sortedData.map((cls) => ({
+                        label: cls.school_class,
+                        value: String(cls.id),
+                      })),
+                    }
+                  : field,
+              ),
+            })),
+          );
 
           // Initialize individual fees
           const initialFees: Record<number, string> = {};
@@ -510,24 +642,6 @@ export default function PrincipalFormBuilder({
           //     return field;
           //   }),
           // );
-          setSections((current) =>
-            current.map((section) => ({
-              ...section,
-              fields: section.fields.map((field) => {
-                if (
-                  field.label.toLowerCase().includes("class") ||
-                  field.key.includes("class")
-                ) {
-                  return {
-                    ...field,
-                    options: classOptions,
-                  };
-                }
-
-                return field;
-              }),
-            })),
-          );
         }
       } catch (err) {
         console.error("Failed to fetch classes:", err);
@@ -542,8 +656,7 @@ export default function PrincipalFormBuilder({
       order: index + 1,
       fields: toPayloadFields(section.fields),
     }));
-
-    const document_field = documentFields
+    const document_fields = documentFields
       .filter((field) => field.selected)
       .map((field) => field.label.trim());
 
@@ -562,14 +675,14 @@ export default function PrincipalFormBuilder({
       unique_link: slugify(formTitle),
       fee_type: feeType,
       sections: formattedSections,
-      document_field,
-      fee_structures:
+      document_fields,
+      fee_structures_input:
         feesEnabled && feeType === "individual"
           ? Object.entries(individualFees)
               .filter(([_, amt]) => amt && Number(amt) > 0)
               .map(([id, amt]) => ({
                 class_name: Number(id),
-                amount: Number(amt),
+                fee_amount: Number(amt).toFixed(2),
               }))
           : [],
     };
@@ -593,10 +706,6 @@ export default function PrincipalFormBuilder({
       if (!title.trim()) {
         nextErrors.title = "Form title is required";
       }
-      // if (!payload.sections[0].fields.length) {
-      //   nextErrors.personalFields =
-      //     "At least one student information field is required";
-      // }
       const hasFields = payload.sections.some(
         (section) => section.fields.length > 0,
       );
@@ -604,6 +713,16 @@ export default function PrincipalFormBuilder({
       if (!hasFields) {
         nextErrors.personalFields = "At least one section field is required";
       }
+
+      // this logic is for the check box
+      // const applyingField = sections
+      //   .flatMap((section) => section.fields)
+      //   .find((field) => field.key === "applying_for_class");
+
+      // if (!applyingField || applyingField.options.length === 0) {
+      //   nextErrors.applying_for_class =
+      //     "Please configure the 'Applying For Class' field by selecting at least one class option below.";
+      // }
     }
 
     if (step === 2 && feesEnabled) {
@@ -661,7 +780,7 @@ export default function PrincipalFormBuilder({
   const copyPayload = async () => {
     await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
   };
-  // this add new
+
   const updateFieldList = (
     section: "documents",
     updater: (fields: ConfiguredField[]) => ConfiguredField[],
@@ -674,27 +793,41 @@ export default function PrincipalFormBuilder({
     updater: (fields: ConfiguredField[]) => ConfiguredField[],
   ) => {
     setSections((current) =>
-      current.map((section) =>
-        section.id === sectionId
-          ? {
-              ...section,
-              fields: updater(section.fields),
-            }
-          : section,
-      ),
+      current.map((section) => {
+        if (section.id === sectionId) {
+          return {
+            ...section,
+            fields: updater(section.fields),
+          };
+        }
+        return section;
+      }),
     );
   };
-  // till this add new
+
+  const sortFields = (fields: ConfiguredField[]) => {
+    return [...fields].sort((a, b) => {
+      // Applying For Class always first
+      if (a.key === "applying_for_class") return -1;
+      if (b.key === "applying_for_class") return 1;
+
+      // Required fields after that
+      // if (a.required && !b.required) return -1;
+      // if (!a.required && b.required) return 1;
+
+      return 0;
+    });
+  };
 
   const getSelectedCount = (fields: ConfiguredField[]) => {
     return fields.filter((f) => f.selected).length;
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="mx-auto max-w-6xl px-4 py-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/40">
+      <div className="mx-auto max-w-7xl px-4 py-6 lg:px-8">
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-8 rounded-3xl border border-slate-200/70 bg-white/80 backdrop-blur-xl shadow-sm p-6">
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
             <School className="h-4 w-4" />
             <span>Admission Management</span>
@@ -704,10 +837,10 @@ export default function PrincipalFormBuilder({
 
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight">
+              <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-slate-900">
                 Create Admission Form
               </h1>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-base text-slate-500 mt-2 font-medium">
                 Configure the admission form for the upcoming academic session
               </p>
             </div>
@@ -725,7 +858,7 @@ export default function PrincipalFormBuilder({
         </div>
 
         {/* Progress Steps */}
-        <div className="mb-8">
+        <div className="mb-10 rounded-3xl border border-slate-200 bg-white shadow-sm p-6">
           <div className="flex items-center justify-between">
             {STEP_TITLES.map((step, index) => {
               const Icon = step.icon;
@@ -745,11 +878,11 @@ export default function PrincipalFormBuilder({
                   >
                     <div
                       className={cn(
-                        "flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all",
+                        "flex h-12 w-12 items-center justify-center rounded-2xl border-2 transition-all duration-300 shadow-sm",
                         isActive &&
-                          "border-primary bg-primary text-primary-foreground",
+                          "border-indigo-600 bg-indigo-600 text-white shadow-lg shadow-indigo-200",
                         isComplete &&
-                          "border-primary bg-primary/10 text-primary",
+                          "border-emerald-500 bg-emerald-50 text-emerald-600",
                         !isActive &&
                           !isComplete &&
                           "border-muted-foreground/25 text-muted-foreground",
@@ -789,12 +922,12 @@ export default function PrincipalFormBuilder({
         </div>
 
         {/* Main Content */}
-        <Card className="shadow-sm">
+        <Card className="border-slate-200 rounded-[2rem] shadow-xl shadow-slate-100 overflow-hidden bg-white/95 backdrop-blur">
           {currentStep === 0 && (
             <>
-              <CardHeader>
+              <CardHeader className="pb-6 border-b border-slate-100 bg-slate-50/50">
                 <CardTitle>Form Details</CardTitle>
-                <CardDescription>
+                <CardDescription className="text-slate-500 text-base">
                   Set the basic information and choose student information
                   fields
                 </CardDescription>
@@ -853,73 +986,104 @@ export default function PrincipalFormBuilder({
                   {sections.map((section, sectionIndex) => (
                     <div
                       key={section.id}
-                      className="rounded-xl border p-4 space-y-4"
+                      className="rounded-3xl border border-slate-200 bg-slate-50/50 p-6 space-y-5 shadow-sm"
                     >
                       {sectionIndex !== 0 && (
                         <div className="flex items-center justify-between">
-                          <Input
-                            value={section.title}
-                            onChange={(e) => {
-                              const updated = [...sections];
-                              updated[sectionIndex].title = e.target.value;
-                              setSections(updated);
-                            }}
-                            placeholder="Section Title"
-                          />
+                          <div className="flex items-center gap-3 w-full">
+                            <Input
+                              value={section.title}
+                              onChange={(e) => {
+                                const updated = [...sections];
+                                updated[sectionIndex].title = e.target.value;
+                                setSections(updated);
+                              }}
+                              placeholder="Section Title"
+                            />
+                          </div>
                         </div>
                       )}
 
-                      <div className="flex justify-end">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            updateSectionFields(section.id, (fields) => [
-                              ...fields,
-                              createCustomField(
-                                "personal",
-                                fields.filter((f) => f.custom).length,
-                              ),
-                            ])
-                          }
-                        >
-                          <Plus className="mr-1 h-4 w-4" />
-                          Add Field
-                        </Button>
+                      <div className="flex justify-end mb-5">
+                        {/* Right Side */}
+                        <div className="flex items-center gap-3">
+                          <div className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700">
+                            {getSelectedCount(section.fields)} selected
+                          </div>
+
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="rounded-xl px-4 shadow-sm hover:shadow-md transition-all"
+                            onClick={() =>
+                              updateSectionFields(section.id, (fields) => [
+                                ...fields,
+                                createCustomField(
+                                  "personal",
+                                  fields.filter((f) => f.custom).length,
+                                ),
+                              ])
+                            }
+                          >
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add Field
+                          </Button>
+                        </div>
                       </div>
 
                       <div className="space-y-3">
-                        {section.fields.map((field, index) => (
-                          <FieldCard
-                            key={field.id}
-                            field={field}
-                            onToggle={(checked) =>
-                              updateSectionFields(section.id, (fields) =>
-                                fields.map((item) =>
-                                  item.id === field.id
-                                    ? { ...item, selected: checked }
-                                    : item,
-                                ),
-                              )
-                            }
-                            onChange={(nextField) =>
-                              updateSectionFields(section.id, (fields) =>
-                                fields.map((item) =>
-                                  item.id === field.id ? nextField : item,
-                                ),
-                              )
-                            }
-                            onRemove={
-                              field.custom
-                                ? () =>
-                                    updateSectionFields(section.id, (fields) =>
-                                      fields.filter(
-                                        (item) => item.id !== field.id,
-                                      ),
-                                    )
-                                : undefined
-                            }
-                          />
+                        {sortFields(section.fields).map((field, index) => (
+                          <div key={field.id}>
+                            {field.key === "applying_for_class" &&
+                              errors.applying_for_class && (
+                                <Alert variant="destructive" className="mb-3">
+                                  <AlertCircle className="h-4 w-4" />
+
+                                  <AlertDescription>
+                                    {errors.applying_for_class}
+                                  </AlertDescription>
+                                </Alert>
+                              )}
+
+                            <FieldCard
+                              field={field}
+                              classes={classes}
+                              onToggle={(checked) =>
+                                updateSectionFields(section.id, (fields) =>
+                                  fields.map((item) =>
+                                    item.id === field.id
+                                      ? {
+                                          ...item,
+                                          selected:
+                                            item.key === "applying_for_class"
+                                              ? true
+                                              : checked,
+                                        }
+                                      : item,
+                                  ),
+                                )
+                              }
+                              onChange={(nextField) =>
+                                updateSectionFields(section.id, (fields) =>
+                                  fields.map((item) =>
+                                    item.id === field.id ? nextField : item,
+                                  ),
+                                )
+                              }
+                              onRemove={
+                                field.custom
+                                  ? () =>
+                                      updateSectionFields(
+                                        section.id,
+                                        (fields) =>
+                                          fields.filter(
+                                            (item) => item.id !== field.id,
+                                          ),
+                                      )
+                                  : undefined
+                              }
+                            />
+                          </div>
                         ))}
                       </div>
                     </div>
@@ -927,7 +1091,7 @@ export default function PrincipalFormBuilder({
 
                   <Button
                     variant="outline"
-                    className="w-full"
+                    className="w-full h-14 rounded-2xl border-dashed border-2 border-slate-300 hover:border-indigo-400 hover:bg-indigo-50 font-bold"
                     onClick={() => {
                       setSections((prev) => [
                         ...prev,
@@ -1001,10 +1165,12 @@ export default function PrincipalFormBuilder({
                     </div>
                   </div>
 
-                  <ScrollArea className="h-[400px] pr-4">
+                  <ScrollArea className="h-[500px] pr-4 rounded-2xl">
                     <div className="space-y-3">
-                      {documentFields.map((field, index) => (
+                      {sortFields(documentFields).map((field, index) => (
                         <FieldCard
+                          section="documents"
+                          classes={classes}
                           key={field.id || `document-field-${index}`}
                           field={field}
                           onToggle={(checked) =>
@@ -1019,7 +1185,13 @@ export default function PrincipalFormBuilder({
                           onChange={(nextField) =>
                             updateFieldList("documents", (fields) =>
                               fields.map((item) =>
-                                item.id === field.id ? nextField : item,
+                                item.id === field.id
+                                  ? {
+                                      ...nextField,
+                                      type: "file",
+                                      required: true,
+                                    }
+                                  : item,
                               ),
                             )
                           }
@@ -1055,7 +1227,7 @@ export default function PrincipalFormBuilder({
                 <div className="grid gap-6 md:max-w-xl">
                   <div className="space-y-4">
                     {/* Application Fee */}
-                    <div className="rounded-lg border p-4">
+                    <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
                       <div className="flex items-center justify-between mb-3">
                         <div>
                           <h4 className="font-medium">Application Fee</h4>
@@ -1238,8 +1410,13 @@ export default function PrincipalFormBuilder({
                           <span className="text-muted-foreground">
                             Application Fee
                           </span>
+
                           <span className="font-medium">
-                            {feesEnabled ? `₹${feesAmount || "0"}` : "Free"}
+                            {!feesEnabled
+                              ? "Free"
+                              : feeType === "individual"
+                                ? "Individual Fee"
+                                : `₹${feesAmount || "0"}`}
                           </span>
                         </div>
                       </div>
@@ -1249,7 +1426,7 @@ export default function PrincipalFormBuilder({
 
                 {/* Success Message */}
                 {createdForm && (
-                  <Alert className="border-green-200 bg-green-50">
+                  <Alert className="border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl shadow-sm">
                     <CheckCircle2 className="h-4 w-4 text-green-600" />
                     <AlertTitle className="text-green-900">
                       Form Created Successfully
@@ -1277,37 +1454,63 @@ export default function PrincipalFormBuilder({
             </>
           )}
 
-          <CardFooter className="flex items-center justify-between border-t px-6 py-4">
-            <Button
-              variant="ghost"
-              onClick={previousStep}
-              disabled={currentStep === 0}
-            >
-              <ChevronLeft className="mr-1 h-4 w-4" />
-              Back
-            </Button>
+          <CardFooter className="sticky bottom-0 z-20 border-t border-slate-200 bg-white/90 backdrop-blur px-6 py-5">
+            <div className="flex items-center justify-between w-full relative">
+              <Button
+                variant="ghost"
+                onClick={previousStep}
+                disabled={currentStep === 0}
+              >
+                <ChevronLeft className="mr-1 h-4 w-4" />
+                Back
+              </Button>
 
-            <div className="flex items-center gap-3">
-              {currentStep < STEP_TITLES.length - 1 ? (
-                <Button onClick={nextStep}>
-                  Continue
-                  <ArrowRight className="ml-1 h-4 w-4" />
-                </Button>
-              ) : (
-                <Button onClick={submitForm} disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Publishing...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="mr-2 h-4 w-4" />
-                      Publish Form
-                    </>
-                  )}
-                </Button>
-              )}
+              {/* error message for the class select */}
+              {/* <div className="mt-2">
+                {errors.applying_for_class && (
+                  <Alert
+                    variant="destructive"
+                    className="rounded-xl border border-red-200 bg-white shadow-sm px-4 py-2"
+                  >
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 shrink-0 text-red-600" />
+                      <AlertDescription className="text-sm font-medium text-red-600">
+                        {errors.applying_for_class}
+                      </AlertDescription>
+                    </div>
+                  </Alert>
+                )}
+              </div> */}
+
+              <div className="flex items-center gap-3">
+                {currentStep < STEP_TITLES.length - 1 ? (
+                  <Button
+                    onClick={nextStep}
+                    className="h-12 px-8 rounded-2xl bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200 font-bold"
+                  >
+                    Continue
+                    <ArrowRight className="ml-1 h-4 w-4" />
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={submitForm}
+                    disabled={isSubmitting}
+                    className="h-12 px-8 rounded-2xl bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-200 font-bold"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Publishing...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="mr-2 h-4 w-4" />
+                        Publish Form
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
             </div>
           </CardFooter>
         </Card>

@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 import {
   UserPlus,
   RefreshCw,
@@ -8,9 +8,9 @@ import {
   AlertCircle,
   CheckCircle2,
   Users,
-  Backpack
-} from "lucide-react"
-import { toast } from "sonner"
+  Backpack,
+} from "lucide-react";
+import { toast } from "sonner";
 
 import {
   getDivisions,
@@ -20,129 +20,142 @@ import {
   type Division,
   type Subject,
   type Teacher,
-  type AssignClassPayload
-} from "@/lib/forms"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
+  type AssignClassPayload,
+} from "@/lib/forms";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/ui/alert"
-import { Checkbox } from "@/components/ui/checkbox"
+} from "@/components/ui/select";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function AssignTeacherPage() {
-  const [divisions, setDivisions] = useState<Division[]>([])
-  const [subjects, setSubjects] = useState<Subject[]>([])
-  const [teachers, setTeachers] = useState<Teacher[]>([])
+  const [divisions, setDivisions] = useState<Division[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
 
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Form State
-  const [selectedClassName, setSelectedClassName] = useState<string>("")
-  const [selectedDivisionId, setSelectedDivisionId] = useState<string>("")
-  const [selectedSubjectId, setSelectedSubjectId] = useState<string>("")
-  const [selectedTeacherId, setSelectedTeacherId] = useState<string>("")
-  const [isClassTeacher, setIsClassTeacher] = useState(false)
+  const [selectedClassName, setSelectedClassName] = useState<string>("");
+  const [selectedDivisionId, setSelectedDivisionId] = useState<string>("");
+  const [selectedSubjectId, setSelectedSubjectId] = useState<string>("");
+  const [selectedTeacherId, setSelectedTeacherId] = useState<string>("");
+  const [isClassTeacher, setIsClassTeacher] = useState(false);
 
   const fetchData = async () => {
-    setIsLoading(true)
-    setError(null)
+    setIsLoading(true);
+    setError(null);
     try {
       const [divisionsData, subjectsData, teachersData] = await Promise.all([
         getDivisions(),
         getSubjects(),
-        getTeachers()
-      ])
+        getTeachers(),
+      ]);
 
-      setDivisions(divisionsData)
-      setSubjects(subjectsData)
-      setTeachers(teachersData)
+      setDivisions(divisionsData);
+      setSubjects(subjectsData);
+      setTeachers(teachersData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load data")
-      toast.error("Could not load required data")
+      setError(err instanceof Error ? err.message : "Failed to load data");
+      toast.error("Could not load required data");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchData()
-  }, [])
+    fetchData();
+  }, []);
 
   // Derived: Unique Class Names and IDs from Divisions
   const classes = Array.from(
     divisions.reduce((acc, current) => {
-      if (current.SchoolClass && current.class_name && !acc.has(current.SchoolClass)) {
-        acc.set(current.SchoolClass, current.class_name)
+      if (
+        current.SchoolClass &&
+        current.class_name &&
+        !acc.has(current.SchoolClass)
+      ) {
+        acc.set(current.SchoolClass, current.class_name);
       }
-      return acc
-    }, new Map<number, string>())
-  ).map(([id, name]) => ({ id, name }))
-    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
+      return acc;
+    }, new Map<number, string>()),
+  )
+    .map(([id, name]) => ({ id, name }))
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
 
   // Derived: Divisions for selected class (using class name for display/lookup)
-  const filteredDivisions = divisions.filter(d => d.class_name === selectedClassName)
+  const filteredDivisions = divisions.filter(
+    (d) => d.SchoolClass.toString() === selectedClassName,
+  );
 
   // Derived: Subjects for selected division
-  const relevantSubjects = subjects.filter(s => s.division === parseInt(selectedDivisionId))
+  const relevantSubjects = subjects.filter(
+    (s) => s.division === parseInt(selectedDivisionId),
+  );
 
   // Label Helpers to fix ID display issue
   const getDivisionLabel = (id: string) => {
-    const div = divisions.find(d => d.id?.toString() === id)
-    return div ? `Division ${div.division}` : ""
-  }
+    const div = divisions.find((d) => d.id?.toString() === id);
+    return div ? `Division ${div.division}` : "";
+  };
 
   const getSubjectLabel = (id: string) => {
-    const sub = subjects.find(s => s.id?.toString() === id)
-    return sub ? sub.name : ""
-  }
+    const sub = subjects.find((s) => s.id?.toString() === id);
+    return sub ? sub.name : "";
+  };
 
   const getTeacherLabel = (id: string) => {
-    const t = teachers.find(t => t.id.toString() === id)
-    return t ? t.name : ""
-  }
+    const t = teachers.find((t) => t.id.toString() === id);
+    return t ? t.name : "";
+  };
 
   const handleAssignTeacher = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!selectedDivisionId || !selectedSubjectId || !selectedTeacherId) {
-      toast.error("Please fill all required fields")
-      return
+      toast.error("Please fill all required fields");
+      return;
     }
 
-    setIsSaving(true)
+    setIsSaving(true);
     try {
       const payload: AssignClassPayload = {
         is_class_teacher: isClassTeacher,
         teacher: parseInt(selectedTeacherId),
         subject: parseInt(selectedSubjectId),
-        division: parseInt(selectedDivisionId)
-      }
+        division: parseInt(selectedDivisionId),
+      };
 
-      await assignClass(payload)
-      toast.success("Teacher assigned successfully")
+      await assignClass(payload);
+      toast.success("Teacher assigned successfully");
 
       // Partial Reset
-      setSelectedTeacherId("")
-      setIsClassTeacher(false)
+      setSelectedTeacherId("");
+      setIsClassTeacher(false);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to assign teacher")
+      toast.error(
+        err instanceof Error ? err.message : "Failed to assign teacher",
+      );
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   return (
     <div className="flex-1 space-y-6 p-8 pt-6 bg-white min-h-screen">
@@ -152,14 +165,24 @@ export default function AssignTeacherPage() {
             <Backpack className="h-6 w-6" />
           </div>
           <div>
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900">Teacher Assignments</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-slate-900">
+              Teacher Assignments
+            </h2>
             <p className="text-muted-foreground mt-1 text-sm font-medium">
-              Manage academic workloads by mapping teachers to divisions and subjects.
+              Manage academic workloads by mapping teachers to divisions and
+              subjects.
             </p>
           </div>
         </div>
-        <Button variant="outline" onClick={fetchData} disabled={isLoading} className="border-slate-200">
-          <RefreshCw className={cn("mr-2 h-4 w-4", isLoading && "animate-spin")} />
+        <Button
+          variant="outline"
+          onClick={fetchData}
+          disabled={isLoading}
+          className="border-slate-200"
+        >
+          <RefreshCw
+            className={cn("mr-2 h-4 w-4", isLoading && "animate-spin")}
+          />
           Refresh Data
         </Button>
       </div>
@@ -167,10 +190,15 @@ export default function AssignTeacherPage() {
       <Separator className="bg-slate-100" />
 
       {error && (
-        <Alert variant="destructive" className="border-red-200 bg-red-50 text-red-800">
+        <Alert
+          variant="destructive"
+          className="border-red-200 bg-red-50 text-red-800"
+        >
           <AlertCircle className="h-4 w-4" />
           <AlertTitle className="font-bold">Fetch Error</AlertTitle>
-          <AlertDescription className="text-sm opacity-90">{error}</AlertDescription>
+          <AlertDescription className="text-sm opacity-90">
+            {error}
+          </AlertDescription>
         </Alert>
       )}
 
@@ -182,7 +210,8 @@ export default function AssignTeacherPage() {
               Assign New Teacher
             </CardTitle>
             <CardDescription className="text-slate-500 font-medium">
-              Define subject leadership and assign teachers to specific class sections.
+              Define subject leadership and assign teachers to specific class
+              sections.
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-1">
@@ -197,20 +226,26 @@ export default function AssignTeacherPage() {
                   <Select
                     value={selectedClassName}
                     onValueChange={(val) => {
-                      setSelectedClassName(val ?? "")
-                      setSelectedDivisionId("")
-                      setSelectedSubjectId("")
+                      setSelectedClassName(val ?? "");
+                      setSelectedDivisionId("");
+                      setSelectedSubjectId("");
                     }}
                     disabled={isLoading || classes.length === 0}
                   >
                     <SelectTrigger className="w-full bg-white border-slate-200 rounded-xl h-12 shadow-sm focus:ring-primary/20 transition-all">
                       <SelectValue placeholder="Pick a Class">
-                        {selectedClassName || undefined}
+                        {classes.find(
+                          (c) => c.id.toString() === selectedClassName,
+                        )?.name || undefined}
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-slate-200 shadow-xl">
                       {classes.map((cls) => (
-                        <SelectItem key={cls.id} value={cls.name} className="rounded-lg my-1">
+                        <SelectItem
+                          key={cls.id}
+                          value={cls.id.toString()}
+                          className="rounded-lg my-1"
+                        >
                           {cls.name}
                         </SelectItem>
                       ))}
@@ -227,19 +262,31 @@ export default function AssignTeacherPage() {
                   <Select
                     value={selectedDivisionId}
                     onValueChange={(val) => {
-                      setSelectedDivisionId(val ?? "")
-                      setSelectedSubjectId("")
+                      setSelectedDivisionId(val ?? "");
+                      setSelectedSubjectId("");
                     }}
                     disabled={isLoading || !selectedClassName}
                   >
                     <SelectTrigger className="w-full bg-white border-slate-200 rounded-xl h-12 shadow-sm focus:ring-primary/20 transition-all">
-                      <SelectValue placeholder={selectedClassName ? "Pick Division" : "Select Class first"}>
-                        {selectedDivisionId ? getDivisionLabel(selectedDivisionId) : undefined}
+                      <SelectValue
+                        placeholder={
+                          selectedClassName
+                            ? "Pick Division"
+                            : "Select Class first"
+                        }
+                      >
+                        {selectedDivisionId
+                          ? getDivisionLabel(selectedDivisionId)
+                          : undefined}
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-slate-200 shadow-xl">
                       {filteredDivisions.map((div) => (
-                        <SelectItem key={div.id} value={div.id!.toString()} className="rounded-lg my-1">
+                        <SelectItem
+                          key={div.id}
+                          value={div.id!.toString()}
+                          className="rounded-lg my-1"
+                        >
                           Division {div.division}
                         </SelectItem>
                       ))}
@@ -261,14 +308,26 @@ export default function AssignTeacherPage() {
                     disabled={isLoading || !selectedDivisionId}
                   >
                     <SelectTrigger className="w-full bg-white border-slate-200 rounded-xl h-12 shadow-sm focus:ring-primary/20 transition-all">
-                      <SelectValue placeholder={selectedDivisionId ? "Pick Subject" : "Select Division first"}>
-                        {selectedSubjectId ? getSubjectLabel(selectedSubjectId) : undefined}
+                      <SelectValue
+                        placeholder={
+                          selectedDivisionId
+                            ? "Pick Subject"
+                            : "Select Division first"
+                        }
+                      >
+                        {selectedSubjectId
+                          ? getSubjectLabel(selectedSubjectId)
+                          : undefined}
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-slate-200 shadow-xl">
                       {relevantSubjects.length > 0 ? (
                         relevantSubjects.map((sub) => (
-                          <SelectItem key={sub.id} value={sub.id!.toString()} className="rounded-lg my-1">
+                          <SelectItem
+                            key={sub.id}
+                            value={sub.id!.toString()}
+                            className="rounded-lg my-1"
+                          >
                             {sub.name}
                           </SelectItem>
                         ))
@@ -294,12 +353,18 @@ export default function AssignTeacherPage() {
                   >
                     <SelectTrigger className="w-full bg-white border-slate-200 rounded-xl h-12 shadow-sm focus:ring-primary/20 transition-all">
                       <SelectValue placeholder="Pick Teacher">
-                        {selectedTeacherId ? getTeacherLabel(selectedTeacherId) : undefined}
+                        {selectedTeacherId
+                          ? getTeacherLabel(selectedTeacherId)
+                          : undefined}
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-slate-200 shadow-xl">
                       {teachers.map((t) => (
-                        <SelectItem key={t.id} value={t.id.toString()} className="rounded-lg my-1">
+                        <SelectItem
+                          key={t.id}
+                          value={t.id.toString()}
+                          className="rounded-lg my-1"
+                        >
                           {t.name}
                         </SelectItem>
                       ))}
@@ -328,7 +393,12 @@ export default function AssignTeacherPage() {
                 <Button
                   type="submit"
                   className="w-full h-14 text-lg font-bold shadow-xl shadow-primary/10 rounded-2xl active:scale-[0.98] transition-all bg-primary hover:bg-primary/90"
-                  disabled={isSaving || !selectedDivisionId || !selectedSubjectId || !selectedTeacherId}
+                  disabled={
+                    isSaving ||
+                    !selectedDivisionId ||
+                    !selectedSubjectId ||
+                    !selectedTeacherId
+                  }
                 >
                   {isSaving ? (
                     <>
@@ -348,5 +418,5 @@ export default function AssignTeacherPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

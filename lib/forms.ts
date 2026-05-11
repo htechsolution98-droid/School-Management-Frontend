@@ -55,7 +55,7 @@ export async function createAdmissionForm(
 
 export async function getPublicFormFields(): Promise<PublicAdmissionForm[]> {
   const url = `${API_BASE_URL}${API_ENDPOINTS.FIELDS}`
-  const response = await fetch(url) // Note: Public fetch
+  const response = await fetchWithAuth(url) // Note: Public fetch
 
   if (!response.ok) {
     let message = "Failed to fetch form fields."
@@ -69,7 +69,8 @@ export async function getPublicFormFields(): Promise<PublicAdmissionForm[]> {
   }
 
   const data = await response.json()
-  return Array.isArray(data) ? data : (data.data ?? data.results ?? [])
+  // return Array.isArray(data) ? data : (data.data ?? data.results ?? [])
+  return data;
 }
 
 export interface SchoolClass {
@@ -114,28 +115,54 @@ export async function deleteSchoolClass(id: number): Promise<void> {
   }
 }
 
-export async function toggleFormStatus(formId: number): Promise<void> {
+// change full function -- S
+export const getClasses = async () => {
+  const response = await fetchWithAuth(
+    "https://school-management-system-sms-z8kv.onrender.com/api/getclass/"
+  );
+
+  console.log("res : ",response)
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch classes");
+  }
+
+  return response.json();
+};
+
+// change full function -- S
+export async function toggleFormStatus(
+  formId: number,
+  is_active: boolean,
+): Promise<void> {
   const url = `${API_BASE_URL}${API_ENDPOINTS.FORM_STATUS}${formId}/`
+
   const response = await fetchWithAuth(url, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      is_active,
+    }),
   })
 
   if (!response.ok) {
     let message = "Failed to update form status."
+
     try {
       const err = await response.json()
       message = err?.detail || err?.message || message
     } catch {
       // Ignore
     }
+
     throw new Error(message)
   }
 }
 
 export async function getPublishedFormLink(): Promise<{ form_link: string }> {
   const url = `${API_BASE_URL}${API_ENDPOINTS.FORM_LINK}`
-  const response = await fetch(url)
+
+  const response = await fetchWithAuth(url)
 
   if (!response.ok) {
     let message = "Failed to fetch form link."
@@ -149,12 +176,12 @@ export async function getPublishedFormLink(): Promise<{ form_link: string }> {
   }
 
   const data = await response.json()
-  
-  // If the backend returns a relative URL, prepend the API_BASE_URL
+
   if (data.form_link && data.form_link.startsWith("/")) {
-    const baseUrl = (API_BASE_URL || "").endsWith("/") 
-      ? API_BASE_URL?.slice(0, -1) 
+    const baseUrl = (API_BASE_URL || "").endsWith("/")
+      ? API_BASE_URL?.slice(0, -1)
       : API_BASE_URL
+
     data.form_link = `${baseUrl}${data.form_link}`
   }
 
@@ -338,7 +365,7 @@ export async function getSyllabusList(): Promise<Syllabus[]> {
 
 export async function saveSyllabus(payload: Syllabus): Promise<void> {
   const url = `${API_BASE_URL}${API_ENDPOINTS.SYLLABUS}`
-  
+
   const formData = new FormData()
   if (payload.syllabus_file instanceof File) {
     formData.append("syllabus_file", payload.syllabus_file)
@@ -431,3 +458,326 @@ export async function assignClass(payload: AssignClassPayload): Promise<void> {
     throw new Error(message)
   }
 }
+
+// add this function -- S
+export interface TempUser {
+  id: number
+  admission_number: string
+  school: number
+  form: number
+  status: string
+}
+
+export async function getTempUsers(): Promise<TempUser[]> {
+  const url = `${API_BASE_URL}${API_ENDPOINTS.GET_TEMP_USER_DATA}`
+
+  const response = await fetchWithAuth(url)
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch temp users")
+  }
+
+  const data = await response.json()
+
+  return Array.isArray(data)
+    ? data
+    : (data.data ?? data.results ?? [])
+}
+
+// add this function -- S
+export async function createSubmission(payload: any) {
+  const response = await fetchWithAuth(
+    `${process.env.NEXT_PUBLIC_API_URL}/submissions/`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    }
+  );
+
+  if (!response.ok) {
+    let message = "Failed to create submission";
+
+    try {
+      const err = await response.json();
+
+      message =
+        err?.detail ||
+        err?.message ||
+        JSON.stringify(err) ||
+        message;
+    } catch {
+      // ignore
+    }
+
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
+export async function updateSubmission(
+  id: string,
+  payload: any
+) {
+  const response = await fetchWithAuth(
+    `${process.env.NEXT_PUBLIC_API_URL}/submissions/`,
+    {
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    }
+  );
+
+  if (!response.ok) {
+    let message = "Failed to update submission";
+
+    try {
+      const err = await response.json();
+
+      message =
+        err?.detail ||
+        err?.message ||
+        JSON.stringify(err) ||
+        message;
+    } catch {
+      // ignore
+    }
+
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
+export async function submitDocuments(payload: {
+  admission_number: string;
+  documents: { document_field: number; file: File }[];
+}): Promise<any> {
+  const formData = new FormData();
+
+  // Admission Number
+  formData.append(
+    "admission_number",
+    payload.admission_number
+  );
+
+  // Documents
+  payload.documents.forEach((doc, index) => {
+    formData.append(
+      `documents[${index}][document_field]`,
+      String(doc.document_field)
+    );
+
+    formData.append(
+      `documents[${index}][file]`,
+      doc.file
+    );
+  });
+
+  // API Call
+  const response = await fetchWithAuth(
+    `${process.env.NEXT_PUBLIC_API_URL}/documentsubmission/`,
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
+
+  // Response Data
+  const data = await response.json();
+
+  // Error Handling
+  if (!response.ok) {
+    if (data?.message === "Admission number is required") {
+      throw new Error("Admission number is required");
+    }
+
+    if (data?.message === "Admission not found") {
+      throw new Error("Admission not found");
+    }
+
+    throw new Error(
+      data?.message ||
+      data?.detail ||
+      "Failed to submit documents"
+    );
+  }
+
+  // Success
+  if (data?.message === "Documents uploaded successfully") {
+    return data;
+  }
+
+  return data;
+}
+
+
+export async function createRazorOrder(payload: {
+  amount: number;
+  admission_number: string;
+}) {
+  const response = await fetchWithAuth(
+    `${API_BASE_URL}${API_ENDPOINTS.RAZOR_ORDER}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data?.error ||
+      data?.message ||
+      "Order creation failed"
+    );
+  }
+
+  return data;
+}
+
+
+//this is the rozerpay logic
+export async function verifyRazorPayment(payload: {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+  admission_number: string;
+}) {
+  const response = await fetchWithAuth(
+    `${API_BASE_URL}${API_ENDPOINTS.PAYMENT_VERIFY}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data?.error ||
+      data?.message ||
+      "Payment verification failed"
+    );
+  }
+
+  return data;
+}
+
+export async function createOfflinePayment(payload: {
+  amount: number;
+  admission_number: string;
+}) {
+  const response = await fetchWithAuth(
+    `${API_BASE_URL}/offline/payment/`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data?.error ||
+      data?.message ||
+      "Offline payment failed"
+    );
+  }
+
+  return data;
+}
+
+// Add this 
+export interface FeeVerifyRecord {
+  id: number
+  school: number
+  admission_number: string
+  fee_amount: number | null
+  status: string
+  fee_verified: boolean
+  fee_verified_at: string | null
+  fee_data: {
+    id: number
+    amount: number
+    currency: string
+    payment_mode: "online" | "offline"
+    fee_verify: boolean
+    razorpay_order_id: string | null
+    razorpay_payment_id: string | null
+    paid_at: string
+    created_at: string
+  } | null
+  field_values: {
+    id: number
+    field: number
+    field_label: string
+    value: string
+  }[]
+}
+
+export async function getFeeVerifyList(): Promise<FeeVerifyRecord[]> {
+  const response = await fetchWithAuth(
+    `${API_BASE_URL}/fee_verify/`
+  )
+
+  if (!response.ok) {
+    let message = "Failed to fetch fee verification list."
+    try {
+      const err = await response.json()
+      message = err?.detail || err?.message || message
+    } catch {}
+    throw new Error(message)
+  }
+
+  const data = await response.json()
+  return Array.isArray(data) ? data : (data.data ?? data.results ?? [])
+}
+
+export async function verifyFee(admissionNumber: string): Promise<void> {
+  const response = await fetchWithAuth(
+    `${API_BASE_URL}/fee_verify/${admissionNumber}/`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        fee_verified: true,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    let message = "Failed to verify fee.";
+
+    try {
+      const err = await response.json();
+
+      message =
+        err?.detail ||
+        err?.message ||
+        message;
+    } catch {}
+
+    throw new Error(message);
+  }
+}
+

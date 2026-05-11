@@ -177,7 +177,7 @@ export async function sendOtp(payload: { email?: string; mobile?: string }): Pro
     let message = "Failed to send OTP.";
     try {
       const err = await response.json();
-      message = err?.detail || err?.message || message;
+      message = err?.error || err?.detail || err?.message || message;
     } catch { /* ignore */ }
     throw new Error(message);
   }
@@ -188,8 +188,24 @@ export async function verifyOtp(payload: {
   mobile?: string; 
   otp: string; 
   password: string;
+  school_id?: number;
+  school_slug?: string;
 }): Promise<any> {
+
   const url = `${API_BASE_URL}${API_ENDPOINTS.VERIFY_OTP}`;
+
+  // GET SCHOOL DATA FROM LOCAL STORAGE
+  const school_id = localStorage.getItem("school_id");
+  const school_slug = localStorage.getItem("school_slug");
+
+  // ADD TO PAYLOAD
+  if (school_id) {
+    payload.school_id = Number(school_id);
+  }
+
+  if (school_slug) {
+    payload.school_slug = school_slug;
+  }
 
   const response = await apiFetch(url, {
     method: "POST",
@@ -335,5 +351,6 @@ export function getDashboardRoute(roles: string[]): string {
   if (role === "librarian") return "/librarian";
   if (role === "clerk" || role === "fees_clerk") return "/clerk";
   if (role === "temp_user") return "/user";
+  if (role === "fees management") return "/fees";
   return "/";
 }

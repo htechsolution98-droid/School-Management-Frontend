@@ -66,6 +66,11 @@ export default function SubjectsPage() {
   const [subjectName, setSubjectName] = useState("")
   const [selectedDivisionId, setSelectedDivisionId] = useState<string>("")
   const [searchQuery, setSearchQuery] = useState("")
+  const [selectedClassId, setSelectedClassId] = useState<string>("")
+
+  const filteredDivisions = divisions.filter(
+  (div) => div.SchoolClass.toString() === selectedClassId
+)
 
   const fetchData = async () => {
     setIsLoading(true)

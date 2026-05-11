@@ -91,7 +91,7 @@ function LoginFormInner() {
       {/* Header */}
       <motion.div custom={0} variants={fadeUp} initial="hidden" animate="visible" className="mb-8">
         <h1 className="text-3xl font-bold text-[#0F172A] mb-2">Sign in</h1>
-        <p className="text-[#64748B] text-sm">
+        {/* <p className="text-[#64748B] text-sm">
           New to EduManage?{" "}
           <Link
             href="/signup"
@@ -99,7 +99,7 @@ function LoginFormInner() {
           >
             Create a free account
           </Link>
-        </p>
+        </p> */}
       </motion.div>
 
       {/* Form */}

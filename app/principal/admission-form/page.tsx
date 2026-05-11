@@ -135,7 +135,7 @@ function FormDetailsModal({
                 <div className="divide-y">
                   {(section.fields || []).map((field, index) => (
                     <div
-                      key={`field-${index}`}
+                      key={field.id || `field-${index}`}
                       className="flex items-center gap-3 px-4 py-3 group hover:bg-slate-50 transition-colors"
                     >
                       <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-600 shrink-0">
@@ -261,7 +261,7 @@ function FormTableRow({
   form: AdmissionFormResponse;
   index: number;
   onView: () => void;
-  onPublishToggle: (formId: number) => void;
+  onPublishToggle: (formId: number, currentStatus: boolean) => void;
   isToggling?: boolean;
 }) {
   const totalFields = (form.sections || []).reduce(
@@ -331,7 +331,7 @@ function FormTableRow({
         <div className="flex items-center gap-2">
           <Switch
             checked={form.is_active}
-            onCheckedChange={() => onPublishToggle(form.id)}
+            onCheckedChange={() => onPublishToggle(form.id, form.is_active)}
             disabled={isToggling}
           />
           <span
@@ -358,13 +358,44 @@ function FormTableRow({
 
 // ─── Published Link Card ──────────────────────────────────────────────────────
 function PublishedLinkCard({ link }: { link: string }) {
+  const uniqueLink = link.split("/").filter(Boolean).pop();
+
+  const frontendLink = `${window.location.origin}/form/${uniqueLink}`;
+
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(link);
+    navigator.clipboard.writeText(frontendLink);
     setCopied(true);
     toast.success("Link copied to clipboard");
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  // add this function
+  const handlePreviewForm = async () => {
+    try {
+      const token = localStorage.getItem("access");
+
+      const response = await fetch(link, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      // STORE DATA
+      localStorage.setItem("school_id", data.school_id.toString());
+
+      localStorage.setItem("school_slug", data.school_slug);
+
+      // REDIRECT
+      window.location.href = `${window.location.origin}/signup`;
+    } catch (error) {
+      console.error("Failed to fetch school data", error);
+
+      toast.error("Failed to open form");
+    }
   };
 
   if (!link) return null;
@@ -395,7 +426,7 @@ function PublishedLinkCard({ link }: { link: string }) {
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           <div className="relative flex-1 sm:w-[320px] lg:w-[400px]">
             <div className="h-10 flex items-center rounded-xl border border-slate-200 bg-slate-50/50 pl-4 pr-10 font-mono text-xs text-slate-600 shadow-inner overflow-hidden whitespace-nowrap">
-              <span className="truncate">{link}</span>
+              <span className="truncate">{frontendLink}</span>
             </div>
             <button
               onClick={handleCopy}
@@ -409,15 +440,14 @@ function PublishedLinkCard({ link }: { link: string }) {
               )}
             </button>
           </div>
+          {/* chnage in the button --s */}
           <Button
-            asChild
             variant="outline"
+            onClick={handlePreviewForm}
             className="h-10 px-4 rounded-xl border-blue-100 bg-blue-50/30 text-blue-600 hover:bg-blue-600 hover:text-white transition-all gap-2"
           >
-            <a href={link} target="_blank" rel="noopener noreferrer">
-              Preview Form
-              <ChevronRight className="h-4 w-4" />
-            </a>
+            Preview Form
+            <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
       </div>
@@ -444,7 +474,17 @@ export default function AdmissionFormPage() {
         getAdmissionForms(),
         getPublishedFormLink().catch(() => ({ form_link: "" })),
       ]);
-      setForms(data);
+
+      const sortedForms = [...data].sort((a, b) => {
+        // ACTIVE FORM ALWAYS FIRST
+        if (a.is_active && !b.is_active) return -1;
+        if (!a.is_active && b.is_active) return 1;
+
+        // THEN SORT BY ID
+        return a.id - b.id;
+      });
+
+      setForms(sortedForms);
       setFormLink(linkData.form_link);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load forms.");
@@ -460,22 +500,31 @@ export default function AdmissionFormPage() {
   const handleCreated = async (createdForm: AdmissionFormResponse) => {
     await fetchForms();
 
-    setSuccessBanner(`Form "${createdForm.title}" was created successfully!`);
+    setSuccessBanner(
+      `Form "${createdForm?.title || "Admission Form"}" was created successfully!`,
+    );
 
     setTimeout(() => {
       setSuccessBanner("");
     }, 5000);
   };
 
-  const handlePublishToggle = async (formId: number) => {
+  // replace this full function -- S
+  const handlePublishToggle = async (
+    formId: number,
+    currentStatus: boolean,
+  ) => {
     if (togglingId !== null) return;
 
     setTogglingId(formId);
 
     try {
-      await toggleFormStatus(formId);
+      const updatedStatus = !currentStatus;
+
+      await toggleFormStatus(formId, updatedStatus);
+
       toast.success("Form status updated successfully");
-      // After toggling, we refresh to ensure the single-active-form constraint is reflected
+
       await fetchForms();
     } catch (err) {
       toast.error(

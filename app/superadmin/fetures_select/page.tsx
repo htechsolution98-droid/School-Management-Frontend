@@ -127,7 +127,7 @@ export default function FeaturesPage() {
 
   try {
     await createFeature({
-      name: featureData.label,
+      name: featureData.label.toUpperCase(),
     })
 
     setSuccess(

@@ -15,10 +15,10 @@ const fadeUp = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { 
-      duration: 0.4, 
-      delay: i * 0.08, 
-      ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number]
+    transition: {
+      duration: 0.4,
+      delay: i * 0.08,
+      ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number],
     },
   }),
 };
@@ -37,19 +37,37 @@ export function SignupForm() {
 
     try {
       const isEmail = identifier.includes("@");
-      const payload = isEmail 
+      const payload = isEmail
         ? { email: identifier.trim() }
         : { mobile: identifier.trim().replace(/\s+/g, "") };
 
       await sendOtp(payload);
-      
+
       const searchParams = new URLSearchParams();
       searchParams.set("identifier", identifier.trim());
       searchParams.set("type", isEmail ? "email" : "mobile");
-      
+
       router.push(`/verify-otp?${searchParams.toString()}`);
     } catch (err: any) {
-      setError(err.message || "Something went wrong. Please try again.");
+      console.log("FULL ERROR :", err);
+
+      const errorMessage =
+        err?.response?.data?.error ||
+        err?.error ||
+        err?.message ||
+        "Something went wrong. Please try again.";
+
+      // If user already exists → redirect to login page
+      if (errorMessage.toLowerCase().includes("already exists")) {
+        const searchParams = new URLSearchParams();
+        searchParams.set("identifier", identifier.trim());
+
+        router.push(`/login?${searchParams.toString()}`);
+
+        return;
+      }
+
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -59,12 +77,23 @@ export function SignupForm() {
     <motion.div
       initial={{ opacity: 0, x: -40 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] }}
+      transition={{
+        duration: 0.5,
+        ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number],
+      }}
       className="w-full"
     >
       {/* Header */}
-      <motion.div custom={0} variants={fadeUp} initial="hidden" animate="visible" className="mb-8">
-        <h1 className="text-3xl font-bold text-[#0F172A] mb-2">Create an account</h1>
+      <motion.div
+        custom={0}
+        variants={fadeUp}
+        initial="hidden"
+        animate="visible"
+        className="mb-8"
+      >
+        <h1 className="text-3xl font-bold text-[#0F172A] mb-2">
+          Create an account
+        </h1>
         <p className="text-[#64748B] text-sm">
           Already have an account?{" "}
           <Link
@@ -79,12 +108,22 @@ export function SignupForm() {
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Identifier (Email/Mobile) */}
-        <motion.div custom={1} variants={fadeUp} initial="hidden" animate="visible" className="space-y-1.5">
-          <Label htmlFor="identifier" className="text-sm font-semibold text-[#374151]">
+        <motion.div
+          custom={1}
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
+          className="space-y-1.5"
+        >
+          <Label
+            htmlFor="identifier"
+            className="text-sm font-semibold text-[#374151]"
+          >
             Email address or Mobile number
           </Label>
           <div className="relative">
-            {identifier.includes("@") || (identifier.length > 0 && !/^\d+$/.test(identifier[0])) ? (
+            {identifier.includes("@") ||
+            (identifier.length > 0 && !/^\d+$/.test(identifier[0])) ? (
               <Mail
                 className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors duration-200 ${
                   focused === "identifier" ? "text-[#4F46E5]" : "text-[#94A3B8]"
@@ -113,13 +152,23 @@ export function SignupForm() {
 
         {/* Error Message */}
         {error && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center"
+          >
             <p className="text-sm font-medium text-red-500">{error}</p>
           </motion.div>
         )}
 
         {/* Submit */}
-        <motion.div custom={2} variants={fadeUp} initial="hidden" animate="visible" className="pt-2">
+        <motion.div
+          custom={2}
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
+          className="pt-2"
+        >
           <Button
             type="submit"
             disabled={isLoading}
@@ -163,7 +212,10 @@ export function SignupForm() {
         className="mt-8 pt-6 border-t border-[#F1F5F9] flex items-center justify-center gap-6"
       >
         {["Secure OTP", "Privacy Protected", "Instant Access"].map((badge) => (
-          <span key={badge} className="flex items-center gap-1.5 text-[10px] font-medium text-[#94A3B8] uppercase tracking-wider">
+          <span
+            key={badge}
+            className="flex items-center gap-1.5 text-[10px] font-medium text-[#94A3B8] uppercase tracking-wider"
+          >
             <span className="h-1.5 w-1.5 rounded-full bg-[#34D399] inline-block" />
             {badge}
           </span>
