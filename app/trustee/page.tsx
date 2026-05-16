@@ -16,7 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createStaff, getStaffList } from "@/lib/staff";
+import { createStaff, getStaffCategories, getStaffList } from "@/lib/staff";
 import { CreateStaffPayload, Staff, StaffCategory } from "@/types";
 
 const STAFF_CATEGORIES: { label: string; value: StaffCategory }[] = [
@@ -33,7 +33,7 @@ const EMPTY_FORM: CreateStaffPayload = {
   name: "",
   email: "",
   phone_number: "",
-  category: "TEACHER",
+  category: "",
   address: "",
   date_of_birth: "",
   salary: "",
@@ -56,10 +56,22 @@ export default function TrusteeDashboard() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [staffCategories, setStaffCategories] = useState<any[]>([]);
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      const data = await getStaffCategories();
+      console.log("categories :", data);
+
+      setStaffCategories(data);
+    } catch (err) {
+      console.log(err);
+    }
+  }, []);
 
   const activeCount = useMemo(
     () => staff.filter((member) => member.is_active).length,
-    [staff]
+    [staff],
   );
 
   const fetchStaff = useCallback(async () => {
@@ -67,6 +79,7 @@ export default function TrusteeDashboard() {
     setError("");
     try {
       const data = await getStaffList();
+      console.log("data : ", data);
       setStaff(data);
     } catch (err: unknown) {
       setError(getErrorMessage(err, "Failed to load staff."));
@@ -77,21 +90,24 @@ export default function TrusteeDashboard() {
 
   useEffect(() => {
     fetchStaff();
-  }, [fetchStaff]);
+    fetchCategories();
+  }, [fetchStaff, fetchCategories]);
 
   const handleInputChange =
     (field: keyof CreateStaffPayload) =>
-      (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const value =
-          field === "is_active"
-            ? event.target.value === "true"
+    (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      const value =
+        field === "is_active"
+          ? event.target.value === "true"
+          : field === "category"
+            ? Number(event.target.value)
             : event.target.value;
 
-        setFormData((prev) => ({
-          ...prev,
-          [field]: value,
-        }));
-      };
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -121,10 +137,15 @@ export default function TrusteeDashboard() {
         <div className="rounded-3xl border border-teal-100 bg-gradient-to-br from-teal-600 via-cyan-600 to-emerald-500 p-6 text-white shadow-sm">
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-2">
-              <p className="text-sm font-medium text-white/80">Trustee Staff Directory</p>
-              <h2 className="text-3xl font-bold tracking-tight">Manage staff records</h2>
+              <p className="text-sm font-medium text-white/80">
+                Trustee Staff Directory
+              </p>
+              <h2 className="text-3xl font-bold tracking-tight">
+                Manage staff records
+              </h2>
               <p className="max-w-xl text-sm text-white/80">
-                Review all staff entries and create new records directly from the trustee panel.
+                Review all staff entries and create new records directly from
+                the trustee panel.
               </p>
             </div>
             <div className="rounded-2xl bg-white/15 p-3">
@@ -149,7 +170,9 @@ export default function TrusteeDashboard() {
               disabled={isFetching}
               className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
             >
-              <RefreshCw className={`mr-2 h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
+              <RefreshCw
+                className={`mr-2 h-4 w-4 ${isFetching ? "animate-spin" : ""}`}
+              />
               Refresh
             </Button>
           </div>
@@ -157,14 +180,18 @@ export default function TrusteeDashboard() {
 
         <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
           <p className="text-sm font-medium text-gray-500">Total Staff</p>
-          <p className="mt-3 text-3xl font-bold text-gray-900">{staff.length}</p>
+          <p className="mt-3 text-3xl font-bold text-gray-900">
+            {staff.length}
+          </p>
           <p className="mt-1 text-sm text-gray-500">Total staff members.</p>
         </div>
 
         <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
           <p className="text-sm font-medium text-gray-500">Active Staff</p>
           <p className="mt-3 text-3xl font-bold text-gray-900">{activeCount}</p>
-          <p className="mt-1 text-sm text-gray-500">Members currently marked active.</p>
+          <p className="mt-1 text-sm text-gray-500">
+            Members currently marked active.
+          </p>
         </div>
       </div>
 
@@ -200,18 +227,33 @@ export default function TrusteeDashboard() {
             className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm"
           >
             <div className="mb-5">
-              <h3 className="text-xl font-semibold text-gray-900">Create staff record</h3>
+              <h3 className="text-xl font-semibold text-gray-900">
+                Create staff record
+              </h3>
             </div>
 
             <form onSubmit={handleSubmit} className="grid gap-5 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
-                <Input id="name" value={formData.name} placeholder="Staff name" onChange={handleInputChange("name")} required />
+                <Input
+                  id="name"
+                  value={formData.name}
+                  placeholder="Staff name"
+                  onChange={handleInputChange("name")}
+                  required
+                />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={formData.email} placeholder="Staff email" onChange={handleInputChange("email")} required />
+                <Input
+                  id="email"
+                  type="email"
+                  value={formData.email}
+                  placeholder="Staff email"
+                  onChange={handleInputChange("email")}
+                  required
+                />
               </div>
 
               <div className="space-y-2">
@@ -229,13 +271,19 @@ export default function TrusteeDashboard() {
                 <Label htmlFor="category">Category</Label>
                 <select
                   id="category"
-                  value={formData.category}
+                  value={formData.category || ""}
                   onChange={handleInputChange("category")}
+                  required
                   className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none"
                 >
-                  {STAFF_CATEGORIES.map((category) => (
-                    <option key={category.value} value={category.value}>
-                      {category.label}
+                  <option value="">Select Category</option>
+
+                  {staffCategories.map((category: any, index: number) => (
+                    <option
+                      key={`${category.feature_id}-${index}`}
+                      value={category.feature_id}
+                    >
+                      {category.feature_name}
                     </option>
                   ))}
                 </select>
@@ -243,7 +291,12 @@ export default function TrusteeDashboard() {
 
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="address">Address</Label>
-                <Input id="address" value={formData.address} onChange={handleInputChange("address")} required />
+                <Input
+                  id="address"
+                  value={formData.address}
+                  onChange={handleInputChange("address")}
+                  required
+                />
               </div>
 
               <div className="space-y-2">
@@ -284,8 +337,16 @@ export default function TrusteeDashboard() {
               </div>
 
               <div className="md:col-span-2 flex justify-end">
-                <Button type="submit" disabled={isSubmitting} className="bg-teal-600 hover:bg-teal-700">
-                  {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserPlus className="mr-2 h-4 w-4" />}
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="bg-teal-600 hover:bg-teal-700"
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <UserPlus className="mr-2 h-4 w-4" />
+                  )}
                   {isSubmitting ? "Saving..." : "Create Staff"}
                 </Button>
               </div>
@@ -319,14 +380,18 @@ export default function TrusteeDashboard() {
                 <tr>
                   <td colSpan={8} className="px-6 py-14 text-center">
                     <Loader2 className="mx-auto h-6 w-6 animate-spin text-teal-600" />
-                    <p className="mt-2 text-sm text-gray-500">Loading staff...</p>
+                    <p className="mt-2 text-sm text-gray-500">
+                      Loading staff...
+                    </p>
                   </td>
                 </tr>
               ) : staff.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-6 py-14 text-center">
                     <Users className="mx-auto h-8 w-8 text-gray-300" />
-                    <p className="mt-2 text-sm text-gray-500">No staff records found.</p>
+                    <p className="mt-2 text-sm text-gray-500">
+                      No staff records found.
+                    </p>
                   </td>
                 </tr>
               ) : (
@@ -339,10 +404,16 @@ export default function TrusteeDashboard() {
                     className="align-top hover:bg-slate-50/70"
                   >
                     <td className="px-6 py-4">
-                      <div className="font-medium text-gray-900">{member.name || "-"}</div>
-                      <div className="text-xs text-gray-500">ID #{member.id}</div>
+                      <div className="font-medium text-gray-900">
+                        {member.name || "-"}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        ID #{member.id}
+                      </div>
                     </td>
-                    <td className="px-6 py-4 text-gray-600">{categoryLabel(member.category)}</td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {categoryLabel(member.category)}
+                    </td>
                     <td className="px-6 py-4">
                       <div className="space-y-1 text-gray-600">
                         <div className="flex items-center gap-2">
@@ -367,7 +438,9 @@ export default function TrusteeDashboard() {
                         <span>{member.date_of_birth || "-"}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-gray-600">{member.joining_date || "-"}</td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {member.joining_date || "-"}
+                    </td>
                     <td className="px-6 py-4 text-gray-600">
                       <div className="flex items-center gap-2">
                         <BadgeIndianRupee className="h-3.5 w-3.5 text-gray-400" />
@@ -376,10 +449,11 @@ export default function TrusteeDashboard() {
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${member.is_active
-                          ? "bg-emerald-50 text-emerald-700"
-                          : "bg-red-50 text-red-700"
-                          }`}
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
+                          member.is_active
+                            ? "bg-emerald-50 text-emerald-700"
+                            : "bg-red-50 text-red-700"
+                        }`}
                       >
                         {member.is_active ? "Active" : "Inactive"}
                       </span>

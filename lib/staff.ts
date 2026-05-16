@@ -56,3 +56,20 @@ export async function createStaff(payload: CreateStaffPayload): Promise<Staff> {
 
   return response.json();
 }
+
+export async function getStaffCategories() {
+  const response = await fetchWithAuth(
+    `${API_BASE_URL}${API_ENDPOINTS.GET_FEATURE}`,
+    {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch categories.");
+  }
+
+  return response.json();
+}
