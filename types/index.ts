@@ -14,6 +14,10 @@ export interface LoginResponse {
     roles: string[];
   };
   roles?: string[]; // for backward compatibility/direct access
+  school_id?: number;
+  school_slug?: string;
+  modules?: string[];
+
 }
 
 // this is new add 

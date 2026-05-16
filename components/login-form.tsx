@@ -15,10 +15,10 @@ const fadeUp = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { 
-      duration: 0.4, 
-      delay: i * 0.08, 
-      ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number]
+    transition: {
+      duration: 0.4,
+      delay: i * 0.08,
+      ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number],
     },
   }),
 };
@@ -47,34 +47,48 @@ function LoginFormInner() {
     setError("");
 
     // Determine payload based on input type
+    // const isEmail = username.includes("@");
+    // const isMobile = /^\d+$/.test(username);
+
+    // let payload: any = { password };
+
+    // if (isEmail) {
+    //   payload.email = username;
+    // } else if (isMobile) {
+    //   if (username.length !== 10) {
+    //     setError("Mobile number must be exactly 10 digits.");
+    //     setIsLoading(false);
+    //     return;
+    //   }
+    //   payload.mobile = username;
+    // } else {
+    //   setError("Please enter a valid email or 10-digit mobile number.");
+    //   setIsLoading(false);
+    //   return;
+    // }
+
+    // now this is for the studend 
     const isEmail = username.includes("@");
-    const isMobile = /^\d+$/.test(username);
-    
+
     let payload: any = { password };
 
     if (isEmail) {
       payload.email = username;
-    } else if (isMobile) {
-      if (username.length !== 10) {
-        setError("Mobile number must be exactly 10 digits.");
-        setIsLoading(false);
-        return;
-      }
-      payload.mobile = username;
     } else {
-      setError("Please enter a valid email or 10-digit mobile number.");
-      setIsLoading(false);
-      return;
+      payload.mobile = username;
     }
 
     try {
       const response = await loginUser(payload);
       // roles might be top-level or in user.roles depending on backend
+      console.log("response : ",response,"response.user?.roles : ",response.roles, response.user?.roles);
       const roles = response.roles || response.user?.roles || [];
       const route = getDashboardRoute(roles);
       router.push(route);
     } catch (err: any) {
-      setError(err.message || "Failed to login. Please verify your credentials.");
+      setError(
+        err.message || "Failed to login. Please verify your credentials.",
+      );
       console.error("Login failed:", err);
     } finally {
       setIsLoading(false);
@@ -85,11 +99,20 @@ function LoginFormInner() {
     <motion.div
       initial={{ opacity: 0, x: 40 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] }}
+      transition={{
+        duration: 0.5,
+        ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number],
+      }}
       className="w-full"
     >
       {/* Header */}
-      <motion.div custom={0} variants={fadeUp} initial="hidden" animate="visible" className="mb-8">
+      <motion.div
+        custom={0}
+        variants={fadeUp}
+        initial="hidden"
+        animate="visible"
+        className="mb-8"
+      >
         <h1 className="text-3xl font-bold text-[#0F172A] mb-2">Sign in</h1>
         {/* <p className="text-[#64748B] text-sm">
           New to EduManage?{" "}
@@ -105,8 +128,17 @@ function LoginFormInner() {
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Username */}
-        <motion.div custom={1} variants={fadeUp} initial="hidden" animate="visible" className="space-y-1.5">
-          <Label htmlFor="username" className="text-sm font-semibold text-[#374151]">
+        <motion.div
+          custom={1}
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
+          className="space-y-1.5"
+        >
+          <Label
+            htmlFor="username"
+            className="text-sm font-semibold text-[#374151]"
+          >
             Username
           </Label>
           <div className="relative">
@@ -130,9 +162,18 @@ function LoginFormInner() {
         </motion.div>
 
         {/* Password */}
-        <motion.div custom={2} variants={fadeUp} initial="hidden" animate="visible" className="space-y-1.5">
+        <motion.div
+          custom={2}
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
+          className="space-y-1.5"
+        >
           <div className="flex items-center justify-between">
-            <Label htmlFor="password" className="text-sm font-semibold text-[#374151]">
+            <Label
+              htmlFor="password"
+              className="text-sm font-semibold text-[#374151]"
+            >
               Password
             </Label>
             <a
@@ -173,7 +214,11 @@ function LoginFormInner() {
                   exit={{ opacity: 0, scale: 0.7 }}
                   transition={{ duration: 0.15 }}
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </motion.span>
               </AnimatePresence>
             </button>
@@ -182,13 +227,23 @@ function LoginFormInner() {
 
         {/* Error Message */}
         {error && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center"
+          >
             <p className="text-sm font-medium text-red-500">{error}</p>
           </motion.div>
         )}
 
         {/* Submit */}
-        <motion.div custom={3} variants={fadeUp} initial="hidden" animate="visible" className="pt-1">
+        <motion.div
+          custom={3}
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
+          className="pt-1"
+        >
           <Button
             type="submit"
             disabled={isLoading}
@@ -232,7 +287,10 @@ function LoginFormInner() {
         className="mt-6 pt-5 border-t border-[#F1F5F9] flex items-center justify-center gap-6"
       >
         {["256-bit SSL", "GDPR Compliant", "99.9% uptime"].map((badge) => (
-          <span key={badge} className="flex items-center gap-1 text-[10px] font-medium text-[#94A3B8] uppercase tracking-wider">
+          <span
+            key={badge}
+            className="flex items-center gap-1 text-[10px] font-medium text-[#94A3B8] uppercase tracking-wider"
+          >
             <span className="h-1.5 w-1.5 rounded-full bg-[#34D399] inline-block" />
             {badge}
           </span>
@@ -244,7 +302,13 @@ function LoginFormInner() {
 
 export function LoginForm() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-[#4F46E5]" /></div>}>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-[#4F46E5]" />
+        </div>
+      }
+    >
       <LoginFormInner />
     </Suspense>
   );

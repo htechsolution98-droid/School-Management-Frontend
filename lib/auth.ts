@@ -147,13 +147,18 @@ export async function loginUser(credentials: LoginRequest): Promise<LoginRespons
     throw new Error(message);
   }
 
-  const data = await response.json() as LoginResponse & { token?: string };
-  const accessToken = data.access || data.token;
+  const data = await response.json() as LoginResponse;
+  // Tokens now arrive as HttpOnly-style cookies set by the server.
+  // No need to manually call setTokens() — the browser stores them automatically.
+  // Clear any stale legacy tokens from localStorage just in case.
+  clearLegacyLocalTokens();
 
-  if (accessToken) {
-    setTokens(accessToken, data.refresh);
+   if (typeof window !== "undefined") {
+    if (data.school_id)   localStorage.setItem("school_id",   String(data.school_id));
+    if (data.school_slug) localStorage.setItem("school_slug", data.school_slug);
+    if (data.roles)       localStorage.setItem("roles",       JSON.stringify(data.roles));
   }
-
+  
   // Ensure roles is available at the top level for backward compatibility
   if (data.user?.roles && !data.roles) {
     data.roles = data.user.roles;
@@ -183,10 +188,10 @@ export async function sendOtp(payload: { email?: string; mobile?: string }): Pro
   }
 }
 
-export async function verifyOtp(payload: { 
-  email?: string; 
-  mobile?: string; 
-  otp: string; 
+export async function verifyOtp(payload: {
+  email?: string;
+  mobile?: string;
+  otp: string;
   password: string;
   school_id?: number;
   school_slug?: string;
@@ -248,13 +253,8 @@ export async function refreshToken(): Promise<boolean> {
     });
 
     if (response.ok) {
-      const data = await response.json();
-      const newAccess = data.access || data.token;
-      const newRefresh = data.refresh || refresh;
-      if (newAccess) {
-        setTokens(newAccess, newRefresh);
-        return true;
-      }
+      // Server sets new cookies automatically — nothing to store manually
+      return true;
     }
     return false;
   } catch {
@@ -268,71 +268,67 @@ export async function fetchWithAuth(
   input: RequestInfo | URL,
   init: RequestInit = {}
 ): Promise<Response> {
+
   const url = String(input);
 
-  const token = getAccessToken();
-  const headers = new Headers(init.headers);
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
-
-  const response = await apiFetch(url, {
+  // COOKIE BASED REQUEST
+  let response = await apiFetch(url, {
     ...init,
-    headers,
+    credentials: "include",
   });
 
-  if (response.status !== 401) return response;
+  // SUCCESS
+  if (response.status !== 401) {
+    return response;
+  }
 
+  // WAIT IF TOKEN REFRESH RUNNING
   if (isRefreshing) {
-    await new Promise<boolean>((resolve) => refreshSubscribers.push(resolve));
 
-    const newToken = getAccessToken();
-    const newHeaders = new Headers(init.headers);
-    if (newToken) {
-      newHeaders.set("Authorization", `Bearer ${newToken}`);
-    }
+    await new Promise<boolean>((resolve) =>
+      refreshSubscribers.push(resolve)
+    );
+
     return apiFetch(url, {
       ...init,
-      headers: newHeaders,
+      credentials: "include",
     });
   }
 
+  // REFRESH FLOW
   isRefreshing = true;
+
   const refreshed = await refreshToken();
+
   isRefreshing = false;
+
   onRefreshDone(refreshed);
 
+  // REFRESH FAILED
   if (!refreshed) {
     clearTokens();
     return response;
   }
 
-  const freshToken = getAccessToken();
-  const retryHeaders = new Headers(init.headers);
-  if (freshToken) {
-    retryHeaders.set("Authorization", `Bearer ${freshToken}`);
-  }
+  // RETRY REQUEST
   return apiFetch(url, {
     ...init,
-    headers: retryHeaders,
+    credentials: "include",
   });
 }
 
 // ─── Logout ───────────────────────────────────────────────────────────────────
 
 export async function logoutUser(): Promise<void> {
-  const token = getAccessToken();
-  const headers: HeadersInit = { "Content-Type": "application/json" };
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
 
   try {
+
     await apiFetch(`${API_BASE_URL}/logout/`, {
       method: "POST",
-      headers,
+      credentials: "include",
     });
-  } catch { /* ignore */ }
+
+  } catch {}
 
   clearTokens();
 
@@ -352,5 +348,8 @@ export function getDashboardRoute(roles: string[]): string {
   if (role === "clerk" || role === "fees_clerk") return "/clerk";
   if (role === "temp_user") return "/user";
   if (role === "fees management") return "/fees";
+  if (role === "teacher") return "/teacher";
+  if (role === "student") return "/student";
+  if (role === "parents") return "/parent";
   return "/";
 }

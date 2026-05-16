@@ -30,7 +30,7 @@ export interface ConfiguredField {
   options: BuilderOption[]
   selected: boolean
   custom?: boolean
-  lockedType?: boolean;     
+  lockedType?: boolean;
   lockedRequired?: boolean;
 }
 
@@ -61,8 +61,8 @@ export interface AdmissionFormCreatePayload {
   unique_link: string
   fee_type: string
   sections: AdmissionFormSectionPayload[]
-  document_fields: string[]         
-  fee_structures_input: { class_name: number; fee_amount: string }[] 
+  document_fields: string[]
+  fee_structures_input: { class_name: number; fee_amount: string }[]
 }
 
 export interface AdmissionFormResponse extends AdmissionFormCreatePayload {
@@ -114,7 +114,7 @@ export const FIELD_TYPE_OPTIONS: BuilderOption[] = [
 ]
 
 export const PERSONAL_FIELD_TEMPLATES: FieldTemplate[] = [
-  { key: "aadhaar_number", label: "Aadhaar Number", type: "number" , required: true },
+  { key: "aadhaar_number", label: "Aadhaar Number", type: "number", required: true },
   { key: "student_full_name", label: "Student Full Name", type: "text", required: true },
   { key: "date_of_birth", label: "Date of Birth", type: "date", required: true },
   {
@@ -159,18 +159,31 @@ export const PERSONAL_FIELD_TEMPLATES: FieldTemplate[] = [
       { label: "Nursery", value: "nursery" },
       { label: "LKG", value: "lkg" },
       { label: "UKG", value: "ukg" },
-      { label: "Class 1", value: "class_1" },
-      { label: "Class 2", value: "class_2" },
-      { label: "Class 3", value: "class_3" },
-      { label: "Class 4", value: "class_4" },
-      { label: "Class 5", value: "class_5" },
-      { label: "Class 6", value: "class_6" },
-      { label: "Class 7", value: "class_7" },
-      { label: "Class 8", value: "class_8" },
-      { label: "Class 9", value: "class_9" },
-      { label: "Class 10", value: "class_10" },
-      { label: "Class 11", value: "class_11" },
-      { label: "Class 12", value: "class_12" },
+
+      { label: "Class 1", value: "class1" },
+      { label: "Class 2", value: "class2" },
+      { label: "Class 3", value: "class3" },
+      { label: "Class 4", value: "class4" },
+      { label: "Class 5", value: "class5" },
+      { label: "Class 6", value: "class6" },
+      { label: "Class 7", value: "class7" },
+      { label: "Class 8", value: "class8" },
+
+      { label: "Class 9 Basic Math", value: "class9_basic" },
+      { label: "Class 9 Standard Math", value: "class9_standard" },
+      { label: "Class 9 Advanced Math", value: "class9_advanced" },
+
+      { label: "Class 10 Basic Math", value: "class10_basic" },
+      { label: "Class 10 Standard Math", value: "class10_standard" },
+      { label: "Class 10 Advanced Math", value: "class10_advanced" },
+
+      { label: "Class 11 Science", value: "class11_science" },
+      { label: "Class 11 Arts", value: "class11_arts" },
+      { label: "Class 11 Commerce", value: "class11_commerce" },
+
+      { label: "Class 12 Science", value: "class12_science" },
+      { label: "Class 12 Arts", value: "class12_arts" },
+      { label: "Class 12 Commerce", value: "class12_commerce" },
     ],
   },
   { key: "previous_school_name", label: "Previous School Name", type: "text" },
@@ -225,6 +238,7 @@ export const SCHOOL_CLASS_OPTIONS = [
   { label: "Nursery", value: "nursery" },
   { label: "LKG", value: "lkg" },
   { label: "UKG", value: "ukg" },
+
   { label: "Class 1", value: "class1" },
   { label: "Class 2", value: "class2" },
   { label: "Class 3", value: "class3" },
@@ -233,11 +247,19 @@ export const SCHOOL_CLASS_OPTIONS = [
   { label: "Class 6", value: "class6" },
   { label: "Class 7", value: "class7" },
   { label: "Class 8", value: "class8" },
-  { label: "Class 9", value: "class9" },
-  { label: "Class 10", value: "class10" },
+
+  { label: "Class 9 Basic Math", value: "class9_basic" },
+  { label: "Class 9 Standard Math", value: "class9_standard" },
+  { label: "Class 9 Advanced Math", value: "class9_advanced" },
+
+  { label: "Class 10 Basic Math", value: "class10_basic" },
+  { label: "Class 10 Standard Math", value: "class10_standard" },
+  { label: "Class 10 Advanced Math", value: "class10_advanced" },
+
   { label: "Class 11 Science", value: "class11_science" },
   { label: "Class 11 Arts", value: "class11_arts" },
   { label: "Class 11 Commerce", value: "class11_commerce" },
+
   { label: "Class 12 Science", value: "class12_science" },
   { label: "Class 12 Arts", value: "class12_arts" },
   { label: "Class 12 Commerce", value: "class12_commerce" },

@@ -7,7 +7,6 @@ import {
   Loader2,
   AlertCircle,
   CheckCircle2,
-  Users,
   Backpack,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -52,11 +51,12 @@ export default function AssignTeacherPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Form State
-  const [selectedClassName, setSelectedClassName] = useState<string>("");
   const [selectedDivisionId, setSelectedDivisionId] = useState<string>("");
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>("");
   const [selectedTeacherId, setSelectedTeacherId] = useState<string>("");
   const [isClassTeacher, setIsClassTeacher] = useState(false);
+
+  // ── Fetch all data on mount ─────────────────────────────────────────────────
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -67,7 +67,6 @@ export default function AssignTeacherPage() {
         getSubjects(),
         getTeachers(),
       ]);
-
       setDivisions(divisionsData);
       setSubjects(subjectsData);
       setTeachers(teachersData);
@@ -83,53 +82,50 @@ export default function AssignTeacherPage() {
     fetchData();
   }, []);
 
-  // Derived: Unique Class Names and IDs from Divisions
-  const classes = Array.from(
-    divisions.reduce((acc, current) => {
-      if (
-        current.SchoolClass &&
-        current.class_name &&
-        !acc.has(current.SchoolClass)
-      ) {
-        acc.set(current.SchoolClass, current.class_name);
-      }
-      return acc;
-    }, new Map<number, string>()),
-  )
-    .map(([id, name]) => ({ id, name }))
-    .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+  // ── Derived: Combined "Class 5 - A" options ─────────────────────────────────
+  const classDivisionOptions = [...divisions]
+    .filter((d) => d.class_name && d.division)
+    .sort((a, b) => {
+      const classCompare = (a.class_name ?? "").localeCompare(
+        b.class_name ?? "",
+        undefined,
+        { numeric: true },
+      );
+      if (classCompare !== 0) return classCompare;
+      return a.division.localeCompare(b.division);
+    });
 
-  // Derived: Divisions for selected class (using class name for display/lookup)
-  const filteredDivisions = divisions.filter(
-    (d) => d.SchoolClass.toString() === selectedClassName,
-  );
-
-  // Derived: Subjects for selected division
+  // ── Derived: Subjects filtered by selected division ─────────────────────────
   const relevantSubjects = subjects.filter(
-    (s) => s.division === parseInt(selectedDivisionId),
+    (s) => s.division !== null && s.division?.toString() === selectedDivisionId,
   );
 
-  // Label Helpers to fix ID display issue
-  const getDivisionLabel = (id: string) => {
-    const div = divisions.find((d) => d.id?.toString() === id);
-    return div ? `Division ${div.division}` : "";
+  // ── Label helpers ───────────────────────────────────────────────────────────
+
+  const getClassDivisionLabel = (divId: string) => {
+    const div = divisions.find((d) => d.id?.toString() === divId);
+    if (!div) return "";
+    return `${div.class_name} - ${div.division}`;
   };
 
-  const getSubjectLabel = (id: string) => {
-    const sub = subjects.find((s) => s.id?.toString() === id);
-    return sub ? sub.name : "";
-  };
+  const getSubjectLabel = (subId: string) =>
+    subjects.find((s) => s.id?.toString() === subId)?.name ?? "";
 
-  const getTeacherLabel = (id: string) => {
-    const t = teachers.find((t) => t.id.toString() === id);
-    return t ? t.name : "";
-  };
+  const getTeacherLabel = (teachId: string) =>
+    teachers.find((t) => t.id.toString() === teachId)?.name ?? "";
+
+  // ── Submit ──────────────────────────────────────────────────────────────────
 
   const handleAssignTeacher = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!selectedDivisionId || !selectedSubjectId || !selectedTeacherId) {
       toast.error("Please fill all required fields");
+      return;
+    }
+
+    if (!isClassTeacher) {
+      toast.error("You must mark this teacher as a Class Teacher to proceed");
       return;
     }
 
@@ -145,7 +141,7 @@ export default function AssignTeacherPage() {
       await assignClass(payload);
       toast.success("Teacher assigned successfully");
 
-      // Partial Reset
+      // Partial reset
       setSelectedTeacherId("");
       setIsClassTeacher(false);
     } catch (err) {
@@ -157,15 +153,18 @@ export default function AssignTeacherPage() {
     }
   };
 
+  // ── Render ──────────────────────────────────────────────────────────────────
+
   return (
-    <div className="flex-1 space-y-6 p-8 pt-6 bg-white min-h-screen">
-      <div className="flex items-center justify-between">
+    <div className="flex-1 space-y-4 p-3 sm:p-4 md:p-6 lg:p-8 bg-white min-h-screen overflow-x-hidden">
+      {/* ── Page Header ── */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
           <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-sm border border-primary/20">
             <Backpack className="h-6 w-6" />
           </div>
           <div>
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
               Teacher Assignments
             </h2>
             <p className="text-muted-foreground mt-1 text-sm font-medium">
@@ -189,6 +188,7 @@ export default function AssignTeacherPage() {
 
       <Separator className="bg-slate-100" />
 
+      {/* ── Error Alert ── */}
       {error && (
         <Alert
           variant="destructive"
@@ -202,8 +202,9 @@ export default function AssignTeacherPage() {
         </Alert>
       )}
 
-      <div className="max-w-2xl mx-auto">
-        <Card className="shadow-2xl border-slate-200/60 overflow-hidden ring-1 ring-slate-200/50">
+      {/* ── Form Card ── */}
+      <div className="w-full max-w-2xl mx-auto">
+        <Card className="w-full shadow-xl border-slate-200/60 overflow-hidden ring-1 ring-slate-200/50 rounded-2xl">
           <CardHeader className="pb-6 space-y-2 bg-slate-50/50 border-b border-slate-100">
             <CardTitle className="text-2xl flex items-center gap-3 text-slate-900">
               <UserPlus className="h-7 w-7 text-primary" />
@@ -214,89 +215,54 @@ export default function AssignTeacherPage() {
               sections.
             </CardDescription>
           </CardHeader>
-          <CardContent className="pt-1">
-            <form onSubmit={handleAssignTeacher} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Class Selection */}
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                    School Class
-                  </label>
-                  <Select
-                    value={selectedClassName}
-                    onValueChange={(val) => {
-                      setSelectedClassName(val ?? "");
-                      setSelectedDivisionId("");
-                      setSelectedSubjectId("");
-                    }}
-                    disabled={isLoading || classes.length === 0}
-                  >
-                    <SelectTrigger className="w-full bg-white border-slate-200 rounded-xl h-12 shadow-sm focus:ring-primary/20 transition-all">
-                      <SelectValue placeholder="Pick a Class">
-                        {classes.find(
-                          (c) => c.id.toString() === selectedClassName,
-                        )?.name || undefined}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl border-slate-200 shadow-xl">
-                      {classes.map((cls) => (
-                        <SelectItem
-                          key={cls.id}
-                          value={cls.id.toString()}
-                          className="rounded-lg my-1"
-                        >
-                          {cls.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
 
-                {/* Division Selection */}
+          <CardContent className="pt-6">
+            <form onSubmit={handleAssignTeacher} className="space-y-5">
+              {/* ── Row 1: Class & Division + Subject ── */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* Class & Division */}
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
                     <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                    Division
+                    Class &amp; Division
                   </label>
                   <Select
                     value={selectedDivisionId}
                     onValueChange={(val) => {
                       setSelectedDivisionId(val ?? "");
                       setSelectedSubjectId("");
+                      setSelectedTeacherId("");
                     }}
-                    disabled={isLoading || !selectedClassName}
+                    disabled={isLoading || classDivisionOptions.length === 0}
                   >
                     <SelectTrigger className="w-full bg-white border-slate-200 rounded-xl h-12 shadow-sm focus:ring-primary/20 transition-all">
-                      <SelectValue
-                        placeholder={
-                          selectedClassName
-                            ? "Pick Division"
-                            : "Select Class first"
-                        }
-                      >
+                      <SelectValue placeholder="Pick Class & Division">
                         {selectedDivisionId
-                          ? getDivisionLabel(selectedDivisionId)
+                          ? getClassDivisionLabel(selectedDivisionId)
                           : undefined}
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-slate-200 shadow-xl">
-                      {filteredDivisions.map((div) => (
-                        <SelectItem
-                          key={div.id}
-                          value={div.id!.toString()}
-                          className="rounded-lg my-1"
-                        >
-                          Division {div.division}
-                        </SelectItem>
-                      ))}
+                      {classDivisionOptions.length === 0 ? (
+                        <div className="p-4 text-center text-sm text-slate-500 italic">
+                          No classes found
+                        </div>
+                      ) : (
+                        classDivisionOptions.map((div) => (
+                          <SelectItem
+                            key={div.id}
+                            value={div.id!.toString()}
+                            className="rounded-lg my-1"
+                          >
+                            {div.class_name} - {div.division}
+                          </SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Subject Selection */}
+                {/* Subject */}
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
                     <span className="h-1.5 w-1.5 rounded-full bg-primary" />
@@ -312,7 +278,7 @@ export default function AssignTeacherPage() {
                         placeholder={
                           selectedDivisionId
                             ? "Pick Subject"
-                            : "Select Division first"
+                            : "Select Class first"
                         }
                       >
                         {selectedSubjectId
@@ -332,34 +298,53 @@ export default function AssignTeacherPage() {
                           </SelectItem>
                         ))
                       ) : (
-                        <div className="p-4 text-center text-sm text-slate-500 font-medium italic">
-                          No subjects available
+                        <div className="p-4 text-center text-sm text-slate-500 italic">
+                          {selectedDivisionId
+                            ? "No subjects for this division"
+                            : "Select Class & Division first"}
                         </div>
                       )}
                     </SelectContent>
                   </Select>
-                </div>
 
-                {/* Teacher Selection */}
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                    Staff Member (Teacher)
-                  </label>
-                  <Select
-                    value={selectedTeacherId}
-                    onValueChange={(val) => setSelectedTeacherId(val ?? "")}
-                    disabled={isLoading || teachers.length === 0}
-                  >
-                    <SelectTrigger className="w-full bg-white border-slate-200 rounded-xl h-12 shadow-sm focus:ring-primary/20 transition-all">
-                      <SelectValue placeholder="Pick Teacher">
-                        {selectedTeacherId
-                          ? getTeacherLabel(selectedTeacherId)
-                          : undefined}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl border-slate-200 shadow-xl">
-                      {teachers.map((t) => (
+                  {/* Hint when no subjects found */}
+                  {selectedDivisionId && relevantSubjects.length === 0 && (
+                    <p className="text-xs text-amber-600 mt-1 leading-relaxed">
+                      No subjects linked to{" "}
+                      <span className="font-semibold">
+                        {getClassDivisionLabel(selectedDivisionId)}
+                      </span>
+                      . Add subjects via the Subjects page first.
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* ── Row 2: Staff Member (Teacher) — full width ── */}
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                  Staff Member (Teacher)
+                </label>
+                <Select
+                  value={selectedTeacherId}
+                  onValueChange={(val) => setSelectedTeacherId(val ?? "")}
+                  disabled={isLoading || teachers.length === 0}
+                >
+                  <SelectTrigger className="w-full bg-white border-slate-200 rounded-xl h-12 shadow-sm focus:ring-primary/20 transition-all">
+                    <SelectValue placeholder="Pick Teacher">
+                      {selectedTeacherId
+                        ? getTeacherLabel(selectedTeacherId)
+                        : undefined}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl border-slate-200 shadow-xl">
+                    {teachers.length === 0 ? (
+                      <div className="p-4 text-center text-sm text-slate-500 italic">
+                        No teachers found
+                      </div>
+                    ) : (
+                      teachers.map((t) => (
                         <SelectItem
                           key={t.id}
                           value={t.id.toString()}
@@ -367,37 +352,59 @@ export default function AssignTeacherPage() {
                         >
                           {t.name}
                         </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
 
-              {/* Class Teacher Checkbox */}
-              <div className="flex items-center space-x-2 px-1 py-2">
+              {/* ── Make Class Teacher — directly below Staff Member ── */}
+              <div
+                onClick={() => setIsClassTeacher((prev) => !prev)}
+                className={cn(
+                  "flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 cursor-pointer select-none transition-all",
+                  isClassTeacher
+                    ? "border-primary/40 bg-primary/5"
+                    : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-slate-100",
+                )}
+              >
                 <Checkbox
                   id="is_class_teacher"
                   checked={isClassTeacher}
                   onCheckedChange={(checked) => setIsClassTeacher(!!checked)}
-                  className="h-5 w-5 border-slate-300"
+                  className="h-5 w-5 border-slate-300 pointer-events-none"
                 />
-                <label
-                  htmlFor="is_class_teacher"
-                  className="text-sm font-semibold text-slate-700 cursor-pointer select-none"
-                >
-                  Make Class Teacher
-                </label>
+                <div className="flex-1">
+                  <label
+                    htmlFor="is_class_teacher"
+                    className={cn(
+                      "text-sm font-semibold cursor-pointer select-none",
+                      isClassTeacher ? "text-primary" : "text-slate-700",
+                    )}
+                  >
+                    Make Class Teacher
+                  </label>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    This teacher will be assigned as the primary class teacher
+                  </p>
+                </div>
+                {/* Visual indicator */}
+                {isClassTeacher && (
+                  <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
+                )}
               </div>
 
-              <div className="pt-2">
+              {/* ── Submit Button ── */}
+              <div className="pt-1">
                 <Button
                   type="submit"
-                  className="w-full h-14 text-lg font-bold shadow-xl shadow-primary/10 rounded-2xl active:scale-[0.98] transition-all bg-primary hover:bg-primary/90"
+                  className="w-full h-12 sm:h-14 text-base sm:text-lg font-bold shadow-xl shadow-primary/10 rounded-2xl active:scale-[0.98] transition-all bg-primary hover:bg-primary/90"
                   disabled={
                     isSaving ||
                     !selectedDivisionId ||
                     !selectedSubjectId ||
-                    !selectedTeacherId
+                    !selectedTeacherId ||
+                    !isClassTeacher
                   }
                 >
                   {isSaving ? (
