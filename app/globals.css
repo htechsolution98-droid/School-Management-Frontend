@@ -120,13 +120,25 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    box-sizing: border-box;
   }
+
+  html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+html {
+  @apply font-sans;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
 
   body {
     @apply bg-background text-foreground;
-  }
-
-  html {
-    @apply font-sans;
+    overflow-x: hidden;
+    width: 100%;
   }
 }
