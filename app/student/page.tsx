@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import {
   BookOpen,
   BookMarked,
@@ -14,7 +14,7 @@ import {
 // ─────────────────────────────────────────────
 // Animation Variants
 // ─────────────────────────────────────────────
-const fadeUp = {
+const fadeUp: Variants = {
   hidden: { opacity: 0, y: 30 },
   visible: (i: number = 0) => ({
     opacity: 1,
@@ -22,12 +22,12 @@ const fadeUp = {
     transition: {
       delay: i * 0.1,
       duration: 0.5,
-      ease: "easeOut",
+      ease: "easeOut" as const,
     },
   }),
 };
 
-const fadeIn = {
+const fadeIn: Variants = {
   hidden: { opacity: 0 },
   visible: (i: number = 0) => ({
     opacity: 1,
@@ -38,7 +38,7 @@ const fadeIn = {
   }),
 };
 
-const scaleIn = {
+const scaleIn: Variants = {
   hidden: { opacity: 0, scale: 0.92 },
   visible: (i: number = 0) => ({
     opacity: 1,
@@ -46,7 +46,7 @@ const scaleIn = {
     transition: {
       delay: i * 0.1,
       duration: 0.4,
-      ease: "easeOut",
+      ease: "easeOut" as const,
     },
   }),
 };

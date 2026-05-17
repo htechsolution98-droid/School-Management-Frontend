@@ -727,7 +727,7 @@ function MultiStepForm({
     return values;
   };
   const [formValues, setFormValues] = useState<any>(getInitialFormValues());
-  const [docValues, setDocValues] = useState<any>({});
+  const [docValues, setDocValues] = useState<Record<number, string | File>>({});
   const [docErrors, setDocErrors] = useState<any>({});
   const [errors, setErrors] = useState<any>({});
   const [submitting, setSubmitting] = useState(false);
@@ -1829,9 +1829,9 @@ function DocumentsStep({
 
   // const [docValues, setDocValues] = useState<Record<number, string | File>>({});
   const handleFile = (id: number, file: File) =>
-    setDocValues((p) => ({ ...p, [id]: file }));
-  const handleText = (id: number, val: string) =>
-    setDocValues((p) => ({ ...p, [id]: val }));
+  setDocValues((p: Record<number, string | File>) => ({ ...p, [id]: file }));
+const handleText = (id: number, val: string) =>
+  setDocValues((p: Record<number, string | File>) => ({ ...p, [id]: val }));
 
   return (
     <motion.div

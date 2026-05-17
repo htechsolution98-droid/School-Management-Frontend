@@ -46,7 +46,7 @@ import {
 
 const feeFormSchema = z
   .object({
-    feetype: z.number({ required_error: "Select a fee type" }).min(1),
+    feetype: z.number().min(1, "Select a fee type"),
     amount: z
       .string()
       .min(1, "Amount is required")
@@ -301,11 +301,11 @@ function FeeModal({
   const { register, handleSubmit, watch, setValue, formState: { errors }, reset } = useForm<FeeFormValues>({
     resolver: zodResolver(feeFormSchema),
     defaultValues: {
-      feetype: editing?.feetype ?? 0,
+      feetype: editing ? feeTypes.find(ft => ft.name === editing.feetype_name)?.id ?? 0 : 0,
       amount: editing?.amount ?? "",
       late_fee_enabled: editing?.late_fee_enabled ?? false,
       grace_days: editing?.grace_days?.toString() ?? "",
-      late_fee_type: (editing?.late_fee_type as LateFeeType) ?? "per_day",
+      late_fee_type: (editing?.late_fee_type ?? "per_day") as LateFeeType,
       late_fee_amount: editing?.late_fee_amount ?? "",
       max_late_fee: editing?.max_late_fee ?? "",
     },

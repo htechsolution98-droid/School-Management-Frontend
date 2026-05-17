@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
+
 import {
   Users,
   Search,
@@ -61,13 +62,10 @@ import {
   patchDocuments,
   assignGrNumber,
   type Admission,
-  type SchoolClass,
 } from "@/lib/forms";
 import { getClasses } from "@/lib/forms";
 
 // ─── Assign GR Number API ─────────────────────────────────────────────────────
-
-
 
 // ─── StatusBadge ──────────────────────────────────────────────────────────────
 
@@ -394,9 +392,9 @@ export default function StudentRecordsPage() {
 
   const openFieldEdit = (adm: Admission) => {
     setEditingAdmission(adm);
-    const init: Record<number, string> = {};
+    const init: Record<string, string> = {};
     adm.field_values.forEach((fv) => {
-      init[fv.field] = fv.value;
+      init[String(fv.field)] = fv.value;
     });
     setEditedFields(init);
   };
@@ -580,7 +578,7 @@ export default function StudentRecordsPage() {
                       {/* ── Collapsed row ── */}
                       <div
                         className={cn(
-                            "flex flex-col sm:flex-row sm:items-center gap-3 px-4 sm:px-6 py-4 transition-colors cursor-pointer",
+                          "flex flex-col sm:flex-row sm:items-center gap-3 px-4 sm:px-6 py-4 transition-colors cursor-pointer",
                           isExpanded ? "bg-slate-50" : "hover:bg-slate-50/70",
                         )}
                         onClick={() =>
@@ -811,11 +809,11 @@ export default function StudentRecordsPage() {
                   </label>
                   {fv.field_label.toLowerCase().includes("class") ? (
                     <Select
-                      value={String(editedFields[String(fv.field)] ?? fv.value)}
-                      onValueChange={(value) =>
+                      value={editedFields[String(fv.field)] || String(fv.value)}
+                      onValueChange={(value: string | null) =>
                         setEditedFields((prev) => ({
                           ...prev,
-                          [String(fv.field)]: value,
+                          [String(fv.field)]: value ?? "",
                         }))
                       }
                     >
@@ -834,7 +832,7 @@ export default function StudentRecordsPage() {
                     </Select>
                   ) : (
                     <Input
-                      value={editedFields[String(fv.field)] ?? fv.value}
+                      value={editedFields[String(fv.field)] || String(fv.value)}
                       onChange={(e) =>
                         setEditedFields((prev) => ({
                           ...prev,

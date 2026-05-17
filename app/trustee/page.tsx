@@ -33,7 +33,7 @@ const EMPTY_FORM: CreateStaffPayload = {
   name: "",
   email: "",
   phone_number: "",
-  category: "",
+  category: "" as StaffCategory,
   address: "",
   date_of_birth: "",
   salary: "",

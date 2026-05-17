@@ -182,8 +182,8 @@ export async function getPublishedFormLink(): Promise<{ form_link: string }> {
 
   if (data.form_link && data.form_link.startsWith("/")) {
     const baseUrl = (API_BASE_URL || "").endsWith("/")
-      ? API_BASE_URL.slice(0, -1)
-      : API_BASE_URL
+  ? (API_BASE_URL || "").slice(0, -1)
+  : (API_BASE_URL || "")
 
     data.form_link = `${baseUrl}${data.form_link}`
   }
@@ -1740,45 +1740,6 @@ export async function submitHomework(
 // They use the same `fetchWithAuth`, `API_BASE_URL` already in that file.
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
-export interface HomeworkItem {
-  id: number;
-  school: number;
-  division: number;
-  division_name: string;
-  school_class_name: string;
-  teacher: number;
-  teacher_name: string;
-  title: string;
-  description: string;
-  assigned_date: string;   // "2026-05-15"
-  due_date: string;        // "2026-05-20"
-  attachment: string | null;
-  is_active: boolean;
-  submission_count: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface HomeworkSubmission {
-  id: number;
-  school: number;
-  homework: number;
-  homework_title: string;
-  student: number;
-  student_name: string;
-  attachment: string | null;
-  submitted_at: string;       // ISO datetime
-  submission_date: string;    // "2026-05-15"
-  status: "pending" | "submitted" | "late" | "checked";
-  marks: number | null;
-  teacher_remark: string | null;
-  checked_by: number | null;
-  checked_at: string | null;
-  created_at: string;
-  updated_at: string;
-}
 
 // ─── GET /homework/ — list all homework for this teacher ─────────────────────
 
@@ -2140,14 +2101,14 @@ export async function deleteFeeType(id: number): Promise<void> {
     throw new Error(message);
   }
 }
-export const feeTypeSchema = z.object({   // ← ADD THIS ENTIRE BLOCK
+export const feeTypeSchema = z.object({
   name: z
     .string()
     .min(1, "Fee type name is required")
     .max(100, "Name must be 100 characters or less"),
   billing_cycle: z.enum(
     ["single", "monthly", "quarterly", "half_yearly", "yearly"],
-    { required_error: "Please select a billing cycle" }
+    { error: "Please select a billing cycle" }  //  Zod v4 syntax
   ),
 })
 
@@ -2167,6 +2128,7 @@ export interface FeeWiseClass {
   school_class: number;
   school_class_name: string;
   amount: string;
+
   late_fee_enabled: boolean;
   grace_days: number | null;
   late_fee_type: LateFeeType | null;

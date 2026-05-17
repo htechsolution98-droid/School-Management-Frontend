@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
+
 import {
   ChevronDown,
   ChevronRight,
@@ -32,8 +33,67 @@ import {
   getTimetable,
   createTimetable,
   updateTimetable,
-  getAssignedTeachers, // ← NEW import
+  getAssignedTeachers,
 } from "@/lib/forms";
+
+// ─── TYPES ────────────────────────────────────────────────────────────────────
+interface Division {
+  id: number;
+  class_name: string;
+  division: string;
+}
+
+interface Subject {
+  id: number;
+  name: string;
+}
+
+interface Teacher {
+  id: number;
+  name: string;
+}
+
+interface AssignedTeacher {
+  teacher: number | string;
+  subject: number | string;
+  teacher_name?: string;
+  subject_name?: string;
+  is_class_teacher?: boolean;
+}
+
+interface Slot {
+  id: string;
+  slot_number: number;
+  is_lecture: boolean;
+  is_break: boolean;
+  slot_start_time: string;
+  slot_end_time: string;
+  subject: string | number | null;
+  teacher: string | number | null;
+  subject_name?: string;
+  teacher_name?: string;
+}
+
+interface FormDataType {
+  day: string;
+  class_division: string | number;
+  total_lecture: number;
+  total_breaks: number;
+  start_time: string;
+  end_time: string;
+  academicYear: string;
+}
+
+interface ToastData {
+  msg: string;
+  type: "success" | "error" | "info" | "warning";
+}
+
+interface ToastProps {
+  message: string;
+  type: "success" | "error" | "info" | "warning";
+  onClose: () => void;
+}
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 const DAYS = [
@@ -45,7 +105,7 @@ const DAYS = [
   "saturday",
   "sunday",
 ];
-const DAY_SHORT = {
+const DAY_SHORT: Record<string, string> = {
   monday: "Mon",
   tuesday: "Tue",
   wednesday: "Wed",
@@ -54,7 +114,7 @@ const DAY_SHORT = {
   saturday: "Sat",
   sunday: "Sun",
 };
-const DAY_FULL = {
+const DAY_FULL: Record<string, string> = {
   monday: "Monday",
   tuesday: "Tuesday",
   wednesday: "Wednesday",
@@ -63,7 +123,6 @@ const DAY_FULL = {
   saturday: "Saturday",
   sunday: "Sunday",
 };
-// const ACADEMIC_YEARS = ["2024-2025", "2025-2026", "2026-2027", "2027-2028"];
 
 const SLOT_COLORS = [
   {
@@ -117,7 +176,7 @@ const SLOT_COLORS = [
 ];
 
 // ─── SMALL HELPERS ────────────────────────────────────────────────────────────
-function fmtTime(t) {
+function fmtTime(t: string): string {
   if (!t) return "";
   const parts = t.split(":");
   const h = parseInt(parts[0], 10);
@@ -128,32 +187,36 @@ function fmtTime(t) {
   return `${String(h12).padStart(2, "0")}:${String(m).padStart(2, "0")} ${ampm}`;
 }
 
-function toApiTime(t) {
+function toApiTime(t: string): string {
   if (!t) return "00:00:00";
   const parts = t.split(":");
   if (parts.length === 2) return `${t}:00`;
   return t;
 }
 
-function minutesBetween(start, end) {
+function minutesBetween(start: string, end: string): number {
   if (!start || !end) return 0;
   const [sh, sm] = start.split(":").map(Number);
   const [eh, em] = end.split(":").map(Number);
   return Math.max(0, eh * 60 + em - (sh * 60 + sm));
 }
 
-function genId() {
+function genId(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
+function fmtMinutes(m: number): string {
+  return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+}
+
 // ─── TOAST ────────────────────────────────────────────────────────────────────
-function Toast({ message, type, onClose }) {
+function Toast({ message, type, onClose }: ToastProps) {
   useEffect(() => {
     const t = setTimeout(onClose, 4500);
     return () => clearTimeout(t);
   }, [onClose]);
 
-  const cfg = {
+  const cfg: Record<string, { cls: string; Icon: React.ElementType }> = {
     success: { cls: "bg-emerald-600", Icon: CheckCircle2 },
     error: { cls: "bg-red-600", Icon: AlertCircle },
     info: { cls: "bg-blue-600", Icon: Info },
@@ -184,8 +247,16 @@ function SelectField({
   disabled = false,
   accent = "violet",
   icon: Icon,
+}: {
+  value: string | number;
+  onChange: (value: string) => void;
+  children: React.ReactNode;
+  placeholder?: string;
+  disabled?: boolean;
+  accent?: string;
+  icon?: React.ElementType;
 }) {
-  const ring = {
+  const ring: Record<string, string> = {
     violet: "focus:ring-violet-300 focus:border-violet-400",
     emerald: "focus:ring-emerald-300 focus:border-emerald-400",
     orange: "focus:ring-orange-300 focus:border-orange-400",
@@ -216,7 +287,13 @@ function SelectField({
 }
 
 // ─── FIELD LABEL ─────────────────────────────────────────────────────────────
-function Label({ children, required }) {
+function Label({
+  children,
+  required,
+}: {
+  children: React.ReactNode;
+  required?: boolean;
+}) {
   return (
     <label className="block text-xs font-semibold text-gray-600 mb-1.5">
       {children}
@@ -226,7 +303,7 @@ function Label({ children, required }) {
 }
 
 // ─── STEP INDICATOR ──────────────────────────────────────────────────────────
-function StepIndicator({ current }) {
+function StepIndicator({ current }: { current: number }) {
   const steps = [
     { id: 1, label: "Basic Information" },
     { id: 2, label: "Add Time Slots" },
@@ -262,7 +339,7 @@ function StepIndicator({ current }) {
 }
 
 // ─── LIVE PREVIEW PANEL ───────────────────────────────────────────────────────
-function LivePreviewPanel({ slots, day }) {
+function LivePreviewPanel({ slots, day }: { slots: Slot[]; day: string }) {
   const lectureCount = slots.filter((s) => s.is_lecture).length;
   const breakCount = slots.filter((s) => s.is_break).length;
   const totalMin = slots.reduce(
@@ -413,9 +490,9 @@ function LivePreviewPanel({ slots, day }) {
               color: "text-emerald-600",
               bg: "bg-emerald-50",
             },
-          ].map(({ icon: Icon, label, value, color, bg }) => (
+          ].map(({ icon: IconComp, label, value, color, bg }) => (
             <div key={label} className={`${bg} rounded-xl p-3`}>
-              <Icon size={16} className={`${color} mb-1.5`} />
+              <IconComp size={16} className={`${color} mb-1.5`} />
               <p className="text-sm font-black text-gray-800 whitespace-pre-line leading-tight">
                 {String(value)}
               </p>
@@ -435,8 +512,18 @@ function LivePreviewPanel({ slots, day }) {
 // ═══════════════════════════════════════════════════════════════════
 // STEP 1 — Basic Information
 // ═══════════════════════════════════════════════════════════════════
-function Step1BasicInfo({ divisions, form, setForm, onNext }) {
-  const [toast, setToast] = useState(null);
+function Step1BasicInfo({
+  divisions,
+  form,
+  setForm,
+  onNext,
+}: {
+  divisions: Division[];
+  form: FormDataType;
+  setForm: React.Dispatch<React.SetStateAction<FormDataType>>;
+  onNext: () => void;
+}) {
+  const [toast, setToast] = useState<ToastData | null>(null);
 
   const handleNext = () => {
     if (!form.class_division) {
@@ -472,9 +559,7 @@ function Step1BasicInfo({ divisions, form, setForm, onNext }) {
         </div>
       </div>
 
-      {/* ── Row 1: Day / Class / Lectures / Breaks — 4 columns ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
-        {/* Day */}
         <div>
           <Label required>Day</Label>
           <SelectField
@@ -492,7 +577,6 @@ function Step1BasicInfo({ divisions, form, setForm, onNext }) {
           </SelectField>
         </div>
 
-        {/* Class & Division */}
         <div>
           <Label required>Class & Division</Label>
           <SelectField
@@ -509,7 +593,6 @@ function Step1BasicInfo({ divisions, form, setForm, onNext }) {
           </SelectField>
         </div>
 
-        {/* Total Lectures */}
         <div>
           <Label required>Total Lectures</Label>
           <SelectField
@@ -527,7 +610,6 @@ function Step1BasicInfo({ divisions, form, setForm, onNext }) {
           </SelectField>
         </div>
 
-        {/* Total Breaks */}
         <div>
           <Label required>Total Breaks</Label>
           <SelectField
@@ -546,7 +628,6 @@ function Step1BasicInfo({ divisions, form, setForm, onNext }) {
         </div>
       </div>
 
-      {/* ── Row 2: Start / End time ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <div>
           <Label required>Start Time</Label>
@@ -617,12 +698,20 @@ function Step2TimeSlots({
   setSlots,
   onNext,
   onBack,
+}: {
+  form: FormDataType;
+  subjects: Subject[];
+  teachers: Teacher[];
+  assignedTeachers: AssignedTeacher[];
+  slots: Slot[];
+  setSlots: React.Dispatch<React.SetStateAction<Slot[]>>;
+  onNext: () => void;
+  onBack: () => void;
 }) {
-  const [toast, setToast] = useState(null);
-  const [dragIndex, setDragIndex] = useState(null);
-  const dragOver = useRef(null);
+  const [toast, setToast] = useState<ToastData | null>(null);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const dragOver = useRef<number | null>(null);
 
-  // ── auto-generate ──────────────────────────────────────────────
   const autoGenerate = useCallback(() => {
     const lectureCount = form.total_lecture || 4;
     const breakCount = form.total_breaks ?? 1;
@@ -630,22 +719,17 @@ function Step2TimeSlots({
     const perLecture = 45;
     const perBreak = 15;
 
-    // First lecture → class teacher (is_class_teacher === true)
     const classTeacherEntry = (assignedTeachers || []).find(
       (t) => t.is_class_teacher === true,
     );
 
-    // Distribute break positions evenly between lectures
-    const breakPositions = new Set();
+    const breakPositions = new Set<number>();
     if (breakCount > 0) {
       const spacing = Math.floor(lectureCount / (breakCount + 1));
       for (let b = 1; b <= breakCount; b++) breakPositions.add(b * spacing);
     }
 
-    const fmt = (m) =>
-      `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
-
-    const generated = [];
+    const generated: Slot[] = [];
     let currentMin = sh * 60 + sm;
     let slotNumber = 1;
     let lecturesAdded = 0;
@@ -660,8 +744,8 @@ function Step2TimeSlots({
         slot_number: slotNumber++,
         is_lecture: true,
         is_break: false,
-        slot_start_time: fmt(currentMin),
-        slot_end_time: fmt(currentMin + perLecture),
+        slot_start_time: fmtMinutes(currentMin),
+        slot_end_time: fmtMinutes(currentMin + perLecture),
         subject:
           isFirst && classTeacherEntry
             ? String(classTeacherEntry.subject ?? "")
@@ -687,8 +771,8 @@ function Step2TimeSlots({
           slot_number: slotNumber++,
           is_lecture: false,
           is_break: true,
-          slot_start_time: fmt(currentMin),
-          slot_end_time: fmt(currentMin + perBreak),
+          slot_start_time: fmtMinutes(currentMin),
+          slot_end_time: fmtMinutes(currentMin + perBreak),
           subject: null,
           teacher: null,
         });
@@ -704,17 +788,14 @@ function Step2TimeSlots({
     });
   }, [form, assignedTeachers, setSlots]);
 
-  // ── helpers to compute continuous next start time ──────────────
-  const nextStart = (prev) =>
+  const nextStart = (prev: Slot[]): string =>
     prev[prev.length - 1]?.slot_end_time ?? form.start_time ?? "";
-  const fmt = (m) =>
-    `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
 
   const addLecture = () =>
     setSlots((prev) => {
       const startTime = nextStart(prev);
       const [sh2, sm2] = startTime ? startTime.split(":").map(Number) : [0, 0];
-      const endTime = startTime ? fmt(sh2 * 60 + sm2 + 45) : "";
+      const endTime = startTime ? fmtMinutes(sh2 * 60 + sm2 + 45) : "";
       return [
         ...prev,
         {
@@ -736,7 +817,7 @@ function Step2TimeSlots({
     setSlots((prev) => {
       const startTime = nextStart(prev);
       const [sh2, sm2] = startTime ? startTime.split(":").map(Number) : [0, 0];
-      const endTime = startTime ? fmt(sh2 * 60 + sm2 + 15) : "";
+      const endTime = startTime ? fmtMinutes(sh2 * 60 + sm2 + 15) : "";
       return [
         ...prev,
         {
@@ -752,24 +833,24 @@ function Step2TimeSlots({
       ];
     });
 
-  const removeSlot = (id) =>
+  const removeSlot = (id: string) =>
     setSlots((prev) =>
       prev
         .filter((s) => s.id !== id)
         .map((s, i) => ({ ...s, slot_number: i + 1 })),
     );
 
-  const updateSlot = (id, field, value) => {
+  const updateSlot = (id: string, field: string, value: string) => {
     setSlots((prev) =>
       prev.map((s) => {
         if (s.id !== id) return s;
-        const updated = { ...s, [field]: value };
+        const updated: Slot = { ...s, [field]: value };
         if (field === "subject") {
-          const subj = subjects.find((x) => x.id === Number(value));
+          const subj = subjects.find((x: Subject) => x.id === Number(value));
           updated.subject_name = subj?.name ?? "";
         }
         if (field === "teacher") {
-          const tchr = teachers.find((x) => x.id === Number(value));
+          const tchr = teachers.find((x: Teacher) => x.id === Number(value));
           updated.teacher_name = tchr?.name ?? "";
         }
         return updated;
@@ -777,9 +858,8 @@ function Step2TimeSlots({
     );
   };
 
-  // ── drag reorder ───────────────────────────────────────────────
-  const onDragStart = (i) => setDragIndex(i);
-  const onDragEnter = (i) => {
+  const onDragStart = (i: number) => setDragIndex(i);
+  const onDragEnter = (i: number) => {
     dragOver.current = i;
   };
   const onDragEnd = () => {
@@ -795,7 +875,9 @@ function Step2TimeSlots({
     setSlots((prev) => {
       const arr = [...prev];
       const [moved] = arr.splice(dragIndex, 1);
-      arr.splice(dragOver.current, 0, moved);
+      if (dragOver.current !== null) {
+        arr.splice(dragOver.current, 0, moved);
+      }
       return arr.map((s, idx) => ({ ...s, slot_number: idx + 1 }));
     });
     setDragIndex(null);
@@ -842,7 +924,6 @@ function Step2TimeSlots({
 
   return (
     <div>
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 bg-violet-100 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -866,15 +947,10 @@ function Step2TimeSlots({
       {slots.length > 0 && (
         <div className="hidden md:grid grid-cols-12 gap-2 px-3 pb-2 text-[10px] text-gray-400 font-bold uppercase tracking-wide">
           <div className="xl:col-span-1">#</div>
-
           <div className="xl:col-span-2">Time</div>
-
           <div className="xl:col-span-2">Type</div>
-
           <div className="xl:col-span-3">Subject *</div>
-
           <div className="xl:col-span-3">Teacher *</div>
-
           <div className="xl:col-span-1">Action</div>
         </div>
       )}
@@ -889,7 +965,7 @@ function Step2TimeSlots({
 
           return (
             <div
-              key={slot.id}
+              key={slot.id ?? i}
               draggable
               onDragStart={() => onDragStart(i)}
               onDragEnter={() => onDragEnter(i)}
@@ -901,20 +977,18 @@ function Step2TimeSlots({
                   : "bg-white border-gray-100 hover:border-violet-200 hover:shadow-sm"
               } ${dragIndex === i ? "opacity-50 scale-95" : ""}`}
             >
-              {/* Drag + Number */}
               <div className="col-span-1 flex items-center gap-1">
                 <GripVertical
                   size={14}
                   className="text-gray-300 flex-shrink-0"
                 />
                 <div
-                  className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black text-white flex-shrink-0 ${isBreak ? "bg-orange-400" : color.icon}`}
+                  className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black text-white flex-shrink-0 ${isBreak ? "bg-orange-400" : color?.icon}`}
                 >
                   {slot.slot_number}
                 </div>
               </div>
 
-              {/* Time */}
               <div className="xl:col-span-2">
                 <input
                   type="time"
@@ -934,7 +1008,6 @@ function Step2TimeSlots({
                 />
               </div>
 
-              {/* Type Badge */}
               <div className="col-span-2">
                 {isBreak ? (
                   <span className="inline-flex items-center gap-1 bg-orange-100 text-orange-700 text-[10px] font-bold px-2.5 py-1.5 rounded-lg">
@@ -942,14 +1015,13 @@ function Step2TimeSlots({
                   </span>
                 ) : (
                   <span
-                    className={`inline-flex items-center gap-1 ${color.badge} text-[10px] font-bold px-2.5 py-1.5 rounded-lg`}
+                    className={`inline-flex items-center gap-1 ${color?.badge} text-[10px] font-bold px-2.5 py-1.5 rounded-lg`}
                   >
                     <BookOpen size={10} /> LECTURE
                   </span>
                 )}
               </div>
 
-              {/* Subject */}
               <div className="xl:col-span-3">
                 {isBreak ? (
                   <p className="text-[11px] text-orange-400 italic pl-1">
@@ -958,7 +1030,7 @@ function Step2TimeSlots({
                 ) : (
                   <div className="relative">
                     <select
-                      value={slot.subject}
+                      value={String(slot.subject ?? "")}
                       onChange={(e) =>
                         updateSlot(slot.id, "subject", e.target.value)
                       }
@@ -979,19 +1051,17 @@ function Step2TimeSlots({
                 )}
               </div>
 
-              {/* Teacher */}
               <div className="col-span-3">
                 {!isBreak && (
                   <div className="relative">
                     <select
-                      value={slot.teacher}
+                      value={String(slot.teacher ?? "")}
                       onChange={(e) =>
                         updateSlot(slot.id, "teacher", e.target.value)
                       }
                       className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-violet-300 bg-white appearance-none pr-7 cursor-pointer"
                     >
                       <option value="">Teacher *</option>
-                      {/* Show only teachers assigned to this division */}
                       {teachers.map((t) => (
                         <option key={t.id} value={t.id}>
                           {t.name}
@@ -1006,7 +1076,6 @@ function Step2TimeSlots({
                 )}
               </div>
 
-              {/* Delete */}
               <div className="col-span-1 flex justify-center">
                 <button
                   onClick={() => removeSlot(slot.id)}
@@ -1101,10 +1170,19 @@ function Step3PreviewSave({
   existingId,
   onSaved,
   onBack,
+}: {
+  form: FormDataType;
+  slots: Slot[];
+  subjects: Subject[];
+  teachers: Teacher[];
+  divisions: Division[];
+  existingId: number | null;
+  onSaved: (record: unknown) => void;
+  onBack: () => void;
 }) {
   const [saving, setSaving] = useState(false);
-  const [savedId, setSavedId] = useState(existingId ?? null);
-  const [toast, setToast] = useState(null);
+  const [savedId, setSavedId] = useState<number | null>(existingId ?? null);
+  const [toast, setToast] = useState<ToastData | null>(null);
 
   const divName = divisions.find((d) => d.id === Number(form.class_division));
 
@@ -1134,12 +1212,13 @@ function Step3PreviewSave({
         setToast({ msg: "Timetable updated successfully!", type: "success" });
       } else {
         record = await createTimetable(buildPayload());
-        setSavedId(record.id);
+        setSavedId(record?.id);
         setToast({ msg: "Timetable saved successfully!", type: "success" });
       }
       setTimeout(() => onSaved(record), 1200);
-    } catch (e) {
-      setToast({ msg: e.message, type: "error" });
+    } catch (e: unknown) {
+      const error = e as Error;
+      setToast({ msg: error.message, type: "error" });
     } finally {
       setSaving(false);
     }
@@ -1200,7 +1279,7 @@ function Step3PreviewSave({
               className={`flex items-center gap-4 rounded-2xl p-4 border-2 ${isBreak ? "bg-orange-50 border-orange-100" : "bg-white border-gray-100 hover:shadow-sm"} transition-shadow`}
             >
               <div
-                className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${isBreak ? "bg-orange-100" : color.icon}`}
+                className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${isBreak ? "bg-orange-100" : color?.icon}`}
               >
                 {isBreak ? (
                   <Coffee size={18} className="text-orange-500" />
@@ -1219,7 +1298,7 @@ function Step3PreviewSave({
                   </>
                 ) : (
                   <>
-                    <p className={`font-bold ${color.text}`}>
+                    <p className={`font-bold ${color?.text}`}>
                       {slot.subject_name ||
                         subjects.find((s) => s.id === Number(slot.subject))
                           ?.name ||
@@ -1238,7 +1317,7 @@ function Step3PreviewSave({
               </div>
               <div className="flex-shrink-0 text-right">
                 <span
-                  className={`text-[11px] font-bold px-3 py-1.5 rounded-full ${isBreak ? "bg-orange-100 text-orange-600" : color.badge}`}
+                  className={`text-[11px] font-bold px-3 py-1.5 rounded-full ${isBreak ? "bg-orange-100 text-orange-600" : color?.badge}`}
                 >
                   {isBreak ? "Break" : `Period ${slot.slot_number}`}
                 </span>
@@ -1300,6 +1379,14 @@ function SuccessView({
   divisions,
   savedRecord,
   onCreateNew,
+}: {
+  form: FormDataType;
+  slots: Slot[];
+  subjects: Subject[];
+  teachers: Teacher[];
+  divisions: Division[];
+  savedRecord: { id?: number } | null;
+  onCreateNew: () => void;
 }) {
   const divName = divisions.find((d) => d.id === Number(form.class_division));
   let lectureIdx = 0;
@@ -1342,10 +1429,10 @@ function SuccessView({
           return (
             <div
               key={slot.id ?? i}
-              className={`flex items-center gap-4 rounded-2xl p-4 border-2 ${isBreak ? "bg-orange-50 border-orange-100" : `${color.bg} ${color.border}`}`}
+              className={`flex items-center gap-4 rounded-2xl p-4 border-2 ${isBreak ? "bg-orange-50 border-orange-100" : `${color?.bg} ${color?.border}`}`}
             >
               <div
-                className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${isBreak ? "bg-orange-100" : color.icon}`}
+                className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${isBreak ? "bg-orange-100" : color?.icon}`}
               >
                 {isBreak ? (
                   <Coffee size={18} className="text-orange-500" />
@@ -1364,7 +1451,7 @@ function SuccessView({
                   </>
                 ) : (
                   <>
-                    <p className={`font-bold ${color.text}`}>
+                    <p className={`font-bold ${color?.text}`}>
                       {slot.subject_name ||
                         subjects.find((s) => s.id === Number(slot.subject))
                           ?.name ||
@@ -1382,7 +1469,7 @@ function SuccessView({
                 )}
               </div>
               <span
-                className={`text-[11px] font-bold px-3 py-1.5 rounded-full flex-shrink-0 ${isBreak ? "bg-orange-100 text-orange-600" : "bg-white/70 " + color.text}`}
+                className={`text-[11px] font-bold px-3 py-1.5 rounded-full flex-shrink-0 ${isBreak ? "bg-orange-100 text-orange-600" : `bg-white/70 ${color?.text}`}`}
               >
                 {isBreak ? "Break" : `Period ${slot.slot_number}`}
               </span>
@@ -1398,92 +1485,108 @@ function SuccessView({
 // ROOT EXPORT — CreateTimetablePage
 // ═══════════════════════════════════════════════════════════════════
 export default function CreateTimetablePage() {
-  const [divisions, setDivisions] = useState([]);
-  const [subjects, setSubjects] = useState([]);
-  const [teachers, setTeachers] = useState([]);
-  const [assignedTeachers, setAssignedTeachers] = useState([]);
+  const [divisions, setDivisions] = useState<Division[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [assignedTeachers, setAssignedTeachers] = useState<AssignedTeacher[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
-  const [loadErr, setLoadErr] = useState(null);
+  const [loadErr, setLoadErr] = useState<string | null>(null);
 
   const [step, setStep] = useState(1);
-  const [academicYear, setAcademicYear] = useState("2026-2027");
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<FormDataType>({
     day: "monday",
     class_division: "",
     total_lecture: 4,
-    total_breaks: 1, // ← NEW
+    total_breaks: 1,
     start_time: "08:00",
     end_time: "12:00",
     academicYear: "2026-2027",
   });
 
-  const [slots, setSlots] = useState([]);
-  const [existingId, setExistingId] = useState(null);
-  const [savedRecord, setSavedRecord] = useState(null);
+  const [slots, setSlots] = useState<Slot[]>([]);
+  const [existingId, setExistingId] = useState<number | null>(null);
+  const [savedRecord, setSavedRecord] = useState<{ id?: number } | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // ── Load master data on mount ─────────────────────────────────────
-  useEffect(() => {
-    (async () => {
-      try {
-        const [divs, subs, tchs] = await Promise.all([
-          getDivisions(),
-          getSubjects(),
-          getTeachers(),
-        ]);
-        setDivisions(Array.isArray(divs) ? divs : []);
-        setSubjects(Array.isArray(subs) ? subs : []);
-        setTeachers(Array.isArray(tchs) ? tchs : []);
-      } catch (e) {
-        // ← fix: e was referenced outside catch before
-        setLoadErr(e.message);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
-
-  // ── Fetch assigned teachers whenever division changes ─────────────
-  // Single effect — no duplicate
   useEffect(() => {
     if (!form.class_division) return;
     (async () => {
       try {
         const assigned = await getAssignedTeachers(form.class_division);
-        setAssignedTeachers(Array.isArray(assigned) ? assigned : []);
+        setAssignedTeachers(
+          Array.isArray(assigned) ? (assigned as AssignedTeacher[]) : [],
+        );
       } catch {
         setAssignedTeachers([]);
       }
     })();
   }, [form.class_division]);
 
-  // ── Restore existing timetable when division or day changes ──────
   useEffect(() => {
     if (!form.class_division) return;
     (async () => {
       try {
         const records = await getTimetable(Number(form.class_division));
-        const list = Array.isArray(records) ? records : [];
-        const match = list.find((r) => r.day === form.day);
+
+        // ✅ Fix: use unknown[] instead of Record<string, unknown>[]
+        const list: unknown[] = Array.isArray(records) ? records : [];
+
+        const match = list.find(
+          (r) =>
+            r !== null &&
+            typeof r === "object" &&
+            (r as { day?: string }).day === form.day,
+        ) as
+          | {
+              id: number;
+              day: string;
+              total_lecture?: number;
+              start_time?: string;
+              end_time?: string;
+              slots?: unknown[];
+            }
+          | undefined;
+
         if (match) {
-          setExistingId(match.id);
-          const restored = (match.slots ?? []).map((s) => ({
-            id: genId(),
-            slot_number: s.slot_number,
-            is_lecture: !!s.is_lecture,
-            is_break: !!s.is_break,
-            slot_start_time: s.slot_start_time?.slice(0, 5) ?? "",
-            slot_end_time: s.slot_end_time?.slice(0, 5) ?? "",
-            subject: s.subject ?? "",
-            teacher: s.teacher ?? "",
-            subject_name: subjects.find((x) => x.id === s.subject)?.name ?? "",
-            teacher_name: teachers.find((x) => x.id === s.teacher)?.name ?? "",
-          }));
+          setExistingId(match.id as number);
+
+          const rawSlots: unknown[] = Array.isArray(match.slots)
+            ? match.slots
+            : [];
+
+          const restored: Slot[] = rawSlots.map((s) => {
+            const slot = s as {
+              slot_number?: number;
+              is_lecture?: boolean;
+              is_break?: boolean;
+              slot_start_time?: string;
+              slot_end_time?: string;
+              subject?: number | null;
+              teacher?: number | null;
+            };
+            return {
+              id: genId(),
+              slot_number: (slot.slot_number as number) ?? 0,
+              is_lecture: !!slot.is_lecture,
+              is_break: !!slot.is_break,
+              slot_start_time: slot.slot_start_time?.slice(0, 5) ?? "",
+              slot_end_time: slot.slot_end_time?.slice(0, 5) ?? "",
+              subject: slot.subject ?? "",
+              teacher: slot.teacher ?? "",
+              subject_name:
+                subjects.find((x) => x.id === slot.subject)?.name ?? "",
+              teacher_name:
+                teachers.find((x) => x.id === slot.teacher)?.name ?? "",
+            };
+          });
+
           setSlots(restored);
           setForm((f) => ({
             ...f,
-            total_lecture: match.total_lecture ?? f.total_lecture,
+            total_lecture: (match.total_lecture as number) ?? f.total_lecture,
             start_time: match.start_time?.slice(0, 5) ?? f.start_time,
             end_time: match.end_time?.slice(0, 5) ?? f.end_time,
           }));
@@ -1496,18 +1599,146 @@ export default function CreateTimetablePage() {
     })();
   }, [form.class_division, form.day, subjects, teachers]);
 
+  useEffect(() => {
+    if (!form.class_division) return;
+    (async () => {
+      try {
+        const records = await getTimetable(Number(form.class_division));
+        const list = Array.isArray(records) ? records : [];
+        const match = list.find((r: { day: string }) => r.day === form.day);
+        if (match) {
+          setExistingId(match.id);
+          const restored: Slot[] = (match.slots ?? []).map(
+            (s: {
+              slot_number: number;
+              is_lecture: boolean;
+              is_break: boolean;
+              slot_start_time: string;
+              slot_end_time: string;
+              subject: number | null;
+              teacher: number | null;
+            }) => ({
+              id: genId(),
+              slot_number: s.slot_number,
+              is_lecture: !!s.is_lecture,
+              is_break: !!s.is_break,
+              slot_start_time: s.slot_start_time?.slice(0, 5) ?? "",
+              slot_end_time: s.slot_end_time?.slice(0, 5) ?? "",
+              subject: s.subject ?? "",
+              teacher: s.teacher ?? "",
+              subject_name:
+                subjects.find((x) => x.id === s.subject)?.name ?? "",
+              teacher_name:
+                teachers.find((x) => x.id === s.teacher)?.name ?? "",
+            }),
+          );
+          setSlots(restored);
+          setForm((f) => ({
+            ...f,
+            total_lecture: match.total_lecture ?? f.total_lecture,
+            start_time: match.start_time?.slice(0, 5) ?? f.start_time,
+            end_time: match.end_time?.slice(0, 5) ?? f.end_time,
+          }));
+        } else {
+          setExistingId(null);
+        }
+      } catch {
+        // Silently ignore
+      }
+    })();
+  }, [form.class_division, form.day, subjects, teachers]);
+
+  const handleAutoGenerate = useCallback(
+    (
+      currentForm: FormDataType,
+      currentAssignedTeachers: AssignedTeacher[],
+    ): Slot[] => {
+      const lectureCount = currentForm.total_lecture || 4;
+      const breakCount = currentForm.total_breaks ?? 1;
+      const [sh, sm] = (currentForm.start_time || "08:00")
+        .split(":")
+        .map(Number);
+      const perLecture = 45;
+      const perBreak = 15;
+
+      const classTeacherEntry = (currentAssignedTeachers || []).find(
+        (t) => t.is_class_teacher === true,
+      );
+
+      const breakPositions = new Set<number>();
+      if (breakCount > 0) {
+        const spacing = Math.floor(lectureCount / (breakCount + 1));
+        for (let b = 1; b <= breakCount; b++) breakPositions.add(b * spacing);
+      }
+
+      const generated: Slot[] = [];
+      let currentMin = sh * 60 + sm;
+      let slotNumber = 1;
+      let lecturesAdded = 0;
+      let breaksAdded = 0;
+
+      for (let i = 0; i < lectureCount; i++) {
+        lecturesAdded++;
+        const isFirst = i === 0;
+
+        generated.push({
+          id: genId(),
+          slot_number: slotNumber++,
+          is_lecture: true,
+          is_break: false,
+          slot_start_time: fmtMinutes(currentMin),
+          slot_end_time: fmtMinutes(currentMin + perLecture),
+          subject:
+            isFirst && classTeacherEntry
+              ? String(classTeacherEntry.subject ?? "")
+              : "",
+          teacher:
+            isFirst && classTeacherEntry
+              ? String(classTeacherEntry.teacher ?? "")
+              : "",
+          subject_name:
+            isFirst && classTeacherEntry
+              ? (classTeacherEntry.subject_name ?? "")
+              : "",
+          teacher_name:
+            isFirst && classTeacherEntry
+              ? (classTeacherEntry.teacher_name ?? "")
+              : "",
+        });
+        currentMin += perLecture;
+
+        if (breakPositions.has(lecturesAdded) && breaksAdded < breakCount) {
+          generated.push({
+            id: genId(),
+            slot_number: slotNumber++,
+            is_lecture: false,
+            is_break: true,
+            slot_start_time: fmtMinutes(currentMin),
+            slot_end_time: fmtMinutes(currentMin + perBreak),
+            subject: null,
+            teacher: null,
+          });
+          currentMin += perBreak;
+          breaksAdded++;
+        }
+      }
+
+      return generated;
+    },
+    [],
+  );
+
   const handleReset = () => {
     setStep(1);
     setSlots([]);
     setExistingId(null);
     setSavedRecord(null);
     setShowSuccess(false);
-    setAcademicYear("2026-2027");
     setForm({
       day: "monday",
       class_division: "",
       total_lecture: 4,
-      total_breaks: 1, // ← included in reset
+      total_breaks: 1,
       start_time: "08:00",
       end_time: "12:00",
       academicYear: "2026-2027",
@@ -1564,7 +1795,6 @@ export default function CreateTimetablePage() {
         ::-webkit-scrollbar-thumb { background:#e2e8f0; border-radius:99px; }
       `}</style>
 
-      {/* ── Page header ── */}
       <div className="px-3 sm:px-6 pt-4 sm:pt-6 pb-4">
         <div className="flex items-center gap-2 text-xs text-gray-400 mb-3">
           <span className="hover:text-violet-600 cursor-pointer transition-colors">
@@ -1589,28 +1819,6 @@ export default function CreateTimetablePage() {
                 <RefreshCw size={12} /> Editing existing timetable
               </div>
             )}
-            {/* <div className="relative">
-              <Calendar
-                size={14}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-              />
-              <select
-                value={academicYear}
-                onChange={(e) => {
-                  setAcademicYear(e.target.value);
-                  setForm((f) => ({ ...f, academicYear: e.target.value }));
-                }}
-                className="border border-gray-200 bg-white rounded-xl pl-9 pr-9 py-2.5 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-violet-300 appearance-none cursor-pointer"
-              >
-                {ACADEMIC_YEARS.map((y) => (
-                  <option key={y}>{y}</option>
-                ))}
-              </select>
-              <ChevronDown
-                size={14}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-              />
-            </div> */}
             <button className="w-full sm:w-auto justify-center flex items-center gap-2 px-4 py-2.5 border-2 border-violet-200 text-violet-700 bg-white rounded-xl text-sm font-bold hover:bg-violet-50 transition-all">
               <Eye size={15} /> Preview
             </button>
@@ -1626,7 +1834,6 @@ export default function CreateTimetablePage() {
         </div>
       </div>
 
-      {/* ── Main layout ── */}
       <div className="flex flex-col xl:flex-row min-h-0 px-3 sm:px-6 pb-6 sm:pb-8 gap-4 sm:gap-6 items-start overflow-x-hidden">
         <div className="flex-1 min-w-0">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 sm:p-6 overflow-hidden">
@@ -1652,91 +1859,11 @@ export default function CreateTimetablePage() {
                   setForm={setForm}
                   onNext={() => {
                     setStep(2);
-                    // Auto-generate slots if none exist yet
                     if (slots.length === 0) {
-                      const lectureCount = form.total_lecture || 4;
-                      const breakCount = form.total_breaks ?? 1;
-                      const [sh, sm] = (form.start_time || "08:00")
-                        .split(":")
-                        .map(Number);
-                      const perLecture = 45;
-                      const perBreak = 15;
-
-                      const classTeacherEntry = (assignedTeachers || []).find(
-                        (t) => t.is_class_teacher === true,
+                      const generated = handleAutoGenerate(
+                        form,
+                        assignedTeachers,
                       );
-
-                      const breakPositions = new Set();
-                      if (breakCount > 0) {
-                        const spacing = Math.floor(
-                          lectureCount / (breakCount + 1),
-                        );
-                        for (let b = 1; b <= breakCount; b++)
-                          breakPositions.add(b * spacing);
-                      }
-
-                      const fmt = (m) =>
-                        `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
-
-                      const generated = [];
-                      let currentMin = sh * 60 + sm;
-                      let slotNumber = 1;
-                      let lecturesAdded = 0;
-                      let breaksAdded = 0;
-
-                      for (let i = 0; i < lectureCount; i++) {
-                        lecturesAdded++;
-                        const isFirst = i === 0;
-
-                        generated.push({
-                          id:
-                            Math.random().toString(36).slice(2) +
-                            Date.now().toString(36),
-                          slot_number: slotNumber++,
-                          is_lecture: true,
-                          is_break: false,
-                          slot_start_time: fmt(currentMin),
-                          slot_end_time: fmt(currentMin + perLecture),
-                          subject:
-                            isFirst && classTeacherEntry
-                              ? String(classTeacherEntry.subject ?? "")
-                              : "",
-                          teacher:
-                            isFirst && classTeacherEntry
-                              ? String(classTeacherEntry.teacher ?? "")
-                              : "",
-                          subject_name:
-                            isFirst && classTeacherEntry
-                              ? (classTeacherEntry.subject_name ?? "")
-                              : "",
-                          teacher_name:
-                            isFirst && classTeacherEntry
-                              ? (classTeacherEntry.teacher_name ?? "")
-                              : "",
-                        });
-                        currentMin += perLecture;
-
-                        if (
-                          breakPositions.has(lecturesAdded) &&
-                          breaksAdded < breakCount
-                        ) {
-                          generated.push({
-                            id:
-                              Math.random().toString(36).slice(2) +
-                              Date.now().toString(36),
-                            slot_number: slotNumber++,
-                            is_lecture: false,
-                            is_break: true,
-                            slot_start_time: fmt(currentMin),
-                            slot_end_time: fmt(currentMin + perBreak),
-                            subject: null,
-                            teacher: null,
-                          });
-                          currentMin += perBreak;
-                          breaksAdded++;
-                        }
-                      }
-
                       setSlots(generated);
                     }
                   }}
@@ -1762,7 +1889,7 @@ export default function CreateTimetablePage() {
                   existingId={existingId}
                   onBack={() => setStep(2)}
                   onSaved={(record) => {
-                    setSavedRecord(record);
+                    setSavedRecord(record as { id?: number });
                     setShowSuccess(true);
                   }}
                 />

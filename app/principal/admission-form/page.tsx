@@ -135,7 +135,7 @@ function FormDetailsModal({
                 <div className="divide-y">
                   {(section.fields || []).map((field, index) => (
                     <div
-                      key={field.id || `field-${index}`}
+                      key={`field-${index}`}
                       className="flex items-center gap-3 px-4 py-3 group hover:bg-slate-50 transition-colors"
                     >
                       <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-600 shrink-0">
@@ -360,7 +360,12 @@ function FormTableRow({
 function PublishedLinkCard({ link }: { link: string }) {
   const uniqueLink = link.split("/").filter(Boolean).pop();
 
-  const frontendLink = `${window.location.origin}/form/${uniqueLink}`;
+    const [origin, setOrigin] = useState("");
+  useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
+  const frontendLink = `${origin}/form/${uniqueLink}`;
+
 
   const [copied, setCopied] = useState(false);
 

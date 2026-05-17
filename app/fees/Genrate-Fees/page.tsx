@@ -467,7 +467,8 @@ export default function GenerateStudentFeesPage() {
 
         {/* Selected fee info strip */}
         {selectedFeeWiseObj && (
-          <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "10px 14px", background: C.indigo50, borderRadius: 9, marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
+           <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", background: C.indigo50,
+            borderRadius: 9, marginBottom: 16, flexWrap: "wrap" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: C.accent, fontWeight: 600 }}>
               <FileText size={13} />
               {selectedFeeWiseObj.feetype_name}
