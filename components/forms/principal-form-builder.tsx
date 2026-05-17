@@ -527,12 +527,15 @@ export default function PrincipalFormBuilder({
     },
   ]);
   const [documentFields, setDocumentFields] = useState<ConfiguredField[]>(
-  DOCUMENT_FIELD_TEMPLATES.map((field, index) =>
-    cloneField(createConfiguredField(field), index),
-  ),
-);
+    DOCUMENT_FIELD_TEMPLATES.map((field, index) =>
+      cloneField(createConfiguredField(field), index),
+    ),
+  );
 
   const [feesEnabled, setFeesEnabled] = useState(false);
+  const [paymentMode, setPaymentMode] = useState<"online" | "offline">(
+    "online",
+  );
   const [feeType, setFeeType] = useState<"general" | "individual">("general");
   const [feesAmount, setFeesAmount] = useState("");
   const [individualFees, setIndividualFees] = useState<Record<number, string>>(
@@ -650,6 +653,7 @@ export default function PrincipalFormBuilder({
         `Admission form for academic year ${academicYear}`,
       unique_link: slugify(formTitle),
       fee_type: feeType,
+      payment_mode: feesEnabled ? paymentMode : null,
       sections: formattedSections,
       document_fields,
       fee_structures_input:
@@ -1239,6 +1243,38 @@ export default function PrincipalFormBuilder({
                             >
                               Individual Fees
                             </button>
+                          </div>
+                          {/* Payment Mode */}
+                          <div className="space-y-1.5">
+                            <Label className="text-xs font-medium text-slate-600">
+                              Payment Mode
+                            </Label>
+                            <div className="flex bg-muted p-1 rounded-lg w-full max-w-[300px]">
+                              <button
+                                type="button"
+                                onClick={() => setPaymentMode("online")}
+                                className={cn(
+                                  "flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all",
+                                  paymentMode === "online"
+                                    ? "bg-white text-foreground shadow-sm"
+                                    : "text-muted-foreground hover:text-foreground",
+                                )}
+                              >
+                                Online (Razorpay)
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setPaymentMode("offline")}
+                                className={cn(
+                                  "flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all",
+                                  paymentMode === "offline"
+                                    ? "bg-white text-foreground shadow-sm"
+                                    : "text-muted-foreground hover:text-foreground",
+                                )}
+                              >
+                                Offline (Cash)
+                              </button>
+                            </div>
                           </div>
 
                           {feeType === "general" ? (

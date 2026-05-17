@@ -1,5 +1,5 @@
 export const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_URL;
+        process.env.NEXT_PUBLIC_API_URL || "https://school-management-system-sms-z8kv.onrender.com";
 
 export const API_ENDPOINTS = {
     LOGIN: "/api-login/",
@@ -32,6 +32,6 @@ export const API_ENDPOINTS = {
     STAFF_SALARY_PAYMENT: "/staff-salary-payment/",
     FEE_TYPE: "/feetype/",
     FEE_WISE_CLASS: "/fee-wise-class/",
-
+    DASHBOARD_COUNT: "/dashboard-count/",
 }
 

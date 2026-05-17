@@ -1,725 +1,1401 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
+  Users,
+  IndianRupee,
+  TrendingUp,
   AlertCircle,
-  CalendarDays,
+  Plus,
+  Search,
+  Filter,
+  Eye,
+  MoreVertical,
+  Download,
+  ChevronLeft,
+  ChevronRight,
+  Tag,
+  X,
   CheckCircle2,
-  ChevronDown,
-  GraduationCap,
+  Clock,
+  XCircle,
   Loader2,
   RefreshCw,
-  Search,
-  Users,
-  X,
-  Zap,
-  CheckSquare,
-  Square,
-  Info,
-  FileText,
-  IndianRupee,
+  Percent,
+  CalendarDays,
+  BookOpen,
+  GraduationCap,
 } from "lucide-react";
-
 import {
-  getAcademicYears,
-  getSchoolClasses,
-  getFeeWiseClasses,
-  getStudentsByFeeWiseClass,
-  getExistingStudentFees,
-  bulkCreateStudentFees,
-  type AcademicYear,
-  type SchoolClass,
-  type FeeWiseClass,
-  type StudentForFee,
+  fetchStudents,
+  fetchStudentFees,
+  fetchAcademicYearsForFee,
+  fetchFeeWiseClassesForFee,
+  createMonthlyStudentFee,
+  createSingleStudentFee,
+  addDiscountToStudentFee,
+  deleteStudentFee,
+  formatCurrency,
+  formatBillingPeriod,
+  getUniqueClasses,
+  validateMonthlyFeeForm,
+  validateSingleFeeForm,
+  validateDiscountForm,
+  type Student,
   type StudentFee,
-  type StudentFeePayload,
+  type AcademicYear,
+  type FeeWiseClass,
 } from "@/lib/forms";
 
-// ─── Color tokens ─────────────────────────────────────────────────────────────
-const C = {
-  accent: "#5b5ef4",
-  accentSoft: "#eeeeff",
-  accentHover: "#4749d6",
-  success: "#059669",
-  successSoft: "#d1fae5",
-  danger: "#dc2626",
-  dangerSoft: "#fee2e2",
-  warn: "#d97706",
-  warnSoft: "#fef3c7",
-  border: "#e4e8f0",
-  bg: "#f5f7fb",
-  card: "#ffffff",
-  text: "#111827",
-  muted: "#6b7280",
-  subtle: "#f3f4f6",
-  indigo50: "#eef2ff",
-};
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-function fmt(iso: string) {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
-}
-
-function Spinner({ size = 20, color = C.accent }: { size?: number; color?: string }) {
-  return (
-    <>
-      <Loader2 size={size} color={color} style={{ animation: "spin 0.8s linear infinite", flexShrink: 0 }} />
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-    </>
-  );
-}
-
-// ─── Select dropdown ──────────────────────────────────────────────────────────
-function Select({
-  label, value, onChange, options, placeholder, disabled, loading,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  options: { value: string; label: string }[];
-  placeholder?: string;
-  disabled?: boolean;
-  loading?: boolean;
-}) {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-      <label style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: "0.06em", textTransform: "uppercase" }}>
-        {label}
-      </label>
-      <div style={{ position: "relative" }}>
-        <select
-          value={value}
-          onChange={e => onChange(e.target.value)}
-          disabled={disabled || loading}
-          style={{
-            width: "100%", padding: "10px 36px 10px 13px",
-            border: `1.5px solid ${C.border}`, borderRadius: 10,
-            fontSize: 13, fontWeight: 500, color: value ? C.text : C.muted,
-            background: disabled ? C.subtle : "#fff",
-            appearance: "none", cursor: disabled ? "not-allowed" : "pointer",
-            outline: "none", fontFamily: "inherit",
-          }}
-        >
-          {placeholder && <option value="">{placeholder}</option>}
-          {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-        </select>
-        <div style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>
-          {loading ? <Spinner size={13} /> : <ChevronDown size={14} color={C.muted} />}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Toast ────────────────────────────────────────────────────────────────────
-function Toast({ msg, type, onClose }: { msg: string; type: "success" | "error" | "warn"; onClose: () => void }) {
-  useEffect(() => { const t = setTimeout(onClose, 4000); return () => clearTimeout(t); }, [onClose]);
-  const styles = {
-    success: { bg: C.successSoft, border: "#a7f3d0", color: C.success },
-    error:   { bg: C.dangerSoft,  border: "#fca5a5", color: C.danger },
-    warn:    { bg: C.warnSoft,    border: "#fcd34d", color: C.warn },
-  }[type];
-  return (
-    <div style={{
-      position: "fixed", top: 20, right: 20, zIndex: 2000,
-      display: "flex", alignItems: "flex-start", gap: 10,
-      padding: "13px 16px", borderRadius: 12, maxWidth: 380,
-      background: styles.bg, border: `1px solid ${styles.border}`, color: styles.color,
-      fontSize: 13, fontWeight: 500, boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
-    }}>
-      {type === "success" ? <CheckCircle2 size={16} style={{ flexShrink: 0, marginTop: 1 }} /> :
-       type === "warn"    ? <Info size={16} style={{ flexShrink: 0, marginTop: 1 }} /> :
-                           <AlertCircle size={16} style={{ flexShrink: 0, marginTop: 1 }} />}
-      <span style={{ flex: 1 }}>{msg}</span>
-      <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", padding: 0, display: "flex" }}>
-        <X size={14} />
-      </button>
-    </div>
-  );
-}
-
-// ─── Status badge for existing fees ──────────────────────────────────────────
-function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, { bg: string; color: string; label: string }> = {
-    paid:    { bg: C.successSoft, color: C.success, label: "Paid" },
-    pending: { bg: "#fef9c3",     color: "#854d0e", label: "Pending" },
-    overdue: { bg: C.dangerSoft,  color: C.danger,  label: "Overdue" },
-    partial: { bg: "#dbeafe",     color: "#1d4ed8", label: "Partial" },
+// Status Badge Component
+const StatusBadge = ({ status }: { status: StudentFee["status"] }) => {
+  const config = {
+    paid: {
+      label: "Paid",
+      className: "bg-green-100 text-green-700 border-green-200",
+      icon: CheckCircle2,
+    },
+    unpaid: {
+      label: "Unpaid",
+      className: "bg-red-100 text-red-700 border-red-200",
+      icon: XCircle,
+    },
+    partially_paid: {
+      label: "Partial",
+      className: "bg-yellow-100 text-yellow-700 border-yellow-200",
+      icon: Clock,
+    },
+    overdue: {
+      label: "Overdue",
+      className: "bg-orange-100 text-orange-700 border-orange-200",
+      icon: AlertCircle,
+    },
   };
-  const s = map[status] ?? { bg: C.subtle, color: C.muted, label: status };
+  const { label, className, icon: Icon } = config[status] || config.unpaid;
   return (
-    <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 20, background: s.bg, color: s.color, whiteSpace: "nowrap", letterSpacing: "0.04em", textTransform: "uppercase" }}>
-      {s.label}
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${className}`}
+    >
+      <Icon size={10} />
+      {label}
     </span>
   );
-}
+};
 
-// ─── Row in student table ─────────────────────────────────────────────────────
-interface StudentRow {
-  student: StudentForFee;
-  feeWiseClass: FeeWiseClass;
-  dueDate: string;
-  billingPeriod: string;
-  alreadyExists: boolean;
-  existingStatus?: string;
-  selected: boolean;
-}
+// Avatar Component
+const StudentAvatar = ({
+  name,
+  size = "sm",
+}: {
+  name: string;
+  size?: "sm" | "md";
+}) => {
+  const colors = [
+    "bg-blue-500",
+    "bg-purple-500",
+    "bg-green-500",
+    "bg-orange-500",
+    "bg-pink-500",
+    "bg-indigo-500",
+  ];
+  const color = colors[name.charCodeAt(0) % colors.length];
+  const sizeClass = size === "sm" ? "w-8 h-8 text-xs" : "w-10 h-10 text-sm";
+  return (
+    <div
+      className={`${sizeClass} ${color} rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0`}
+    >
+      {name.charAt(0).toUpperCase()}
+    </div>
+  );
+};
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
-export default function GenerateStudentFeesPage() {
-  // ── Filters ────────────────────────────────────────────────────────────────
-  const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
-  const [classes, setClasses]             = useState<SchoolClass[]>([]);
-  const [feeWiseList, setFeeWiseList]     = useState<FeeWiseClass[]>([]);
+// Stat Card Component
+const StatCard = ({
+  title,
+  value,
+  subtitle,
+  icon: Icon,
+  iconBg,
+  valueColor,
+}: {
+  title: string;
+  value: string;
+  subtitle: string;
+  icon: React.ElementType;
+  iconBg: string;
+  valueColor?: string;
+}) => (
+  <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+    <div className="flex items-start gap-3">
+      <div className={`${iconBg} p-2.5 rounded-lg flex-shrink-0`}>
+        <Icon size={18} className="text-white" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-xs text-gray-500 font-medium truncate">{title}</p>
+        <p
+          className={`text-lg font-bold mt-0.5 ${valueColor || "text-gray-900"}`}
+        >
+          {value}
+        </p>
+        <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>
+      </div>
+    </div>
+  </div>
+);
 
-  const [selectedYear,        setSelectedYear]        = useState("");
-  const [selectedClass,       setSelectedClass]       = useState("");
-  const [selectedFeeWise,     setSelectedFeeWise]     = useState("");
-  const [selectedBillingPeriod, setSelectedBillingPeriod] = useState("");
-  const [dueDate,             setDueDate]             = useState("");
-  const [searchQuery,         setSearchQuery]         = useState("");
+// Modal Wrapper
+const Modal = ({
+  isOpen,
+  onClose,
+  title,
+  children,
+  maxWidth = "max-w-lg",
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+  maxWidth?: string;
+}) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      <div
+        className={`relative bg-white rounded-2xl shadow-2xl w-full ${maxWidth} max-h-[90vh] overflow-y-auto`}
+      >
+        <div className="flex items-center justify-between p-5 border-b border-gray-100 sticky top-0 bg-white rounded-t-2xl z-10">
+          <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <X size={18} className="text-gray-500" />
+          </button>
+        </div>
+        <div className="p-5">{children}</div>
+      </div>
+    </div>
+  );
+};
 
-  // ── Data ───────────────────────────────────────────────────────────────────
-  const [rows,       setRows]       = useState<StudentRow[]>([]);
-  const [loadingInit, setLoadingInit] = useState(true);
-  const [loadingFee,  setLoadingFee]  = useState(false);
-  const [loadingStudents, setLoadingStudents] = useState(false);
-  const [generating,  setGenerating]  = useState(false);
-  const [studentsLoaded, setStudentsLoaded] = useState(false);
+// Form Field Component
+const FormField = ({
+  label,
+  error,
+  required,
+  children,
+}: {
+  label: string;
+  error?: string;
+  required?: boolean;
+  children: React.ReactNode;
+}) => (
+  <div className="space-y-1.5">
+    <label className="block text-sm font-medium text-gray-700">
+      {label} {required && <span className="text-red-500">*</span>}
+    </label>
+    {children}
+    {error && (
+      <p className="text-xs text-red-500 flex items-center gap-1">
+        <AlertCircle size={12} />
+        {error}
+      </p>
+    )}
+  </div>
+);
 
-  // ── UI ─────────────────────────────────────────────────────────────────────
-  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" | "warn" } | null>(null);
-  const showToast = (msg: string, type: "success" | "error" | "warn" = "success") => setToast({ msg, type });
+const inputClass =
+  "w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white";
+const selectClass =
+  "w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white appearance-none cursor-pointer";
 
-  // ── Load academic years + classes ──────────────────────────────────────────
-  useEffect(() => {
-    Promise.all([getAcademicYears(), getSchoolClasses()])
-      .then(([years, cls]) => {
-        setAcademicYears(years);
-        setClasses(cls);
-        if (years.length > 0) setSelectedYear(String(years[0].id));
-      })
-      .catch(() => showToast("Failed to load initial data.", "error"))
-      .finally(() => setLoadingInit(false));
-  }, []);
+// Create Fee Modal
+const CreateFeeModal = ({
+  isOpen,
+  onClose,
+  students,
+  academicYears,
+  feeWiseClasses,
+  onSuccess,
+  activeTab,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  students: Student[];
+  academicYears: AcademicYear[];
+  feeWiseClasses: FeeWiseClass[];
+  onSuccess: () => void;
+  activeTab: "monthly" | "single";
+}) => {
+  const [feeType, setFeeType] = useState<"monthly" | "single">(activeTab);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [toast, setToast] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
 
-  // ── Load fee-wise classes when class changes ───────────────────────────────
-  useEffect(() => {
-    if (!selectedClass) { setFeeWiseList([]); setSelectedFeeWise(""); return; }
-    setLoadingFee(true);
-    getFeeWiseClasses({ school_class: Number(selectedClass) })
-      .then(data => {
-        setFeeWiseList(data);
-        setSelectedFeeWise("");
-        setSelectedBillingPeriod("");
-      })
-      .catch(() => showToast("Failed to load fee types for this class.", "error"))
-      .finally(() => setLoadingFee(false));
-  }, [selectedClass]);
-
-  // ── Reset billing period when fee type changes ─────────────────────────────
-  useEffect(() => {
-    setSelectedBillingPeriod("");
-    setStudentsLoaded(false);
-    setRows([]);
-  }, [selectedFeeWise]);
-
-  // ── Selected fee-wise class object ────────────────────────────────────────
-  const selectedFeeWiseObj = feeWiseList.find(f => String(f.id) === selectedFeeWise) ?? null;
-
-  // ── Billing periods from selected academic year ───────────────────────────
-  const selectedYearObj = academicYears.find(y => String(y.id) === selectedYear) ?? null;
-  const billingPeriods: { value: string; label: string }[] = selectedYearObj?.billing_periods?.map(p => ({
-    value: p,
-    label: new Date(p + "-01").toLocaleDateString("en-IN", { month: "long", year: "numeric" }) + ` (${p})`,
-  })) ?? [];
-
-  const isSingleFee = selectedFeeWiseObj?.billing_cycle === "single";
-
-  // ── Load students ─────────────────────────────────────────────────────────
-  const handleLoadStudents = useCallback(async () => {
-    if (!selectedYear || !selectedClass || !selectedFeeWise || !dueDate) {
-      showToast("Please fill Academic Year, Class, Fee Type, and Due Date.", "warn");
-      return;
-    }
-    if (!isSingleFee && !selectedBillingPeriod) {
-      showToast("Please select a billing period.", "warn");
-      return;
-    }
- 
-    setLoadingStudents(true);
-    setStudentsLoaded(false);
-    setRows([]);
- 
-    try {
-      const [students, existingFees] = await Promise.all([
-        // CHANGED: was getStudentsByClass(Number(selectedClass))
-        getStudentsByFeeWiseClass(
-          Number(selectedFeeWise),   // feeWiseClassId
-          Number(selectedClass)      // schoolClassId
-        ),
-        getExistingStudentFees({
-          school_class:   Number(selectedClass),
-          billing_period: isSingleFee ? "" : selectedBillingPeriod,
-          academic_year:  Number(selectedYear),
-          fee_wise_class: Number(selectedFeeWise),   // ← ADDED
-        }),
-      ]);
- 
-      // Build a lookup: "studentId-feeWiseClassId-billingPeriod" → existing fee
-      const existingMap = new Map<string, StudentFee>();
-      existingFees.forEach((ef) => {
-        const key = `${ef.student}-${ef.fee_wise_class}-${ef.billing_period ?? ""}`;
-        existingMap.set(key, ef);
-      });
- 
-      const built: StudentRow[] = students.map((s) => {
-        const key = `${s.id}-${selectedFeeWise}-${isSingleFee ? "" : selectedBillingPeriod}`;
-        const existing = existingMap.get(key);
-        return {
-          student:        s,
-          feeWiseClass:   selectedFeeWiseObj!,
-          dueDate,
-          billingPeriod:  isSingleFee ? "" : selectedBillingPeriod,
-          alreadyExists:  !!existing,
-          existingStatus: existing?.status,
-          selected:       !existing, // pre-select students who don't have this fee yet
-        };
-      });
- 
-      setRows(built);
-      setStudentsLoaded(true);
-    } catch (e: any) {
-      showToast(e.message ?? "Failed to load students.", "error");
-    } finally {
-      setLoadingStudents(false);
-    }
-  }, [
-    selectedYear,
-    selectedClass,
-    selectedFeeWise,
-    selectedBillingPeriod,
-    dueDate,
-    isSingleFee,
-    selectedFeeWiseObj,
-  ]);
-
-  // ── Toggle selection ──────────────────────────────────────────────────────
-  const toggleRow = (idx: number) => {
-    setRows(prev => prev.map((r, i) => i === idx && !r.alreadyExists ? { ...r, selected: !r.selected } : r));
-  };
-
-  const toggleAll = () => {
-    const selectableRows = filteredRows.filter(r => !r.alreadyExists);
-    const allSelected = selectableRows.every(r => r.selected);
-    const selectableIds = new Set(selectableRows.map(r => r.student.id));
-    setRows(prev => prev.map(r =>
-      selectableIds.has(r.student.id) ? { ...r, selected: !allSelected } : r
-    ));
-  };
-
-  // ── Filter rows by search ─────────────────────────────────────────────────
-  const filteredRows = rows.filter(r => {
-    if (!searchQuery) return true;
-    const q = searchQuery.toLowerCase();
-    return (
-      r.student.name.toLowerCase().includes(q) ||
-      (r.student.surname ?? "").toLowerCase().includes(q) ||
-      r.student.admission_number.toLowerCase().includes(q)
-    );
+  const [form, setForm] = useState({
+    student: "",
+    academic_year: "",
+    fee_wise_class: "",
+    billing_period: new Date().toISOString().slice(0, 7),
+    due_date: "",
   });
 
-  const selectedRows = filteredRows.filter(r => r.selected && !r.alreadyExists);
-  const allSelectable = filteredRows.filter(r => !r.alreadyExists);
-  const allSelected = allSelectable.length > 0 && allSelectable.every(r => r.selected);
-  const someSelected = allSelectable.some(r => r.selected);
+  useEffect(() => {
+    setFeeType(activeTab);
+  }, [activeTab]);
 
-  // ── Generate fees ─────────────────────────────────────────────────────────
-  const handleGenerate = async () => {
-    if (selectedRows.length === 0) {
-      showToast("No students selected.", "warn");
-      return;
-    }
+  const filteredFeeClasses = feeWiseClasses;
 
-    setGenerating(true);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const errs =
+      feeType === "monthly"
+        ? validateMonthlyFeeForm(form)
+        : validateSingleFeeForm(form);
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+
+    setLoading(true);
     try {
-      const payloads: StudentFeePayload[] = selectedRows.map(r => ({
-        student: r.student.id,
-        academic_year: Number(selectedYear),
-        fee_wise_class: Number(selectedFeeWise),
-        billing_period: r.billingPeriod,
-        due_date: r.dueDate,
-      }));
+      const payload = {
+        student: parseInt(form.student),
+        academic_year: parseInt(form.academic_year),
+        fee_wise_class: parseInt(form.fee_wise_class),
+        billing_period: feeType === "monthly" ? form.billing_period : "",
+        due_date: form.due_date,
+      };
 
-      const { success, failed } = await bulkCreateStudentFees(payloads);
+      const result =
+        feeType === "monthly"
+          ? await createMonthlyStudentFee(payload)
+          : await createSingleStudentFee(payload);
 
-      // Mark successfully generated as existing
-      const successStudentIds = new Set(success.map(s => s.student));
-      setRows(prev => prev.map(r =>
-        successStudentIds.has(r.student.id)
-          ? { ...r, alreadyExists: true, existingStatus: "pending", selected: false }
-          : r
-      ));
-
-      if (failed.length === 0) {
-        showToast(`✓ Generated fees for ${success.length} student${success.length !== 1 ? "s" : ""}.`, "success");
+      if (result.success) {
+        setToast({ type: "success", message: "Fee created successfully!" });
+        setTimeout(() => {
+          onSuccess();
+          onClose();
+        }, 1500);
       } else {
-        showToast(`Generated ${success.length}, failed ${failed.length}. Check and retry.`, "warn");
+        setToast({
+          type: "error",
+          message: result.error || "Failed to create fee",
+        });
       }
-    } catch (e: any) {
-      showToast(e.message ?? "Fee generation failed.", "error");
     } finally {
-      setGenerating(false);
+      setLoading(false);
     }
   };
 
-  // ── Render ────────────────────────────────────────────────────────────────
-  if (loadingInit) {
-    return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh", flexDirection: "column", gap: 12 }}>
-        <Spinner size={32} />
-        <p style={{ margin: 0, fontSize: 14, color: C.muted }}>Loading…</p>
-      </div>
-    );
-  }
+  const update = (key: string, value: string) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+    if (errors[key]) setErrors((prev) => ({ ...prev, [key]: "" }));
+  };
 
   return (
-    <div style={{ background: C.bg, minHeight: "100vh", padding: 24, fontFamily: "inherit" }}>
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}} *{box-sizing:border-box}`}</style>
-
-      {toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
-
-      {/* ── Page Header ── */}
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 4 }}>
-          <div style={{ width: 38, height: 38, borderRadius: 10, background: C.accentSoft, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <IndianRupee size={19} color={C.accent} />
-          </div>
-          <div>
-            <h1 style={{ margin: 0, fontSize: 21, fontWeight: 700, color: C.text }}>Generate Student Fees</h1>
-            <p style={{ margin: 0, fontSize: 13, color: C.muted }}>Select class, fee type & billing period, then generate fees for students</p>
-          </div>
-        </div>
+    <Modal isOpen={isOpen} onClose={onClose} title="Create Student Fee">
+      {/* Fee Type Toggle */}
+      <div className="flex bg-gray-100 rounded-xl p-1 mb-5">
+        {(["monthly", "single"] as const).map((type) => (
+          <button
+            key={type}
+            onClick={() => {
+              setFeeType(type);
+              setErrors({});
+            }}
+            className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+              feeType === type
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            {type === "monthly" ? "Monthly Fee" : "Single Fee"}
+          </button>
+        ))}
       </div>
 
-      {/* ── Filter Card ── */}
-      <div style={{ background: C.card, borderRadius: 14, border: `1.5px solid ${C.border}`, padding: 24, marginBottom: 20 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 16, marginBottom: 16 }}>
-          {/* Academic Year */}
-          <Select
-            label="Academic Year"
-            value={selectedYear}
-            onChange={setSelectedYear}
-            options={academicYears.map(y => ({ value: String(y.id), label: y.name }))}
-            placeholder="Select year…"
-          />
+      {toast && (
+        <div
+          className={`mb-4 p-3 rounded-lg flex items-center gap-2 text-sm ${
+            toast.type === "success"
+              ? "bg-green-50 text-green-700 border border-green-200"
+              : "bg-red-50 text-red-700 border border-red-200"
+          }`}
+        >
+          {toast.type === "success" ? (
+            <CheckCircle2 size={16} />
+          ) : (
+            <XCircle size={16} />
+          )}
+          {toast.message}
+        </div>
+      )}
 
-          {/* Class */}
-          <Select
-            label="Class"
-            value={selectedClass}
-            onChange={v => { setSelectedClass(v); setStudentsLoaded(false); setRows([]); }}
-            options={classes.map(c => ({ value: String(c.id), label: c.school_class }))}
-            placeholder="Select class…"
-          />
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <FormField label="Student" error={errors.student} required>
+          <select
+            className={selectClass}
+            value={form.student}
+            onChange={(e) => update("student", e.target.value)}
+          >
+            <option value="">Select student...</option>
+            {students.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name} {s.surname || ""}{" "}
+                {s.class_name ? `(${s.class_name})` : ""}
+              </option>
+            ))}
+          </select>
+        </FormField>
 
-          {/* Fee Type */}
-          <Select
-            label="Fee Type"
-            value={selectedFeeWise}
-            onChange={setSelectedFeeWise}
-            options={feeWiseList.map(f => ({ value: String(f.id), label: `${f.feetype_name} (₹${Number(f.amount).toLocaleString("en-IN")})` }))}
-            placeholder={selectedClass ? "Select fee…" : "Select class first"}
-            disabled={!selectedClass}
-            loading={loadingFee}
-          />
+        <FormField label="Academic Year" error={errors.academic_year} required>
+          <select
+            className={selectClass}
+            value={form.academic_year}
+            onChange={(e) => update("academic_year", e.target.value)}
+          >
+            <option value="">Select academic year...</option>
+            {academicYears.map((ay) => (
+              <option key={ay.id} value={ay.id}>
+                {ay.name} {ay.is_active ? "(Active)" : ""}
+              </option>
+            ))}
+          </select>
+        </FormField>
 
-          {/* Billing Period — only for non-single fees */}
-          {!isSingleFee && (
-            <Select
-              label="Billing Period"
-              value={selectedBillingPeriod}
-              onChange={setSelectedBillingPeriod}
-              options={billingPeriods}
-              placeholder={selectedFeeWise ? "Select period…" : "Select fee first"}
-              disabled={!selectedFeeWise || isSingleFee}
+        <FormField label="Fee Structure" error={errors.fee_wise_class} required>
+          <select
+            className={selectClass}
+            value={form.fee_wise_class}
+            onChange={(e) => update("fee_wise_class", e.target.value)}
+          >
+            <option value="">Select fee structure...</option>
+            {filteredFeeClasses.map((fc) => (
+              <option key={fc.id} value={fc.id}>
+                {fc.feetype_name} — ₹
+                {parseFloat(fc.amount).toLocaleString("en-IN")}
+              </option>
+            ))}
+          </select>
+        </FormField>
+
+        {feeType === "monthly" && (
+          <FormField
+            label="Billing Period"
+            error={errors.billing_period}
+            required
+          >
+            <input
+              type="month"
+              className={inputClass}
+              value={form.billing_period}
+              onChange={(e) => update("billing_period", e.target.value)}
             />
+          </FormField>
+        )}
+
+        <FormField label="Due Date" error={errors.due_date} required>
+          <input
+            type="date"
+            className={inputClass}
+            value={form.due_date}
+            onChange={(e) => update("due_date", e.target.value)}
+          />
+        </FormField>
+
+        <div className="flex gap-3 pt-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2 transition-colors"
+          >
+            {loading ? (
+              <>
+                <Loader2 size={16} className="animate-spin" /> Creating...
+              </>
+            ) : (
+              "Create Fee"
+            )}
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+};
+
+// Discount Modal
+const DiscountModal = ({
+  isOpen,
+  onClose,
+  fee,
+  onSuccess,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  fee: StudentFee | null;
+  onSuccess: () => void;
+}) => {
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [toast, setToast] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
+  const [form, setForm] = useState({
+    discount_amount: "",
+    discount_reference: "",
+    discount_note: "",
+  });
+
+  useEffect(() => {
+    if (fee) {
+      setForm({
+        discount_amount:
+          fee.discount_amount && fee.discount_amount !== "0.00"
+            ? fee.discount_amount
+            : "",
+        discount_reference: fee.discount_reference || "",
+        discount_note: fee.discount_note || "",
+      });
+    }
+  }, [fee]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const errs = validateDiscountForm(form);
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+    if (!fee) return;
+
+    setLoading(true);
+    try {
+      const result = await addDiscountToStudentFee(fee.id, form);
+      if (result.success) {
+        setToast({
+          type: "success",
+          message: "Discount applied successfully!",
+        });
+        setTimeout(() => {
+          onSuccess();
+          onClose();
+        }, 1500);
+      } else {
+        setToast({
+          type: "error",
+          message: result.error || "Failed to apply discount",
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const update = (key: string, value: string) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+    if (errors[key]) setErrors((prev) => ({ ...prev, [key]: "" }));
+  };
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Apply Discount">
+      {fee && (
+        <div className="bg-blue-50 rounded-xl p-4 mb-5 border border-blue-100">
+          <div className="flex items-center gap-3">
+            <StudentAvatar name={fee.student_name} size="md" />
+            <div>
+              <p className="font-semibold text-gray-900">{fee.student_name}</p>
+              <p className="text-sm text-gray-500">
+                {fee.class_name} • {formatBillingPeriod(fee.billing_period)}
+              </p>
+              <p className="text-sm font-medium text-blue-600 mt-0.5">
+                Fee Amount: {formatCurrency(fee.amount)}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {toast && (
+        <div
+          className={`mb-4 p-3 rounded-lg flex items-center gap-2 text-sm ${
+            toast.type === "success"
+              ? "bg-green-50 text-green-700 border border-green-200"
+              : "bg-red-50 text-red-700 border border-red-200"
+          }`}
+        >
+          {toast.type === "success" ? (
+            <CheckCircle2 size={16} />
+          ) : (
+            <XCircle size={16} />
+          )}
+          {toast.message}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <FormField
+          label="Discount Amount (₹)"
+          error={errors.discount_amount}
+          required
+        >
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">
+              ₹
+            </span>
+            <input
+              type="number"
+              className={`${inputClass} pl-7`}
+              placeholder="0.00"
+              value={form.discount_amount}
+              onChange={(e) => update("discount_amount", e.target.value)}
+              min="0"
+              step="0.01"
+            />
+          </div>
+        </FormField>
+
+        <FormField
+          label="Reference / Approval"
+          error={errors.discount_reference}
+          required
+        >
+          <input
+            type="text"
+            className={inputClass}
+            placeholder="e.g. Principal approval #123"
+            value={form.discount_reference}
+            onChange={(e) => update("discount_reference", e.target.value)}
+          />
+        </FormField>
+
+        <FormField label="Note (Optional)" error={errors.discount_note}>
+          <textarea
+            className={`${inputClass} resize-none`}
+            rows={3}
+            placeholder="e.g. Sibling discount, scholarship..."
+            value={form.discount_note}
+            onChange={(e) => update("discount_note", e.target.value)}
+          />
+        </FormField>
+
+        {form.discount_amount &&
+          fee &&
+          !isNaN(parseFloat(form.discount_amount)) && (
+            <div className="bg-green-50 border border-green-100 rounded-lg p-3 text-sm">
+              <div className="flex justify-between text-gray-600">
+                <span>Original Amount:</span>
+                <span>{formatCurrency(fee.amount)}</span>
+              </div>
+              <div className="flex justify-between text-red-600">
+                <span>Discount:</span>
+                <span>- {formatCurrency(form.discount_amount)}</span>
+              </div>
+              <div className="flex justify-between font-semibold text-gray-900 pt-2 border-t border-green-200 mt-2">
+                <span>Payable Amount:</span>
+                <span>
+                  {formatCurrency(
+                    Math.max(
+                      0,
+                      parseFloat(fee.amount) - parseFloat(form.discount_amount),
+                    ),
+                  )}
+                </span>
+              </div>
+            </div>
           )}
 
-          {/* Due Date */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <label style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: "0.06em", textTransform: "uppercase" }}>
-              Due Date <span style={{ color: C.danger }}>*</span>
-            </label>
-            <input
-              type="date"
-              value={dueDate}
-              onChange={e => setDueDate(e.target.value)}
-              style={{
-                padding: "10px 13px", border: `1.5px solid ${C.border}`, borderRadius: 10,
-                fontSize: 13, fontWeight: 500, color: dueDate ? C.text : C.muted,
-                background: "#fff", outline: "none", fontFamily: "inherit", width: "100%",
-              }}
-            />
+        <div className="flex gap-3 pt-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2 transition-colors"
+          >
+            {loading ? (
+              <>
+                <Loader2 size={16} className="animate-spin" /> Applying...
+              </>
+            ) : (
+              <>
+                <Tag size={14} /> Apply Discount
+              </>
+            )}
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+};
+
+// View Fee Modal
+const ViewFeeModal = ({
+  isOpen,
+  onClose,
+  fee,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  fee: StudentFee | null;
+}) => {
+  if (!fee) return null;
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Fee Details">
+      <div className="space-y-4">
+        <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+          <StudentAvatar name={fee.student_name} size="md" />
+          <div>
+            <p className="font-semibold text-gray-900 text-base">
+              {fee.student_name} {fee.student_surname || ""}
+            </p>
+            <p className="text-sm text-gray-500">{fee.class_name}</p>
+            <StatusBadge status={fee.status} />
           </div>
         </div>
 
-        {/* Selected fee info strip */}
-        {selectedFeeWiseObj && (
-           <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", background: C.indigo50,
-            borderRadius: 9, marginBottom: 16, flexWrap: "wrap" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: C.accent, fontWeight: 600 }}>
-              <FileText size={13} />
-              {selectedFeeWiseObj.feetype_name}
-            </div>
-            <div style={{ fontSize: 12, color: C.muted }}>
-              Amount: <strong style={{ color: C.text }}>₹{Number(selectedFeeWiseObj.amount).toLocaleString("en-IN")}</strong>
-            </div>
-            <div style={{ fontSize: 12, color: C.muted }}>
-              Cycle: <strong style={{ color: C.text }}>{selectedFeeWiseObj.billing_cycle === "single" ? "One-time" : selectedFeeWiseObj.billing_cycle}</strong>
-            </div>
-            {selectedFeeWiseObj.late_fee_enabled && (
-              <div style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 20, background: "#fef3c7", color: "#92400e" }}>
-                Late fee: ₹{selectedFeeWiseObj.late_fee_amount} / {selectedFeeWiseObj.late_fee_type === "per_day" ? "day" : "flat"}
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            {
+              label: "Academic Year",
+              value: fee.academic_year_name,
+              icon: CalendarDays,
+            },
+            {
+              label: "Fee Structure",
+              value: fee.fee_wise_class_name,
+              icon: BookOpen,
+            },
+            {
+              label: "Billing Period",
+              value: formatBillingPeriod(fee.billing_period),
+              icon: CalendarDays,
+            },
+            {
+              label: "Due Date",
+              value: new Date(fee.due_date).toLocaleDateString("en-IN"),
+              icon: Clock,
+            },
+          ].map(({ label, value, icon: Icon }) => (
+            <div key={label} className="bg-gray-50 rounded-lg p-3">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Icon size={12} className="text-gray-400" />
+                <span className="text-xs text-gray-400 font-medium">
+                  {label}
+                </span>
               </div>
+              <p className="text-sm font-semibold text-gray-900">{value}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 space-y-2">
+          <div className="flex justify-between text-sm text-gray-600">
+            <span>Fee Amount</span>
+            <span className="font-medium">{formatCurrency(fee.amount)}</span>
+          </div>
+          <div className="flex justify-between text-sm text-green-600">
+            <span>Discount</span>
+            <span className="font-medium">
+              - {formatCurrency(fee.discount_amount ?? "0")}
+            </span>
+          </div>
+          <div className="flex justify-between text-sm font-bold text-gray-900 pt-2 border-t border-blue-200">
+            <span>Payable Amount</span>
+            <span className="text-blue-600">
+              {formatCurrency(fee.payable_amount)}
+            </span>
+          </div>
+        </div>
+
+        {fee.discount_reference && (
+          <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-3">
+            <p className="text-xs font-medium text-yellow-700 mb-1">
+              Discount Reference
+            </p>
+            <p className="text-sm text-gray-700">{fee.discount_reference}</p>
+            {fee.discount_note && (
+              <p className="text-xs text-gray-500 mt-1">{fee.discount_note}</p>
             )}
           </div>
         )}
-
-        {/* Load Students button */}
-        <button
-          onClick={handleLoadStudents}
-          disabled={loadingStudents}
-          style={{
-            display: "flex", alignItems: "center", gap: 8,
-            padding: "11px 24px", borderRadius: 10, border: "none",
-            background: C.accent, color: "#fff", fontSize: 13, fontWeight: 700,
-            cursor: loadingStudents ? "not-allowed" : "pointer",
-            opacity: loadingStudents ? 0.75 : 1,
-            boxShadow: "0 4px 14px rgba(91,94,244,0.3)",
-          }}
-        >
-          {loadingStudents ? <Spinner size={15} color="#fff" /> : <Users size={15} />}
-          {loadingStudents ? "Loading Students…" : "Load Students"}
-        </button>
       </div>
+    </Modal>
+  );
+};
 
-      {/* ── Students Table ── */}
-      {studentsLoaded && (
-        <div style={{ background: C.card, borderRadius: 14, border: `1.5px solid ${C.border}`, overflow: "hidden" }}>
+// Main Page Component
+export default function GenerateFeesPage() {
+  const [activeTab, setActiveTab] = useState<"monthly" | "single">("monthly");
+  const [students, setStudents] = useState<Student[]>([]);
+  const [fees, setFees] = useState<StudentFee[]>([]);
+  const [academicYears, setAcademicYears] = useState<AcademicYear[]>([]);
+  const [feeWiseClasses, setFeeWiseClasses] = useState<FeeWiseClass[]>([]);
 
-          {/* Table toolbar */}
-          <div style={{ padding: "16px 20px", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 9, background: C.accentSoft, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <GraduationCap size={17} color={C.accent} />
-              </div>
-              <div>
-                <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: C.text }}>
-                  Students List ({rows.length})
-                </p>
-                <p style={{ margin: 0, fontSize: 11, color: C.muted }}>
-                  {rows.filter(r => r.alreadyExists).length} already generated · {allSelectable.length} available
-                </p>
-              </div>
-            </div>
+  // Filters
+  const [filterClass, setFilterClass] = useState("");
+  const [filterPeriod, setFilterPeriod] = useState("2026-04");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 8;
 
-            {/* Search */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8, background: C.subtle, border: `1.5px solid ${C.border}`, borderRadius: 9, padding: "0 12px", height: 36, minWidth: 220 }}>
-              <Search size={13} color={C.muted} />
-              <input
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Search by name or admission no…"
-                style={{ flex: 1, border: "none", background: "transparent", fontSize: 12, outline: "none", color: C.text }}
-              />
-            </div>
+  // Modals
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [discountModalOpen, setDiscountModalOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [selectedFee, setSelectedFee] = useState<StudentFee | null>(null);
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false); // ✅ ADD THIS
+
+  const uniqueClasses = getUniqueClasses(students);
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [studentsRes, feesRes, yearsRes, feeClassesRes] = await Promise.all(
+        [
+          fetchStudents(),
+          fetchStudentFees({
+            class_name: filterClass,
+            billing_period: filterPeriod,
+            search: searchQuery,
+            page: currentPage,
+          }),
+          fetchAcademicYearsForFee(), // ✅ updated
+          fetchFeeWiseClassesForFee(), // ✅ updated
+        ],
+      );
+
+      if (studentsRes.success && studentsRes.data)
+        setStudents(studentsRes.data);
+      if (feesRes.success && feesRes.data) {
+  setFees(feesRes.data.results);
+}
+
+      if (yearsRes.success && yearsRes.data) setAcademicYears(yearsRes.data);
+      if (feeClassesRes.success && feeClassesRes.data)
+        setFeeWiseClasses(feeClassesRes.data);
+    } catch {
+      // silently fail
+    } finally {
+      setLoading(false);
+    }
+  }, [filterClass, filterPeriod, searchQuery, currentPage]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  // Client-side filtering for mock data
+  const filteredFees = fees.filter((fee) => {
+    const matchClass = !filterClass || fee.class_name === filterClass;
+    const matchPeriod = !filterPeriod || fee.billing_period === filterPeriod;
+    const matchSearch =
+      !searchQuery ||
+      fee.student_name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchTab =
+      activeTab === "monthly"
+        ? fee.billing_period !== "" && fee.billing_period != null
+        : fee.billing_period === "" || fee.billing_period == null;
+
+    return matchClass && matchPeriod && matchSearch && matchTab;
+  });
+
+  const paginatedFees = filteredFees.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
+  const totalPages = Math.ceil(filteredFees.length / ITEMS_PER_PAGE);
+
+  // Stats
+  const totalStudents = students.length;
+  const totalOutstanding = fees
+    .filter((f) => f.status !== "paid")
+    .reduce((a, f) => a + parseFloat(f.payable_amount), 0);
+  const totalCollected = fees
+    .filter((f) => f.status === "paid")
+    .reduce((a, f) => a + parseFloat(f.payable_amount), 0);
+  const overdueFees = fees // ✅ ADD THIS
+    .filter((f) => f.status === "overdue")
+    .reduce((a, f) => a + parseFloat(f.payable_amount), 0);
+  const totalDiscount = fees.reduce(
+    (a, f) => a + (parseFloat(f.discount_amount ?? "0") || 0),
+    0,
+  );
+
+  const discountedStudents = fees.filter(
+    (f) => parseFloat(f.discount_amount ?? "0") > 0,
+  ).length;
+
+  const avgDiscount =
+    discountedStudents > 0 ? totalDiscount / discountedStudents : 0;
+
+  const handleDiscount = (fee: StudentFee) => {
+    setSelectedFee(fee);
+    setDiscountModalOpen(true);
+    setOpenMenuId(null);
+  };
+  const handleView = (fee: StudentFee) => {
+    setSelectedFee(fee);
+    setViewModalOpen(true);
+    setOpenMenuId(null);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Student Fee</h1>
+            <p className="text-sm text-gray-500 mt-0.5">
+              Manage student fees, billing and discounts
+            </p>
           </div>
-
-          {/* Column headers */}
-          <div style={{
-            display: "grid", gridTemplateColumns: "44px 40px 1fr 140px 130px 110px 90px 80px",
-            padding: "9px 20px", background: C.bg, borderBottom: `1px solid ${C.border}`,
-            alignItems: "center", gap: 8,
-          }}>
-            {/* Select all */}
-            <div
-              onClick={toggleAll}
-              style={{ cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
-            >
-              {allSelected
-                ? <CheckSquare size={16} color={C.accent} />
-                : someSelected
-                  ? <div style={{ width: 16, height: 16, border: `2px solid ${C.accent}`, borderRadius: 4, background: "#e0e7ff", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <div style={{ width: 8, height: 2, background: C.accent, borderRadius: 2 }} />
-                    </div>
-                  : <Square size={16} color={C.muted} />
-              }
-            </div>
-            {["#", "Student Name", "Admission No.", "Fee Type", "Amount (₹)", "Due Date", "Status"].map(h => (
-              <span key={h} style={{ fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: "0.06em", textTransform: "uppercase" }}>{h}</span>
-            ))}
-          </div>
-
-          {/* Rows */}
-          {filteredRows.length === 0 ? (
-            <div style={{ padding: "40px 20px", textAlign: "center", color: C.muted }}>
-              <Users size={28} style={{ display: "block", margin: "0 auto 10px", opacity: 0.3 }} />
-              <p style={{ margin: 0, fontSize: 14 }}>{searchQuery ? "No students match your search" : "No students found for this class"}</p>
-            </div>
-          ) : (
-            filteredRows.map((row, idx) => {
-              const fullIdx = rows.findIndex(r => r.student.id === row.student.id);
-              return (
-                <div
-                  key={row.student.id}
-                  onClick={() => !row.alreadyExists && toggleRow(fullIdx)}
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "44px 40px 1fr 140px 130px 110px 90px 80px",
-                    padding: "13px 20px",
-                    borderBottom: `1px solid ${C.border}`,
-                    alignItems: "center",
-                    gap: 8,
-                    cursor: row.alreadyExists ? "default" : "pointer",
-                    background: row.alreadyExists
-                      ? "#fafbfc"
-                      : row.selected
-                        ? C.indigo50
-                        : C.card,
-                    transition: "background 0.1s",
-                    opacity: row.alreadyExists ? 0.75 : 1,
-                  }}
-                >
-                  {/* Checkbox */}
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    {row.alreadyExists ? (
-                      <CheckCircle2 size={16} color={C.success} />
-                    ) : row.selected ? (
-                      <CheckSquare size={16} color={C.accent} />
-                    ) : (
-                      <Square size={16} color={C.muted} />
-                    )}
-                  </div>
-
-                  {/* # */}
-                  <span style={{ fontSize: 12, color: C.muted, fontWeight: 500 }}>{idx + 1}</span>
-
-                  {/* Name */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-                    <div style={{
-                      width: 30, height: 30, borderRadius: "50%", flexShrink: 0,
-                      background: `hsl(${(row.student.id * 47) % 360}, 60%, 88%)`,
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      fontSize: 11, fontWeight: 700, color: `hsl(${(row.student.id * 47) % 360}, 50%, 35%)`,
-                    }}>
-                      {((row.student.surname ?? row.student.name)[0] ?? "?").toUpperCase()}
-                    </div>
-                    <div>
-                      <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: C.text }}>
-                        {[row.student.surname, row.student.name].filter(Boolean).join(" ")}
-                      </p>
-                      {row.student.gr_no && (
-                        <p style={{ margin: 0, fontSize: 11, color: C.muted }}>GR: {row.student.gr_no}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Admission No */}
-                  <span style={{ fontSize: 12, color: C.muted, fontFamily: "monospace" }}>{row.student.admission_number}</span>
-
-                  {/* Fee Type */}
-                  <span style={{ fontSize: 12, fontWeight: 500, color: C.text }}>{row.feeWiseClass.feetype_name}</span>
-
-                  {/* Amount */}
-                  <span style={{ fontSize: 13, fontWeight: 700, color: C.text }}>
-                    ₹{Number(row.feeWiseClass.amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
-                  </span>
-
-                  {/* Due Date */}
-                  <span style={{ fontSize: 12, color: C.muted }}>{fmt(row.dueDate)}</span>
-
-                  {/* Status */}
-                  {row.alreadyExists
-                    ? <StatusBadge status={row.existingStatus ?? "pending"} />
-                    : <span style={{ fontSize: 11, color: C.muted, fontStyle: "italic" }}>Not yet</span>
-                  }
-                </div>
-              );
-            })
-          )}
-
-          {/* Footer */}
-          <div style={{
-            padding: "14px 20px", borderTop: `1px solid ${C.border}`,
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-            flexWrap: "wrap", gap: 12,
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: C.text }}>
-                Total Selected: <span style={{ color: C.accent }}>{selectedRows.length}</span> student{selectedRows.length !== 1 ? "s" : ""}
-              </span>
-              {selectedRows.length > 0 && selectedFeeWiseObj && (
-                <span style={{ fontSize: 12, color: C.muted }}>
-                  Total: <strong style={{ color: C.text }}>
-                    ₹{(selectedRows.length * Number(selectedFeeWiseObj.amount)).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
-                  </strong>
-                </span>
-              )}
-            </div>
-
+          <div className="flex items-center gap-2">
             <button
-              onClick={handleGenerate}
-              disabled={selectedRows.length === 0 || generating}
-              style={{
-                display: "flex", alignItems: "center", gap: 8,
-                padding: "11px 28px", borderRadius: 10, border: "none",
-                background: selectedRows.length === 0 ? C.subtle : C.accent,
-                color: selectedRows.length === 0 ? C.muted : "#fff",
-                fontSize: 13, fontWeight: 700,
-                cursor: selectedRows.length === 0 || generating ? "not-allowed" : "pointer",
-                opacity: generating ? 0.7 : 1,
-                boxShadow: selectedRows.length > 0 ? "0 4px 14px rgba(91,94,244,0.3)" : "none",
-                transition: "all 0.15s",
-              }}
+              onClick={loadData}
+              disabled={loading}
+              className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-gray-500"
             >
-              {generating ? <Spinner size={15} color={selectedRows.length > 0 ? "#fff" : C.muted} /> : <Zap size={15} />}
-              {generating ? "Generating…" : `Generate Fees (${selectedRows.length})`}
+              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+            </button>
+            <button className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+              <Download size={15} /> Export
+            </button>
+            <button
+              onClick={() => setCreateModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm"
+            >
+              <Plus size={16} /> Create Fee
             </button>
           </div>
         </div>
-      )}
 
-      {/* ── Empty state before loading ── */}
-      {!studentsLoaded && !loadingStudents && (
-        <div style={{
-          background: C.card, borderRadius: 14, border: `1.5px dashed ${C.border}`,
-          padding: "52px 24px", textAlign: "center",
-        }}>
-          <div style={{ width: 56, height: 56, borderRadius: 16, background: C.accentSoft, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
-            <Users size={26} color={C.accent} />
-          </div>
-          <h3 style={{ margin: "0 0 8px", fontSize: 16, fontWeight: 700, color: C.text }}>No students loaded yet</h3>
-          <p style={{ margin: "0 0 20px", fontSize: 13, color: C.muted, maxWidth: 360, marginLeft: "auto", marginRight: "auto" }}>
-            Select an academic year, class, fee type, and due date above, then click <strong>Load Students</strong> to see the list.
-          </p>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 20, flexWrap: "wrap" }}>
-            {[
-              { icon: <CalendarDays size={14} />, text: "Pick academic year" },
-              { icon: <GraduationCap size={14} />, text: "Select class & fee" },
-              { icon: <Users size={14} />, text: "Load students" },
-              { icon: <Zap size={14} />, text: "Generate fees" },
-            ].map((step, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: C.muted }}>
-                <span style={{ color: C.accent }}>{step.icon}</span>
-                <span style={{ fontWeight: 500 }}>{step.text}</span>
-                {i < 3 && <span style={{ color: "#d1d5db", marginLeft: 6 }}>→</span>}
-              </div>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <StatCard
+            title="Total Students"
+            value={totalStudents.toLocaleString()}
+            subtitle="Active students"
+            icon={Users}
+            iconBg="bg-blue-500"
+          />
+          <StatCard
+            title="Total Outstanding"
+            value={`₹${(totalOutstanding / 100000).toFixed(2)}L`}
+            subtitle="Pending amount"
+            icon={IndianRupee}
+            iconBg="bg-purple-500"
+            valueColor="text-purple-600"
+          />
+          <StatCard
+            title="Total Collected"
+            value={`₹${(totalCollected / 1000).toFixed(1)}K`}
+            subtitle="This academic year"
+            icon={TrendingUp}
+            iconBg="bg-green-500"
+            valueColor="text-green-600"
+          />
+          <StatCard
+            title="Overdue Fees"
+            value={`₹${(overdueFees / 1000).toFixed(1)}K`}
+            subtitle="Requires attention"
+            icon={AlertCircle}
+            iconBg="bg-orange-500"
+            valueColor="text-orange-600"
+          />
+        </div>
+
+        {/* Main Table Card */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          {/* Tabs */}
+          <div className="flex border-b border-gray-100 px-5 pt-4">
+            {(["monthly", "single"] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => {
+                  setActiveTab(tab);
+                  setCurrentPage(1);
+                }}
+                className={`pb-3 px-4 text-sm font-medium border-b-2 transition-all -mb-px ${
+                  activeTab === tab
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                {tab === "monthly" ? "Monthly Fees" : "Single Fees"}
+              </button>
             ))}
           </div>
+
+          {/* Filters */}
+          <div className="p-4 border-b border-gray-50">
+            <div className="flex flex-col sm:flex-row gap-3">
+              {/* Class Filter */}
+              <div className="relative flex-1 min-w-0">
+                <GraduationCap
+                  size={15}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                />
+                <select
+                  className="w-full pl-9 pr-8 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white appearance-none"
+                  value={filterClass}
+                  onChange={(e) => {
+                    setFilterClass(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                >
+                  <option value="">All Classes</option>
+                  {uniqueClasses.map((c) => (
+                    <option key={c} value={c}>
+                      {c
+                        .replace(/_/g, " ")
+                        .replace(/\b\w/g, (l) => l.toUpperCase())}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Period Filter */}
+              {activeTab === "monthly" && (
+                <div className="relative flex-1 min-w-0">
+                  <CalendarDays
+                    size={15}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  />
+                  <input
+                    type="month"
+                    className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    value={filterPeriod}
+                    onChange={(e) => {
+                      setFilterPeriod(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* Search */}
+              <div className="relative flex-1 min-w-0 sm:max-w-xs">
+                <Search
+                  size={15}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                />
+                <input
+                  type="text"
+                  placeholder="Search student..."
+                  className="w-full pl-9 pr-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Table */}
+          <div className="hidden md:block overflow-x-auto">
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 size={32} className="animate-spin text-blue-500" />
+              </div>
+            ) : paginatedFees.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 text-gray-400">
+                <Filter size={40} className="mb-3 opacity-50" />
+                <p className="font-medium">No fees found</p>
+                <p className="text-sm mt-1">Try adjusting your filters</p>
+              </div>
+            ) : (
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-100">
+                    {[
+                      "Student",
+                      "Class & Section",
+                      "Billing Period",
+                      "Due Date",
+                      "Amount (₹)",
+                      "Discount (₹)",
+                      "Payable (₹)",
+                      "Status",
+                      "Action",
+                    ].map((h) => (
+                      <th
+                        key={h}
+                        className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap"
+                      >
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {paginatedFees.map((fee) => (
+                    <tr
+                      key={fee.id}
+                      className="hover:bg-gray-50/50 transition-colors group"
+                    >
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <StudentAvatar name={fee.student_name} />
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {fee.student_name}
+                            </p>
+                            <p className="text-xs text-gray-400">
+                              ID#{fee.student.toString().padStart(3, "0")}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <p className="text-sm text-gray-700 font-medium capitalize">
+                          {fee.class_name?.replace(/_/g, " ")}
+                        </p>
+                        <p className="text-xs text-gray-400">A Section</p>
+                      </td>
+                      <td className="px-4 py-3">
+                        {fee.billing_period ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-xs font-medium border border-blue-100">
+                            {formatBillingPeriod(fee.billing_period)}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400 text-xs">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600">
+                        {new Date(fee.due_date).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </td>
+                      <td className="px-4 py-3 text-sm font-semibold text-gray-900">
+                        ₹{parseFloat(fee.amount).toLocaleString("en-IN")}
+                      </td>
+                      <td className="px-4 py-3 text-sm font-semibold text-green-600">
+                        {parseFloat(fee.discount_amount ?? "0") > 0 ? (
+                          `₹${parseFloat(fee.discount_amount ?? "0").toLocaleString("en-IN")}`
+                        ) : (
+                          <span className="text-gray-400 font-normal">
+                            ₹0.00
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-sm font-bold text-gray-900">
+                        ₹
+                        {parseFloat(fee.payable_amount).toLocaleString("en-IN")}
+                      </td>
+                      <td className="px-4 py-3">
+                        <StatusBadge status={fee.status} />
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => handleView(fee)}
+                            className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-400 hover:text-gray-700"
+                          >
+                            <Eye size={15} />
+                          </button>
+                          <button
+                            onClick={() => handleDiscount(fee)}
+                            className="p-1.5 hover:bg-blue-50 rounded-lg transition-colors text-gray-400 hover:text-blue-600"
+                          >
+                            <Percent size={15} />
+                          </button>
+                          <div className="relative">
+                            <button
+                              onClick={() =>
+                                setOpenMenuId(
+                                  openMenuId === fee.id ? null : fee.id,
+                                )
+                              }
+                              className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors text-gray-400 hover:text-gray-700"
+                            >
+                              <MoreVertical size={15} />
+                            </button>
+                            {openMenuId === fee.id && (
+                              <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-xl shadow-lg z-20 w-36 py-1">
+                                <button
+                                  onClick={() => handleView(fee)}
+                                  className="w-full px-3 py-2 text-sm text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                >
+                                  <Eye size={14} /> View
+                                </button>
+                                <button
+                                  onClick={() => handleDiscount(fee)}
+                                  className="w-full px-3 py-2 text-sm text-left text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                >
+                                  <Percent size={14} /> Discount
+                                </button>
+                                <hr className="my-1 border-gray-100" />
+                                <button
+                                  onClick={async () => {
+                                    await deleteStudentFee(fee.id);
+                                    setFees((prev) =>
+                                      prev.filter((f) => f.id !== fee.id),
+                                    );
+                                    setOpenMenuId(null);
+                                  }}
+                                  className="w-full px-3 py-2 text-sm text-left text-red-600 hover:bg-red-50 flex items-center gap-2"
+                                >
+                                  <X size={14} /> Delete
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="md:hidden divide-y divide-gray-100">
+            {loading ? (
+              <div className="flex items-center justify-center py-16">
+                <Loader2 size={32} className="animate-spin text-blue-500" />
+              </div>
+            ) : paginatedFees.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+                <Filter size={32} className="mb-2 opacity-50" />
+                <p className="text-sm font-medium">No fees found</p>
+              </div>
+            ) : (
+              paginatedFees.map((fee) => (
+                <div
+                  key={fee.id}
+                  className="p-4 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3 min-w-0">
+                      <StudentAvatar name={fee.student_name} />
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 truncate">
+                          {fee.student_name}
+                        </p>
+                        <p className="text-xs text-gray-400 capitalize">
+                          {fee.class_name?.replace(/_/g, " ")}
+                        </p>
+                        {fee.billing_period && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 text-xs font-medium mt-1">
+                            {formatBillingPeriod(fee.billing_period)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <StatusBadge status={fee.status} />
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-3 gap-2">
+                    <div className="bg-gray-50 rounded-lg p-2 text-center">
+                      <p className="text-xs text-gray-400">Amount</p>
+                      <p className="text-sm font-bold text-gray-900">
+                        ₹{(parseFloat(fee.amount) / 1000).toFixed(0)}K
+                      </p>
+                    </div>
+                    <div className="bg-green-50 rounded-lg p-2 text-center">
+                      <p className="text-xs text-gray-400">Discount</p>
+                      <p className="text-sm font-bold text-green-600">
+                        ₹{parseFloat(fee.discount_amount ?? "0").toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="bg-blue-50 rounded-lg p-2 text-center">
+                      <p className="text-xs text-gray-400">Payable</p>
+                      <p className="text-sm font-bold text-blue-600">
+                        ₹{(parseFloat(fee.payable_amount) / 1000).toFixed(0)}K
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      onClick={() => handleView(fee)}
+                      className="flex-1 py-2 text-xs font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 flex items-center justify-center gap-1 transition-colors"
+                    >
+                      <Eye size={12} /> View
+                    </button>
+                    <button
+                      onClick={() => handleDiscount(fee)}
+                      className="flex-1 py-2 text-xs font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 flex items-center justify-center gap-1 transition-colors"
+                    >
+                      <Percent size={12} /> Discount
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Pagination */}
+          {filteredFees.length > 0 && (
+            <div className="px-4 py-3 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <p className="text-xs text-gray-500">
+                Showing{" "}
+                {Math.min(
+                  (currentPage - 1) * ITEMS_PER_PAGE + 1,
+                  filteredFees.length,
+                )}{" "}
+                to {Math.min(currentPage * ITEMS_PER_PAGE, filteredFees.length)}{" "}
+                of {filteredFees.length} entries
+              </p>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeft size={15} />
+                </button>
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let page = i + 1;
+                  if (totalPages > 5) {
+                    if (currentPage > 3) page = currentPage - 2 + i;
+                    if (currentPage > totalPages - 2) page = totalPages - 4 + i;
+                  }
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`w-8 h-8 text-sm rounded-lg font-medium transition-colors ${
+                        currentPage === page
+                          ? "bg-blue-600 text-white"
+                          : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
+                <button
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(totalPages, p + 1))
+                  }
+                  disabled={currentPage === totalPages}
+                  className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronRight size={15} />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Discount Summary */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <h3 className="text-base font-semibold text-gray-900 mb-4">
+            Discount Summary
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div className="flex items-center gap-3 p-3 bg-green-50 rounded-xl">
+              <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Tag size={18} className="text-white" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Total Discount Given</p>
+                <p className="text-base font-bold text-gray-900">
+                  ₹
+                  {totalDiscount.toLocaleString("en-IN", {
+                    minimumFractionDigits: 2,
+                  })}
+                </p>
+                <p className="text-xs text-gray-400">This month</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl">
+              <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Users size={18} className="text-white" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Discounted Fees</p>
+                <p className="text-base font-bold text-gray-900">
+                  {discountedStudents}
+                </p>
+                <p className="text-xs text-gray-400">Students</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-xl col-span-2 sm:col-span-1">
+              <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Percent size={18} className="text-white" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Average Discount</p>
+                <p className="text-base font-bold text-gray-900">
+                  ₹{avgDiscount.toFixed(2)}
+                </p>
+                <p className="text-xs text-gray-400">Per student</p>
+              </div>
+            </div>
+          </div>
+          <button className="mt-4 w-full sm:w-auto float-right flex items-center gap-2 px-4 py-2 border border-gray-200 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+            View All Discounts →
+          </button>
+        </div>
+      </div>
+
+      {/* Click outside to close menu */}
+      {openMenuId !== null && (
+        <div
+          className="fixed inset-0 z-10"
+          onClick={() => setOpenMenuId(null)}
+        />
       )}
+
+      {/* Modals */}
+      <CreateFeeModal
+        isOpen={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        students={students}
+        academicYears={academicYears}
+        feeWiseClasses={feeWiseClasses}
+        onSuccess={loadData}
+        activeTab={activeTab}
+      />
+
+      <DiscountModal
+        isOpen={discountModalOpen}
+        onClose={() => setDiscountModalOpen(false)}
+        fee={selectedFee}
+        onSuccess={loadData}
+      />
+
+      <ViewFeeModal
+        isOpen={viewModalOpen}
+        onClose={() => setViewModalOpen(false)}
+        fee={selectedFee}
+      />
     </div>
   );
 }

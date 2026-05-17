@@ -62,6 +62,7 @@ export interface AdmissionFormCreatePayload {
   fee_type: string
   sections: AdmissionFormSectionPayload[]
   document_fields: string[]
+  payment_mode: "online" | "offline" | null;
   fee_structures_input: { class_name: number; fee_amount: string }[]
 }
 
@@ -69,6 +70,7 @@ export interface AdmissionFormResponse extends AdmissionFormCreatePayload {
   id: number
   unique_link: string
   is_active: boolean
+  payment_mode?: "online" | "offline" | null;
 }
 
 export interface PublicField {

@@ -377,31 +377,10 @@ function PublishedLinkCard({ link }: { link: string }) {
   };
 
   // add this function
-  const handlePreviewForm = async () => {
-    try {
-      const token = localStorage.getItem("access");
-
-      const response = await fetch(link, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await response.json();
-
-      // STORE DATA
-      localStorage.setItem("school_id", data.school_id.toString());
-
-      localStorage.setItem("school_slug", data.school_slug);
-
-      // REDIRECT
-      window.location.href = `${window.location.origin}/signup`;
-    } catch (error) {
-      console.error("Failed to fetch school data", error);
-
-      toast.error("Failed to open form");
-    }
-  };
+  const handlePreviewForm = () => {
+  if (!frontendLink) return;
+  window.open(frontendLink, "_blank");
+};
 
   if (!link) return null;
 

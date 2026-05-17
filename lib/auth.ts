@@ -13,9 +13,19 @@ const COOKIE_PATH = "path=/";
 const COOKIE_SAME_SITE = "SameSite=Lax";
 
 function apiFetch(input: RequestInfo | URL, init: RequestInit = {}) {
+  const { headers, body, ...rest } = init;
+  const isFormData = body instanceof FormData;
+
   return fetch(input, {
     ...COOKIE_FETCH_OPTIONS,
-    ...init,
+    ...rest,
+    body,
+    headers: isFormData
+      ? { ...(headers as Record<string, string>) }        // ← no Content-Type for FormData
+      : {
+          "Content-Type": "application/json",             // ← default for JSON
+          ...(headers as Record<string, string>),
+        },
   });
 }
 
