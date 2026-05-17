@@ -28,6 +28,7 @@ import {
   createRazorOrder,
   verifyRazorPayment,
   createOfflinePayment,
+  getAdmissionReceipt,
 } from "@/lib/forms";
 import { submitDocuments } from "@/lib/forms";
 
@@ -84,14 +85,15 @@ export default function AdmissionPortal() {
           )?.value || "Student",
         grade: `Form ${item.form}`,
         status: item.status,
-        lastUpdated: "Recently",
         fee_data: item.fee_data ?? null,
         pay_process: item.pay_process ?? false,
-        progress: item.fee_data
-          ? 100
-          : item.sections?.some((s: any) => s?.field_values?.length > 0)
-            ? 65
-            : 35,
+        lastUpdated: "Recently",
+        progress:
+          item.pay_process && item.fee_data?.paid_at
+            ? 100
+            : item.sections?.some((s: any) => s?.field_values?.length > 0)
+              ? 65
+              : 35,
         sections: item.sections,
       }));
       setChildren(formattedData);
@@ -108,7 +110,6 @@ export default function AdmissionPortal() {
     fetchData();
   }, []);
 
-  // ✅ handleBack is now at the TOP LEVEL of AdmissionPortal — not inside handlePaymentSuccess
   const handleBack = async () => {
     setSelectedChild(null);
     await fetchData();
@@ -126,7 +127,7 @@ export default function AdmissionPortal() {
                 payment_mode: "online",
                 paid_at: new Date().toISOString(),
               },
-              pay_process: true, // ← ADD THIS
+              pay_process: true,
               progress: 100,
             }
           : c,
@@ -149,28 +150,18 @@ export default function AdmissionPortal() {
             )?.value || "Student",
           grade: `Form ${item.form}`,
           status: item.status,
-          fee_data: item.fee_data,
+          fee_data: item.fee_data ?? null,
+          pay_process: item.pay_process ?? false,
           lastUpdated: "Recently",
-          progress: item.fee_data
-            ? 100
-            : item.sections?.some((s: any) => s?.field_values?.length > 0)
-              ? 65
-              : 35,
+          progress:
+            item.pay_process && item.fee_data?.paid_at
+              ? 100
+              : item.sections?.some((s: any) => s?.field_values?.length > 0)
+                ? 65
+                : 35,
           sections: item.sections,
         }));
-        setChildren(
-          formattedData.map((fresh: any) => {
-            if (fresh.admission_number === paidAdmissionNumber) {
-              return {
-                ...fresh,
-                fee_data: fresh.fee_data ?? { payment_status: "completed" },
-                pay_process: fresh.pay_process ?? true, // ← ADD THIS
-                progress: 100,
-              };
-            }
-            return fresh;
-          }),
-        );
+        setChildren(formattedData);
       } catch (error) {
         console.log(error);
       }
@@ -255,6 +246,22 @@ function ChildrenList({
   children: any[];
 }) {
   const [receiptChild, setReceiptChild] = useState<any>(null);
+  const [receiptData, setReceiptData] = useState<any>(null);
+  const [receiptLoading, setReceiptLoading] = useState(false);
+
+  const handleReceiptOpen = async (child: any) => {
+    setReceiptChild(child);
+    setReceiptData(null);
+    setReceiptLoading(true);
+    try {
+      const data = await getAdmissionReceipt(child.admission_number);
+      setReceiptData(data[0] ?? data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setReceiptLoading(false);
+    }
+  };
 
   return (
     <motion.div
@@ -272,7 +279,10 @@ function ChildrenList({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setReceiptChild(null)}
+              onClick={() => {
+                setReceiptChild(null);
+                setReceiptData(null);
+              }}
               className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
             />
 
@@ -304,98 +314,190 @@ function ChildrenList({
                   </div>
                 </div>
 
-                {/* Modal body */}
                 <div className="px-7 py-6 space-y-4">
-                  {/* Student info */}
-                  <div className="bg-slate-50 rounded-2xl p-4 space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                        Student
-                      </span>
-                      <span className="text-sm font-black text-slate-800">
-                        {receiptChild.name}
-                      </span>
+                  {receiptLoading ? (
+                    <div className="flex items-center justify-center py-10">
+                      <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
                     </div>
-                    <div className="h-px bg-slate-200" />
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                        Admission No.
-                      </span>
-                      <span className="text-sm font-black text-indigo-600 font-mono">
-                        {receiptChild.admission_number || receiptChild.id}
-                      </span>
-                    </div>
-                    <div className="h-px bg-slate-200" />
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                        Class
-                      </span>
-                      <span className="text-sm font-black text-slate-800">
-                        {receiptChild.grade}
-                      </span>
-                    </div>
-                    <div className="h-px bg-slate-200" />
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                        Status
-                      </span>
-                      <span className="text-xs font-black uppercase tracking-wider text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
-                        ✓ Paid
-                      </span>
-                    </div>
-                  </div>
+                  ) : receiptData ? (
+                    <>
+                      {/* Student info */}
+                      <div className="bg-slate-50 rounded-2xl p-4 space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            Student
+                          </span>
+                          <span className="text-sm font-black text-slate-800">
+                            {receiptData.field_values?.find(
+                              (f: any) => f.field_name === "Student Name",
+                            )?.value || receiptChild?.name}
+                          </span>
+                        </div>
+                        <div className="h-px bg-slate-200" />
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            Admission No.
+                          </span>
+                          <span className="text-sm font-black text-indigo-600 font-mono">
+                            {receiptData.admission_number}
+                          </span>
+                        </div>
+                        <div className="h-px bg-slate-200" />
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            Form
+                          </span>
+                          <span className="text-sm font-black text-slate-800">
+                            {receiptData.form_title}
+                          </span>
+                        </div>
+                        <div className="h-px bg-slate-200" />
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            Amount Paid
+                          </span>
+                          <span className="text-sm font-black text-emerald-600">
+                            ₹
+                            {Number(
+                              receiptData.payment_detail?.amount,
+                            ).toLocaleString("en-IN")}{" "}
+                            {receiptData.payment_detail?.currency}
+                          </span>
+                        </div>
+                        <div className="h-px bg-slate-200" />
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            Payment Mode
+                          </span>
+                          <span className="text-xs font-black uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
+                            {receiptData.payment_detail?.payment_mode}
+                          </span>
+                        </div>
+                        <div className="h-px bg-slate-200" />
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            Paid At
+                          </span>
+                          <span className="text-xs font-bold text-slate-600">
+                            {receiptData.payment_detail?.paid_at
+                              ? new Date(
+                                  receiptData.payment_detail.paid_at,
+                                ).toLocaleString("en-IN")
+                              : "—"}
+                          </span>
+                        </div>
+                        <div className="h-px bg-slate-200" />
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            Status
+                          </span>
+                          <span className="text-xs font-black uppercase tracking-wider text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+                            ✓ Paid
+                          </span>
+                        </div>
+                        {receiptData.payment_detail?.razorpay_payment_id && (
+                          <>
+                            <div className="h-px bg-slate-200" />
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                Payment ID
+                              </span>
+                              <span className="text-xs font-mono text-slate-500">
+                                {receiptData.payment_detail.razorpay_payment_id}
+                              </span>
+                            </div>
+                          </>
+                        )}
+                      </div>
 
-                  {/* Info note */}
-                  <div className="flex items-start gap-3 bg-indigo-50 border border-indigo-100 rounded-2xl px-4 py-3">
-                    <Shield
-                      size={15}
-                      className="text-indigo-500 shrink-0 mt-0.5"
-                    />
-                    <p className="text-xs text-indigo-600 font-medium leading-relaxed">
-                      Your official receipt has been generated. Download it for
-                      your records or collect it from the school office.
-                    </p>
-                  </div>
+                      {/* Documents */}
+                      {receiptData.documents?.length > 0 && (
+                        <div className="bg-slate-50 rounded-2xl p-4 space-y-2">
+                          <p className="text-xs font-black uppercase tracking-wider text-slate-400 mb-2">
+                            Documents Submitted
+                          </p>
+                          {receiptData.documents.map((doc: any) => (
+                            <div
+                              key={doc.id}
+                              className="flex items-center justify-between"
+                            >
+                              <span className="text-xs font-semibold text-slate-700">
+                                {doc.document_name}
+                              </span>
 
-                  {/* Action buttons */}
-                  <div className="flex gap-3 pt-1">
-                    <Button
-                      variant="outline"
-                      onClick={() => setReceiptChild(null)}
-                      className="flex-1 rounded-2xl h-11 font-bold border-slate-200 text-slate-600 hover:bg-slate-50 text-sm"
-                    >
-                      Close
-                    </Button>
-                    <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.97 }}
-                      className="flex-1"
-                    >
-                      <Button
-                        onClick={() => {
-                          window.open(
-                            `/receipts/${receiptChild.admission_number || receiptChild.id}.pdf`,
-                            "_blank",
-                          );
-                        }}
-                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl h-11 font-bold shadow-lg shadow-emerald-200 flex items-center justify-center gap-2 text-sm transition-all"
-                      >
-                        <svg
-                          width="15"
-                          height="15"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
+                              <a
+                                href={doc.file}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-indigo-600 font-bold hover:underline"
+                              >
+                                View
+                              </a>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Info note */}
+                      <div className="flex items-start gap-3 bg-indigo-50 border border-indigo-100 rounded-2xl px-4 py-3">
+                        <Shield
+                          size={15}
+                          className="text-indigo-500 shrink-0 mt-0.5"
+                        />
+                        <p className="text-xs text-indigo-600 font-medium leading-relaxed">
+                          Your official receipt has been generated. Download it
+                          for your records or collect it from the school office.
+                        </p>
+                      </div>
+
+                      {/* Action buttons */}
+                      <div className="flex gap-3 pt-1">
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setReceiptChild(null);
+                            setReceiptData(null);
+                          }}
+                          className="flex-1 rounded-2xl h-11 font-bold border-slate-200 text-slate-600 hover:bg-slate-50 text-sm"
                         >
-                          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
-                        </svg>
-                        Download Receipt
-                      </Button>
-                    </motion.div>
-                  </div>
+                          Close
+                        </Button>
+                        <motion.div
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.97 }}
+                          className="flex-1"
+                        >
+                          <Button
+                            onClick={() =>
+                              window.open(
+                                `/receipts/${receiptData.admission_number}.pdf`,
+                                "_blank",
+                              )
+                            }
+                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl h-11 font-bold shadow-lg shadow-emerald-200 flex items-center justify-center gap-2 text-sm transition-all"
+                          >
+                            <svg
+                              width="15"
+                              height="15"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                            </svg>
+                            Download Receipt
+                          </Button>
+                        </motion.div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-center py-8 text-slate-400 text-sm font-medium">
+                      Failed to load receipt.
+                    </div>
+                  )}
                 </div>
               </div>
             </motion.div>
@@ -514,7 +616,8 @@ function ChildrenList({
           const badgeClass =
             STATUS_STYLES[child.status] ??
             "bg-slate-100 text-slate-500 border border-slate-200";
-          const isPaid = child.pay_process === true; // ← ONLY true when pay_process is true
+          const isPaid =
+            child.pay_process === true && !!child.fee_data?.paid_at; // ← ONLY true when pay_process is true
 
           return (
             <motion.div
@@ -538,9 +641,10 @@ function ChildrenList({
               onClick={() => {
                 // ← KEY CHANGE: paid cards open receipt modal, not the form
                 if (isPaid) {
-                  setReceiptChild(child);
+                  handleReceiptOpen(child);
                   return;
                 }
+
                 const hasData = child?.sections?.some(
                   (s: any) => s?.field_values?.length > 0,
                 );
@@ -628,7 +732,7 @@ function ChildrenList({
                       className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-4 h-10 font-semibold text-sm flex items-center gap-2 shadow-md shadow-emerald-100 transition-all"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setReceiptChild(child); // ← open modal on button click too
+                        handleReceiptOpen(child);
                       }}
                     >
                       <svg

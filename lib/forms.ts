@@ -653,6 +653,7 @@ export async function verifyRazorPayment(payload: {
   razorpay_payment_id: string;
   razorpay_signature: string;
   admission_number: string;
+  pay_process?: boolean;  
 }) {
   const response = await fetchWithAuth(
     `${API_BASE_URL}${API_ENDPOINTS.PAYMENT_VERIFY}`,
@@ -681,6 +682,7 @@ export async function verifyRazorPayment(payload: {
 export async function createOfflinePayment(payload: {
   amount: number;
   admission_number: string;
+  pay_process?: boolean;
 }) {
   const response = await fetchWithAuth(
     `${API_BASE_URL}/offline/payment/`,
@@ -2739,3 +2741,15 @@ export function validateDiscountForm(data: {
   return errors;
 }
 
+
+export async function getAdmissionReceipt(admission_number: string) {
+  const response = await fetchWithAuth(
+    `${API_BASE_URL}/admission-receipt/${admission_number}/`,
+    { method: "GET" }
+  );
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data?.error || "Failed to fetch receipt");
+  }
+  return data;
+}

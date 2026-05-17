@@ -70,7 +70,6 @@ export interface AdmissionFormResponse extends AdmissionFormCreatePayload {
   id: number
   unique_link: string
   is_active: boolean
-  payment_mode?: "online" | "offline" | null;
 }
 
 export interface PublicField {
@@ -116,42 +115,6 @@ export const FIELD_TYPE_OPTIONS: BuilderOption[] = [
 ]
 
 export const PERSONAL_FIELD_TEMPLATES: FieldTemplate[] = [
-  { key: "aadhaar_number", label: "Aadhaar Number", type: "number", required: true },
-  { key: "student_full_name", label: "Student Full Name", type: "text", required: true },
-  { key: "date_of_birth", label: "Date of Birth", type: "date", required: true },
-  {
-    key: "gender",
-    label: "Gender",
-    type: "select",
-    required: true,
-    options: [
-      { label: "Male", value: "male" },
-      { label: "Female", value: "female" },
-      { label: "Other", value: "other" },
-    ],
-  },
-  {
-    key: "category",
-    label: "Category",
-    type: "select",
-    options: [
-      { label: "General", value: "general" },
-      { label: "OBC", value: "obc" },
-      { label: "SC", value: "sc" },
-      { label: "ST", value: "st" },
-    ],
-  },
-  { key: "blood_group", label: "Blood Group", type: "text" },
-  { key: "father_name", label: "Father's Name", type: "text", required: true },
-  { key: "mother_name", label: "Mother's Name", type: "text", required: true },
-  { key: "mobile_number", label: "Mobile Number", type: "text", required: true },
-  { key: "alternate_mobile_number", label: "Alternate Mobile Number", type: "text" },
-  { key: "email_address", label: "Email Address", type: "email" },
-  { key: "address_line", label: "Address Line", type: "text", required: true },
-  { key: "city_village", label: "City/Village", type: "text", required: true },
-  { key: "district", label: "District", type: "text", required: true },
-  { key: "state", label: "State", type: "text", required: true },
-  { key: "pincode", label: "Pincode", type: "text", required: true },
   {
     key: "applying_for_class",
     label: "Applying For Class",
@@ -188,22 +151,157 @@ export const PERSONAL_FIELD_TEMPLATES: FieldTemplate[] = [
       { label: "Class 12 Commerce", value: "class12_commerce" },
     ],
   },
-  { key: "previous_school_name", label: "Previous School Name", type: "text" },
-  { key: "previous_class", label: "Previous Class", type: "text" },
-  { key: "aadhaar_number", label: "Aadhaar Number", type: "number" },
-]
+
+  {
+    key: "surname",
+    label: "Surname",
+    type: "text",
+    required: true,
+  },
+
+  {
+    key: "student_name",
+    label: "Student Name",
+    type: "text",
+    required: true,
+  },
+
+  {
+    key: "father_name",
+    label: "Father Name",
+    type: "text",
+    required: true,
+  },
+
+  {
+    key: "mother_name",
+    label: "Mother Name",
+    type: "text",
+    required: true,
+  },
+
+  {
+    key: "date_of_birth",
+    label: "Date of Birth",
+    type: "date",
+    required: true,
+  },
+
+  {
+    key: "gender",
+    label: "Gender",
+    type: "select",
+    required: true,
+    options: [
+      { label: "Male", value: "male" },
+      { label: "Female", value: "female" },
+      { label: "Other", value: "other" },
+    ],
+  },
+
+  {
+    key: "category",
+    label: "Category",
+    type: "select",
+    options: [
+      { label: "General", value: "general" },
+      { label: "OBC", value: "obc" },
+      { label: "SC", value: "sc" },
+      { label: "ST", value: "st" },
+    ],
+  },
+
+  {
+    key: "aadhaar_number",
+    label: "Aadhaar Number",
+    type: "number",
+    required: true,
+  },
+
+  {
+    key: "blood_group",
+    label: "Blood Group",
+    type: "text",
+  },
+
+  {
+    key: "mobile_number",
+    label: "Mobile Number",
+    type: "text",
+    required: true,
+  },
+
+  {
+    key: "alternate_mobile_number",
+    label: "Alternate Mobile Number",
+    type: "text",
+  },
+
+  {
+    key: "email_address",
+    label: "Email Address",
+    type: "email",
+  },
+
+  {
+    key: "address_line",
+    label: "Address Line",
+    type: "text",
+    required: true,
+  },
+
+  {
+    key: "city_village",
+    label: "City / Village",
+    type: "text",
+    required: true,
+  },
+
+  {
+    key: "district",
+    label: "District",
+    type: "text",
+    required: true,
+  },
+
+  {
+    key: "state",
+    label: "State",
+    type: "text",
+    required: true,
+  },
+
+  {
+    key: "pincode",
+    label: "Pincode",
+    type: "text",
+    required: true,
+  },
+
+  {
+    key: "previous_school_name",
+    label: "Previous School Name",
+    type: "text",
+  },
+
+  {
+    key: "previous_class",
+    label: "Previous Class",
+    type: "text",
+  },
+];
 
 export const DOCUMENT_FIELD_TEMPLATES: FieldTemplate[] = [
   // { key: "aadhaar_card_number", label: "Aadhaar Card Number", type: "file", required: true },
   { key: "aadhaar_card_file", label: "Aadhaar Card File", type: "file", required: true },
-  { key: "birth_certificate_number", label: "Birth Certificate Number", type: "file", required: true },
+  { key: "birth_certificate", label: "Birth Certificate", type: "file", required: true },
   { key: "birth_certificate_file", label: "Birth Certificate File", type: "file", required: true },
-  { key: "school_leaving_certificate_number", label: "School Leaving Certificate Number", type: "file" },
+  { key: "school_leaving_certificate", label: "School Leaving Certificate", type: "file" },
   { key: "school_leaving_certificate_file", label: "School Leaving Certificate File", type: "file" },
   { key: "student_photo", label: "Student Photo", type: "file", required: true },
-  { key: "caste_certificate_number", label: "Caste Certificate Number", type: "file" },
+  { key: "caste_certificate", label: "Caste Certificate", type: "file" },
   { key: "caste_certificate_file", label: "Caste Certificate File", type: "file" },
-  { key: "income_certificate_number", label: "Income Certificate Number", type: "file" },
+  { key: "income_certificate", label: "Income Certificate Number", type: "file" },
   { key: "income_certificate_file", label: "Income Certificate File", type: "file" },
   {
     key: "address_proof_type",
