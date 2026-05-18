@@ -75,6 +75,7 @@ interface StaffMember {
   name: string;
   role: string;
   department: string;
+  category?: string;
   basic_salary: number;
   salary_generated: boolean;
   payment_status?: string;
@@ -503,15 +504,12 @@ const GenerateModal = ({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const data = await generateSalary(body as any);
       onSuccess(data);
-    } catch (e) {
+       } catch (e) {
       const msg =
-  e instanceof Error
-    ? e.message
-    : "Failed to generate salary.";
-
-setError(msg);
-
-showToast(msg, "error");
+        e instanceof Error
+          ? e.message
+          : "Failed to generate salary.";
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -538,10 +536,11 @@ showToast(msg, "error");
         const formatted = data.map((s: any) => ({
           id: s.id,
           name: s.name,
-          category: s.category, // ADD THIS
+          category: s.category,
           role: s.category,
           department: s.category,
           basic_salary: Number(s.salary || 0),
+          salary_generated: false,
         }));
 
         setStaffOptions(formatted);
@@ -824,13 +823,12 @@ export default function GenerateSalaryPage() {
     msg: string;
     type: "success" | "error";
   } | null>(null);
-  const showToast = (msg: string, type: "success" | "error") => {
+  const showToast = useCallback((msg: string, type: "success" | "error") => {
     setToast({ msg, type });
-
     setTimeout(() => {
       setToast(null);
     }, 3000);
-  };
+  }, []);
 
   // ── GET /api/staff-salary-payment/?salary_month=YYYY-MM ────────────────────
   const fetchStaff = useCallback(async (month: string, isRefresh = false) => {
@@ -873,17 +871,14 @@ export default function GenerateSalaryPage() {
   }, [salaryMonth, fetchStaff]);
   // ── POST success: update row + open receipt modal with real backend data ───
   const handleSuccess = useCallback((data: SalaryPayment) => {
-  setStaffList((prev) => [transformStaff(data), ...prev]);
-
-  setSelectedStaff(null);
-
-  setReceiptData(data);
-
-  showToast(
-    `Salary generated successfully for ${data.staff_name}`,
-    "success",
-  );
-}, []);
+    setStaffList((prev) => [transformStaff(data), ...prev]);
+    setSelectedStaff(null);
+    setReceiptData(data);
+    showToast(
+      `Salary generated successfully for ${data.staff_name}`,
+      "success",
+    );
+  }, [showToast]);
 
   // ── Stats ────────────────────────────────────────────────────────────────────
   const stats = useMemo(() => {
@@ -962,37 +957,37 @@ export default function GenerateSalaryPage() {
   // ─────────────────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-slate-50">
-        <AnimatePresence>
-  {toast && (
-    <motion.div
-      initial={{ opacity: 0, y: -16, scale: 0.96 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -12, scale: 0.96 }}
-      className="fixed top-5 right-5 z-50 flex items-center gap-3 rounded-2xl px-5 py-3.5 shadow-2xl"
-      style={
-        toast.type === "success"
-          ? {
-              background: "#052e16",
-              color: "white",
-              border: "1px solid #166534",
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: -16, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -12, scale: 0.96 }}
+            className="fixed top-5 right-5 z-50 flex items-center gap-3 rounded-2xl px-5 py-3.5 shadow-2xl"
+            style={
+              toast.type === "success"
+                ? {
+                    background: "#052e16",
+                    color: "white",
+                    border: "1px solid #166534",
+                  }
+                : {
+                    background: "#450a0a",
+                    color: "white",
+                    border: "1px solid #991b1b",
+                  }
             }
-          : {
-              background: "#450a0a",
-              color: "white",
-              border: "1px solid #991b1b",
-            }
-      }
-    >
-      {toast.type === "success" ? (
-        <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-      ) : (
-        <AlertCircle className="h-4 w-4 text-red-400 shrink-0" />
-      )}
+          >
+            {toast.type === "success" ? (
+              <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+            ) : (
+              <AlertCircle className="h-4 w-4 text-red-400 shrink-0" />
+            )}
 
-      <p className="text-xs font-bold">{toast.msg}</p>
-    </motion.div>
-  )}
-</AnimatePresence>
+            <p className="text-xs font-bold">{toast.msg}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* ── Page Header — NOT sticky ── */}
       <div className="bg-white border-b border-slate-100 px-6 py-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

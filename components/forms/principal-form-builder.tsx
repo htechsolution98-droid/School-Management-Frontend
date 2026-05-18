@@ -7,27 +7,21 @@ import {
   ChevronLeft,
   ChevronRight,
   Copy,
-  CreditCard,
   FileStack,
   Loader2,
   Plus,
   Settings2,
-  Sparkles,
   Trash2,
-  Eye,
   School,
-  Users,
   FileText,
   GraduationCap,
   Calendar,
   Mail,
   Phone,
-  MapPin,
   Upload,
   Check,
   AlertCircle,
   ArrowRight,
-  Save,
   Send,
 } from "lucide-react";
 
@@ -62,7 +56,6 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -165,7 +158,7 @@ function toPayloadFields(
   fields: ConfiguredField[],
 ): AdmissionFormFieldPayload[] {
   return fields
-    .filter((field) => field.selected)
+    .filter((field): field is ConfiguredField => field.selected)
     .map((field, index) => {
       const isSelect = field.type === "select";
       const validOptions = isSelect
@@ -185,7 +178,7 @@ function toPayloadFields(
         map_to_student_field: STUDENT_FIELD_MAPPING[field.key] || null,
 
         ...(field.key === "applying_for_class"
-          ? { options: null }
+          ? {} // just omit options entirely instead of setting null
           : field.type === "select" && validOptions.length > 0
             ? { options: validOptions }
             : {}),
@@ -482,6 +475,13 @@ function FieldCard({
   );
 }
 
+type Section = {
+  id: number;
+  title: string;
+  order: number;
+  fields: ConfiguredField[];
+};
+
 export default function PrincipalFormBuilder({
   onSuccess,
 }: {
@@ -497,18 +497,6 @@ export default function PrincipalFormBuilder({
 
   const [documentSectionTitle, setDocumentSectionTitle] =
     useState("Required Documents");
-  // const [personalFields, setPersonalFields] = useState(
-  //   PERSONAL_FIELD_TEMPLATES.map((field, index) =>
-  //     cloneField(createConfiguredField(field), index),
-  //   ),
-  // );
-  // new add this for the dynamic section
-  type Section = {
-    id: number;
-    title: string;
-    order: number;
-    fields: ConfiguredField[];
-  };
 
   const [sections, setSections] = useState<Section[]>([
     {
@@ -538,12 +526,16 @@ export default function PrincipalFormBuilder({
       }),
     },
   ]);
-  const [documentFields, setDocumentFields] = useState(
+  const [documentFields, setDocumentFields] = useState<ConfiguredField[]>(
     DOCUMENT_FIELD_TEMPLATES.map((field, index) =>
       cloneField(createConfiguredField(field), index),
     ),
   );
+
   const [feesEnabled, setFeesEnabled] = useState(false);
+  const [paymentMode, setPaymentMode] = useState<"online" | "offline">(
+    "online",
+  );
   const [feeType, setFeeType] = useState<"general" | "individual">("general");
   const [feesAmount, setFeesAmount] = useState("");
   const [individualFees, setIndividualFees] = useState<Record<number, string>>(
@@ -557,9 +549,6 @@ export default function PrincipalFormBuilder({
   );
   const [classes, setClasses] = useState<SchoolClass[]>([]);
 
-  const [selectedClasses, setSelectedClasses] = useState<
-    { id: number; school_class: string }[]
-  >([]);
   useEffect(() => {
     async function fetchClasses() {
       try {
@@ -622,14 +611,6 @@ export default function PrincipalFormBuilder({
           });
           setIndividualFees(initialFees);
 
-          // Map to options format
-          const classOptions = sortedData.map((cls) => ({
-            label: cls.school_class
-              .replace(/_/g, " ")
-              .replace(/\b\w/g, (l) => l.toUpperCase()),
-            value: cls.school_class,
-          }));
-
           // Update initial personal fields if they contain the class selector
           // setPersonalFields((current) =>
           //   current.map((field) => {
@@ -660,8 +641,6 @@ export default function PrincipalFormBuilder({
       .filter((field) => field.selected)
       .map((field) => field.label.trim());
 
-    const feesNum =
-      feesEnabled && feesAmount.trim() ? Number(feesAmount.trim()) : 0;
     const formTitle = `${title.trim()} ${academicYear}`.trim();
 
     return {
@@ -674,6 +653,7 @@ export default function PrincipalFormBuilder({
         `Admission form for academic year ${academicYear}`,
       unique_link: slugify(formTitle),
       fee_type: feeType,
+      payment_mode: feesEnabled ? paymentMode : null,
       sections: formattedSections,
       document_fields,
       fee_structures_input:
@@ -777,15 +757,10 @@ export default function PrincipalFormBuilder({
     }
   };
 
-  const copyPayload = async () => {
-    await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
-  };
-
   const updateFieldList = (
-    section: "documents",
     updater: (fields: ConfiguredField[]) => ConfiguredField[],
-  ) => {
-    setDocumentFields((current) => updater(current));
+  ): void => {
+    setDocumentFields((current: ConfiguredField[]) => updater(current));
   };
 
   const updateSectionFields = (
@@ -1150,7 +1125,7 @@ export default function PrincipalFormBuilder({
                         variant="outline"
                         size="sm"
                         onClick={() =>
-                          updateFieldList("documents", (fields) => [
+                          updateFieldList((fields) => [
                             ...fields,
                             createCustomField(
                               "documents",
@@ -1174,7 +1149,7 @@ export default function PrincipalFormBuilder({
                           key={field.id || `document-field-${index}`}
                           field={field}
                           onToggle={(checked) =>
-                            updateFieldList("documents", (fields) =>
+                            updateFieldList((fields) =>
                               fields.map((item) =>
                                 item.id === field.id
                                   ? { ...item, selected: checked }
@@ -1183,7 +1158,7 @@ export default function PrincipalFormBuilder({
                             )
                           }
                           onChange={(nextField) =>
-                            updateFieldList("documents", (fields) =>
+                            updateFieldList((fields) =>
                               fields.map((item) =>
                                 item.id === field.id
                                   ? {
@@ -1198,7 +1173,7 @@ export default function PrincipalFormBuilder({
                           onRemove={
                             field.custom
                               ? () =>
-                                  updateFieldList("documents", (fields) =>
+                                  updateFieldList((fields) =>
                                     fields.filter(
                                       (item) => item.id !== field.id,
                                     ),
@@ -1268,6 +1243,38 @@ export default function PrincipalFormBuilder({
                             >
                               Individual Fees
                             </button>
+                          </div>
+                          {/* Payment Mode */}
+                          <div className="space-y-1.5">
+                            <Label className="text-xs font-medium text-slate-600">
+                              Payment Mode
+                            </Label>
+                            <div className="flex bg-muted p-1 rounded-lg w-full max-w-[300px]">
+                              <button
+                                type="button"
+                                onClick={() => setPaymentMode("online")}
+                                className={cn(
+                                  "flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all",
+                                  paymentMode === "online"
+                                    ? "bg-white text-foreground shadow-sm"
+                                    : "text-muted-foreground hover:text-foreground",
+                                )}
+                              >
+                                Online (Razorpay)
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setPaymentMode("offline")}
+                                className={cn(
+                                  "flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all",
+                                  paymentMode === "offline"
+                                    ? "bg-white text-foreground shadow-sm"
+                                    : "text-muted-foreground hover:text-foreground",
+                                )}
+                              >
+                                Offline (Cash)
+                              </button>
+                            </div>
                           </div>
 
                           {feeType === "general" ? (

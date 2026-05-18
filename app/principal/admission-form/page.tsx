@@ -135,7 +135,7 @@ function FormDetailsModal({
                 <div className="divide-y">
                   {(section.fields || []).map((field, index) => (
                     <div
-                      key={field.id || `field-${index}`}
+                      key={`field-${index}`}
                       className="flex items-center gap-3 px-4 py-3 group hover:bg-slate-50 transition-colors"
                     >
                       <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-600 shrink-0">
@@ -360,7 +360,12 @@ function FormTableRow({
 function PublishedLinkCard({ link }: { link: string }) {
   const uniqueLink = link.split("/").filter(Boolean).pop();
 
-  const frontendLink = `${window.location.origin}/form/${uniqueLink}`;
+    const [origin, setOrigin] = useState("");
+  useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
+  const frontendLink = `${origin}/form/${uniqueLink}`;
+
 
   const [copied, setCopied] = useState(false);
 
@@ -372,31 +377,10 @@ function PublishedLinkCard({ link }: { link: string }) {
   };
 
   // add this function
-  const handlePreviewForm = async () => {
-    try {
-      const token = localStorage.getItem("access");
-
-      const response = await fetch(link, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await response.json();
-
-      // STORE DATA
-      localStorage.setItem("school_id", data.school_id.toString());
-
-      localStorage.setItem("school_slug", data.school_slug);
-
-      // REDIRECT
-      window.location.href = `${window.location.origin}/signup`;
-    } catch (error) {
-      console.error("Failed to fetch school data", error);
-
-      toast.error("Failed to open form");
-    }
-  };
+  const handlePreviewForm = () => {
+  if (!frontendLink) return;
+  window.open(frontendLink, "_blank");
+};
 
   if (!link) return null;
 

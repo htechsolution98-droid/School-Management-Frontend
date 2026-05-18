@@ -182,13 +182,38 @@ export async function getPublishedFormLink(): Promise<{ form_link: string }> {
 
   if (data.form_link && data.form_link.startsWith("/")) {
     const baseUrl = (API_BASE_URL || "").endsWith("/")
-      ? API_BASE_URL.slice(0, -1)
-      : API_BASE_URL
+  ? (API_BASE_URL || "").slice(0, -1)
+  : (API_BASE_URL || "")
 
     data.form_link = `${baseUrl}${data.form_link}`
   }
 
   return data
+}
+
+// ─── Principal Dashboard ──────────────────────────────────────────────────────
+
+export interface DashboardCount {
+  total_student: number;
+  total_staff: number;
+  admission_not_complete: number;
+}
+
+export async function fetchDashboardCount(): Promise<DashboardCount> {
+  const response = await fetchWithAuth(
+    `${API_BASE_URL}${API_ENDPOINTS.DASHBOARD_COUNT}`
+  );
+
+  if (!response.ok) {
+    let message = "Failed to fetch dashboard data.";
+    try {
+      const err = await response.json();
+      message = err?.detail || err?.message || message;
+    } catch {}
+    throw new Error(message);
+  }
+
+  return response.json();
 }
 
 export async function saveSchoolClasses(classes: string[]): Promise<void> {
@@ -221,7 +246,7 @@ export interface Division {
 }
 
 export async function getDivisions(): Promise<Division[]> {
-  const url = `${API_BASE_URL}${API_ENDPOINTS.DIVISION_LIST}`
+  const url = `${API_BASE_URL}${API_ENDPOINTS.DIVISION_SET}`
   const response = await fetchWithAuth(url)
 
   if (!response.ok) {
@@ -563,63 +588,36 @@ export async function submitDocuments(payload: {
   documents: { document_field: number; file: File }[];
 }): Promise<any> {
   const formData = new FormData();
+  formData.append("admission_number", payload.admission_number);
 
-  // Admission Number
-  formData.append(
-    "admission_number",
-    payload.admission_number
-  );
-
-  // Documents
-  payload.documents.forEach((doc, index) => {
-    formData.append(
-      `documents[${index}][document_field]`,
-      String(doc.document_field)
-    );
-
-    formData.append(
-      `documents[${index}][file]`,
-      doc.file
-    );
+  payload.documents.forEach((doc) => {
+    formData.append("document_field", String(doc.document_field));
+    formData.append("file", doc.file);
   });
 
-  // API Call
   const response = await fetchWithAuth(
-    `${process.env.NEXT_PUBLIC_API_URL}/documentsubmission/`,
+    `${API_BASE_URL}/documentsubmission/`,
     {
       method: "POST",
       body: formData,
     }
   );
 
-  // Response Data
-  const data = await response.json();
-
-  // Error Handling
   if (!response.ok) {
-    if (data?.message === "Admission number is required") {
-      throw new Error("Admission number is required");
-    }
-
-    if (data?.message === "Admission not found") {
-      throw new Error("Admission not found");
-    }
-
-    throw new Error(
-      data?.message ||
-      data?.detail ||
-      "Failed to submit documents"
-    );
+    let message = "Document submission failed";
+    try {
+      const err = await response.json();
+      message = err?.detail || err?.message || message;
+    } catch {}
+    throw new Error(message);
   }
 
-  // Success
-  if (data?.message === "Documents uploaded successfully") {
-    return data;
-  }
-
-  return data;
+  const data = await response.json();
+  // console.log("SUBMIT DOCUMENTS RESPONSE:", data); // ← check what comes back
+  
+  // handle if response is array, take first item
+  return Array.isArray(data) ? data[0] : data;
 }
-
 
 export async function createRazorOrder(payload: {
   amount: number;
@@ -627,12 +625,13 @@ export async function createRazorOrder(payload: {
 }) {
   const response = await fetchWithAuth(
     `${API_BASE_URL}${API_ENDPOINTS.RAZOR_ORDER}`,
-    {
+     {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        admission_number: payload.admission_number,
+        amount: payload.amount * 100,  // ← convert rupees → paise
+      }),
     }
   );
 
@@ -656,6 +655,7 @@ export async function verifyRazorPayment(payload: {
   razorpay_payment_id: string;
   razorpay_signature: string;
   admission_number: string;
+  pay_process?: boolean;  
 }) {
   const response = await fetchWithAuth(
     `${API_BASE_URL}${API_ENDPOINTS.PAYMENT_VERIFY}`,
@@ -684,6 +684,7 @@ export async function verifyRazorPayment(payload: {
 export async function createOfflinePayment(payload: {
   amount: number;
   admission_number: string;
+  pay_process?: boolean;
 }) {
   const response = await fetchWithAuth(
     `${API_BASE_URL}/offline/payment/`,
@@ -1469,7 +1470,7 @@ export async function getTimetable(
   params.set("class_division", String(classDivision));
   if (day) params.set("day", day);
 
-  const url = `${API_BASE_URL}/api/timetable/?${params.toString()}`;
+  const url = `${API_BASE_URL}/timetable/${params.toString() ? `?${params.toString()}` : ""}`;
   const response = await fetchWithAuth(url);
 
   if (!response.ok) {
@@ -1740,45 +1741,6 @@ export async function submitHomework(
 // They use the same `fetchWithAuth`, `API_BASE_URL` already in that file.
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
-export interface HomeworkItem {
-  id: number;
-  school: number;
-  division: number;
-  division_name: string;
-  school_class_name: string;
-  teacher: number;
-  teacher_name: string;
-  title: string;
-  description: string;
-  assigned_date: string;   // "2026-05-15"
-  due_date: string;        // "2026-05-20"
-  attachment: string | null;
-  is_active: boolean;
-  submission_count: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface HomeworkSubmission {
-  id: number;
-  school: number;
-  homework: number;
-  homework_title: string;
-  student: number;
-  student_name: string;
-  attachment: string | null;
-  submitted_at: string;       // ISO datetime
-  submission_date: string;    // "2026-05-15"
-  status: "pending" | "submitted" | "late" | "checked";
-  marks: number | null;
-  teacher_remark: string | null;
-  checked_by: number | null;
-  checked_at: string | null;
-  created_at: string;
-  updated_at: string;
-}
 
 // ─── GET /homework/ — list all homework for this teacher ─────────────────────
 
@@ -1966,9 +1928,11 @@ export interface AcademicYear {
   name: string;
   start_month: number;
   end_month: number;
-  billing_periods: string[];   // ["2026-04", "2026-05", ...]
+  billing_periods: string[];
+  is_active?: boolean;          // ← add this
   status?: "Active" | "Completed" | "Upcoming";
 }
+
 
 // GET /api/academic-year/
 export async function getAcademicYears(): Promise<AcademicYear[]> {
@@ -2140,14 +2104,14 @@ export async function deleteFeeType(id: number): Promise<void> {
     throw new Error(message);
   }
 }
-export const feeTypeSchema = z.object({   // ← ADD THIS ENTIRE BLOCK
+export const feeTypeSchema = z.object({
   name: z
     .string()
     .min(1, "Fee type name is required")
     .max(100, "Name must be 100 characters or less"),
   billing_cycle: z.enum(
     ["single", "monthly", "quarterly", "half_yearly", "yearly"],
-    { required_error: "Please select a billing cycle" }
+    { error: "Please select a billing cycle" }  //  Zod v4 syntax
   ),
 })
 
@@ -2167,6 +2131,7 @@ export interface FeeWiseClass {
   school_class: number;
   school_class_name: string;
   amount: string;
+
   late_fee_enabled: boolean;
   grace_days: number | null;
   late_fee_type: LateFeeType | null;
@@ -2189,16 +2154,21 @@ export interface StudentFee {
   id: number;
   student: number;
   student_name: string;
+  student_surname: string | null;
   academic_year: number;
+  academic_year_name: string;        
   fee_wise_class: number;
+  fee_wise_class_name: string;        
   feetype_name: string;
+  class_name: string;                 
   billing_period: string;
   due_date: string;
   amount: string;
-  discount_amount: string | null;
+  payable_amount: string;              
+  discount_amount: string;             
   discount_reference: string | null;
   discount_note: string | null;
-  status: "pending" | "paid" | "overdue" | "partial";
+  status: "paid" | "unpaid" | "partially_paid" | "overdue";
 }
 
 export interface StudentFeePayload {
@@ -2460,4 +2430,328 @@ export async function getExistingStudentFees(filters: {
  
   const data = await response.json();
   return Array.isArray(data) ? data : (data.results ?? data.data ?? []);
+}
+
+// Types
+export interface Student {
+  id: number;
+  surname: string | null;
+  name: string;
+  father_name: string;
+  mother_name: string;
+  school_class: number | null;
+  class_name?: string;
+}
+
+export interface CreateSingleFeePayload {
+  student: number;
+  academic_year: number;
+  fee_wise_class: number;
+  billing_period: string;
+  due_date: string;
+}
+
+// ─── Student Fee Page - Fee Generation APIs ───────────────────────────────────
+// These use fetchWithAuth to send Bearer token automatically
+
+
+export interface CreateMonthlyFeePayload {
+  student: number;
+  academic_year: number;
+  fee_wise_class: number;
+  billing_period: string;
+  due_date: string;
+}
+export interface ApiResponse<T> {
+  data: T | null;
+  error: string | null;
+  success: boolean;
+}
+
+// ─── Fetch all students ───────────────────────────────────────────────────────
+export async function fetchStudents(): Promise<ApiResponse<Student[]>> {
+  try {
+    const response = await fetchWithAuth(`${API_BASE_URL}/studentget/`);
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err?.detail || `Failed to fetch students: ${response.statusText}`);
+    }
+    const data = await response.json();
+    return { data, error: null, success: true };
+  } catch (error) {
+    return {
+      data: null,
+      error: error instanceof Error ? error.message : "Failed to fetch students",
+      success: false,
+    };
+  }
+}
+
+// ─── Fetch academic years (with auth) ────────────────────────────────────────
+export async function fetchAcademicYearsForFee(): Promise<ApiResponse<AcademicYear[]>> {
+  try {
+    const response = await fetchWithAuth(`${API_BASE_URL}/academic-year/`);
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err?.detail || `Failed to fetch academic years: ${response.statusText}`);
+    }
+    const data = await response.json();
+    const list = Array.isArray(data) ? data : (data.results ?? data.data ?? []);
+    return { data: list, error: null, success: true };
+  } catch (error) {
+    return {
+      data: null,
+      error: error instanceof Error ? error.message : "Failed to fetch academic years",
+      success: false,
+    };
+  }
+}
+
+// ─── Fetch fee wise classes (with auth) ──────────────────────────────────────
+export async function fetchFeeWiseClassesForFee(): Promise<ApiResponse<FeeWiseClass[]>> {
+  try {
+    const response = await fetchWithAuth(`${API_BASE_URL}${API_ENDPOINTS.FEE_WISE_CLASS}`);
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err?.detail || `Failed to fetch fee structures: ${response.statusText}`);
+    }
+    const data = await response.json();
+    const list = Array.isArray(data) ? data : (data.results ?? data.data ?? []);
+    return { data: list, error: null, success: true };
+  } catch (error) {
+    return {
+      data: null,
+      error: error instanceof Error ? error.message : "Failed to fetch fee structures",
+      success: false,
+    };
+  }
+}
+
+// ─── Fetch all student fees (with auth) ──────────────────────────────────────
+export async function fetchStudentFees(params?: {
+  class_name?: string;
+  billing_period?: string;
+  search?: string;
+  page?: number;
+}): Promise<ApiResponse<{ results: StudentFee[]; count: number }>> {
+  try {
+    const queryParams = new URLSearchParams();
+    if (params?.class_name) queryParams.append("class_name", params.class_name);
+    if (params?.billing_period) queryParams.append("billing_period", params.billing_period);
+    if (params?.search) queryParams.append("search", params.search);
+    if (params?.page) queryParams.append("page", params.page.toString());
+
+    const url = `${API_BASE_URL}/student-fee/${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+    const response = await fetchWithAuth(url);
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err?.detail || `Failed to fetch student fees: ${response.statusText}`);
+    }
+    const data = await response.json();
+
+    if (Array.isArray(data)) {
+      return { data: { results: data, count: data.length }, error: null, success: true };
+    }
+    return {
+      data: {
+        results: data.results ?? data.data ?? [],
+        count: data.count ?? data.total ?? 0,
+      },
+      error: null,
+      success: true,
+    };
+  } catch (error) {
+    return {
+      data: null,
+      error: error instanceof Error ? error.message : "Failed to fetch student fees",
+      success: false,
+    };
+  }
+}
+
+// ─── Create monthly student fee (with auth) ───────────────────────────────────
+export async function createMonthlyStudentFee(
+  payload: CreateMonthlyFeePayload
+): Promise<ApiResponse<StudentFee>> {
+  try {
+    const response = await fetchWithAuth(`${API_BASE_URL}/student-fee/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.detail || errorData.message || `Failed to create fee: ${response.statusText}`
+      );
+    }
+    const data = await response.json();
+    return { data, error: null, success: true };
+  } catch (error) {
+    return {
+      data: null,
+      error: error instanceof Error ? error.message : "Failed to create monthly fee",
+      success: false,
+    };
+  }
+}
+
+// ─── Create single student fee (with auth) ────────────────────────────────────
+export async function createSingleStudentFee(
+  payload: CreateSingleFeePayload
+): Promise<ApiResponse<StudentFee>> {
+  try {
+    const response = await fetchWithAuth(`${API_BASE_URL}/student-fee/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...payload, billing_period: "" }),
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.detail || errorData.message || `Failed to create fee: ${response.statusText}`
+      );
+    }
+    const data = await response.json();
+    return { data, error: null, success: true };
+  } catch (error) {
+    return {
+      data: null,
+      error: error instanceof Error ? error.message : "Failed to create single fee",
+      success: false,
+    };
+  }
+}
+
+// ─── Add discount to student fee (with auth) ──────────────────────────────────
+export async function addDiscountToStudentFee(
+  feeId: number,
+  payload: DiscountPayload
+): Promise<ApiResponse<StudentFee>> {
+  try {
+    const response = await fetchWithAuth(`${API_BASE_URL}/student-fee/${feeId}/`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.detail || errorData.message || `Failed to apply discount: ${response.statusText}`
+      );
+    }
+    const data = await response.json();
+    return { data, error: null, success: true };
+  } catch (error) {
+    return {
+      data: null,
+      error: error instanceof Error ? error.message : "Failed to add discount",
+      success: false,
+    };
+  }
+}
+
+// ─── Delete student fee (with auth) ──────────────────────────────────────────
+export async function deleteStudentFee(feeId: number): Promise<ApiResponse<null>> {
+  try {
+    const response = await fetchWithAuth(`${API_BASE_URL}/student-fee/${feeId}/`, {
+      method: "DELETE",
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err?.detail || `Failed to delete fee: ${response.statusText}`);
+    }
+    return { data: null, error: null, success: true };
+  } catch (error) {
+    return {
+      data: null,
+      error: error instanceof Error ? error.message : "Failed to delete fee",
+      success: false,
+    };
+  }
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+export function formatCurrency(amount: string | number): string {
+  const num = typeof amount === "string" ? parseFloat(amount) : amount;
+  if (isNaN(num)) return "₹0.00";
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    minimumFractionDigits: 2,
+  }).format(num);
+}
+
+export function formatBillingPeriod(period: string): string {
+  if (!period) return "—";
+  const [year, month] = period.split("-");
+  const date = new Date(parseInt(year), parseInt(month) - 1);
+  return date.toLocaleDateString("en-IN", { month: "short", year: "numeric" });
+}
+
+export function getUniqueClasses(students: Student[]): string[] {
+  const classes = students
+    .filter((s) => s.class_name)
+    .map((s) => s.class_name as string);
+  return [...new Set(classes)].sort();
+}
+
+// ─── Form Validators ──────────────────────────────────────────────────────────
+export function validateMonthlyFeeForm(data: {
+  student: string;
+  academic_year: string;
+  fee_wise_class: string;
+  billing_period: string;
+  due_date: string;
+}): Record<string, string> {
+  const errors: Record<string, string> = {};
+  if (!data.student) errors.student = "Student is required";
+  if (!data.academic_year) errors.academic_year = "Academic year is required";
+  if (!data.fee_wise_class) errors.fee_wise_class = "Fee structure is required";
+  if (!data.billing_period) errors.billing_period = "Billing period is required";
+  if (!data.due_date) errors.due_date = "Due date is required";
+  return errors;
+}
+
+export function validateSingleFeeForm(data: {
+  student: string;
+  academic_year: string;
+  fee_wise_class: string;
+  due_date: string;
+}): Record<string, string> {
+  const errors: Record<string, string> = {};
+  if (!data.student) errors.student = "Student is required";
+  if (!data.academic_year) errors.academic_year = "Academic year is required";
+  if (!data.fee_wise_class) errors.fee_wise_class = "Fee structure is required";
+  if (!data.due_date) errors.due_date = "Due date is required";
+  return errors;
+}
+
+export function validateDiscountForm(data: {
+  discount_amount: string;
+  discount_reference: string;
+  discount_note: string;
+}): Record<string, string> {
+  const errors: Record<string, string> = {};
+  if (!data.discount_amount) {
+    errors.discount_amount = "Discount amount is required";
+  } else if (isNaN(parseFloat(data.discount_amount)) || parseFloat(data.discount_amount) <= 0) {
+    errors.discount_amount = "Enter a valid discount amount";
+  }
+  if (!data.discount_reference) errors.discount_reference = "Reference is required";
+  return errors;
+}
+
+
+export async function getAdmissionReceipt(admission_number: string) {
+  const response = await fetchWithAuth(
+    `${API_BASE_URL}/admission-receipt/${admission_number}/`,
+    { method: "GET" }
+  );
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data?.error || "Failed to fetch receipt");
+  }
+  return data;
 }

@@ -5,7 +5,7 @@ import { Users, LayoutDashboard } from "lucide-react";
 
 const sidebarLinks = [
   { title: "Staff", href: "/trustee", icon: Users },
-  { title: "Overview", href: "/trustee/dashboard", icon: LayoutDashboard },
+  // { title: "Overview", href: "/trustee/dashboard", icon: LayoutDashboard },
 ];
 
 export default function TrusteeLayout({ children }: { children: React.ReactNode }) {

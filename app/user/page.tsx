@@ -13,7 +13,7 @@ import {
   CreditCard,
   CheckCircle2,
   Upload,
-Sparkles,
+  Sparkles,
   Shield,
   AlertCircle,
 } from "lucide-react";
@@ -28,6 +28,7 @@ import {
   createRazorOrder,
   verifyRazorPayment,
   createOfflinePayment,
+  getAdmissionReceipt,
 } from "@/lib/forms";
 import { submitDocuments } from "@/lib/forms";
 
@@ -84,13 +85,15 @@ export default function AdmissionPortal() {
           )?.value || "Student",
         grade: `Form ${item.form}`,
         status: item.status,
-        lastUpdated: "Recently",
         fee_data: item.fee_data ?? null,
-        progress: item.fee_data
-          ? 100
-          : item.sections?.some((s: any) => s?.field_values?.length > 0)
-            ? 65
-            : 35,
+        pay_process: item.pay_process ?? false,
+        lastUpdated: "Recently",
+        progress:
+          item.pay_process && item.fee_data?.paid_at
+            ? 100
+            : item.sections?.some((s: any) => s?.field_values?.length > 0)
+              ? 65
+              : 35,
         sections: item.sections,
       }));
       setChildren(formattedData);
@@ -107,7 +110,6 @@ export default function AdmissionPortal() {
     fetchData();
   }, []);
 
-  // ✅ handleBack is now at the TOP LEVEL of AdmissionPortal — not inside handlePaymentSuccess
   const handleBack = async () => {
     setSelectedChild(null);
     await fetchData();
@@ -119,14 +121,15 @@ export default function AdmissionPortal() {
       prev.map((c) =>
         c.admission_number === paidAdmissionNumber
           ? {
-            ...c,
-            fee_data: {
-              amount: 0,
-              payment_mode: "online",
-              paid_at: new Date().toISOString(),
-            },
-            progress: 100,
-          }
+              ...c,
+              fee_data: {
+                amount: 0,
+                payment_mode: "online",
+                paid_at: new Date().toISOString(),
+              },
+              pay_process: true,
+              progress: 100,
+            }
           : c,
       ),
     );
@@ -147,27 +150,18 @@ export default function AdmissionPortal() {
             )?.value || "Student",
           grade: `Form ${item.form}`,
           status: item.status,
-          fee_data: item.fee_data,
+          fee_data: item.fee_data ?? null,
+          pay_process: item.pay_process ?? false,
           lastUpdated: "Recently",
-          progress: item.fee_data
-            ? 100
-            : item.sections?.some((s: any) => s?.field_values?.length > 0)
-              ? 65
-              : 35,
+          progress:
+            item.pay_process && item.fee_data?.paid_at
+              ? 100
+              : item.sections?.some((s: any) => s?.field_values?.length > 0)
+                ? 65
+                : 35,
           sections: item.sections,
         }));
-        setChildren(
-          formattedData.map((fresh: any) => {
-            if (fresh.admission_number === paidAdmissionNumber) {
-              return {
-                ...fresh,
-                fee_data: fresh.fee_data ?? { payment_status: "completed" },
-                progress: 100,
-              };
-            }
-            return fresh;
-          }),
-        );
+        setChildren(formattedData);
       } catch (error) {
         console.log(error);
       }
@@ -241,6 +235,201 @@ const STATUS_STYLES: Record<string, string> = {
   completed: "bg-emerald-50 text-emerald-600 border border-emerald-200", // ← ADD
 };
 
+const generateReceiptPDF = (data: any) => {
+  // dynamic import to avoid SSR issues in Next.js
+  import("jspdf").then(({ default: jsPDF }) => {
+    import("jspdf-autotable").then(({ default: autoTable }) => {
+      const doc = new jsPDF();
+      const pageW = doc.internal.pageSize.getWidth();
+      const left = 14;
+
+      const fmt = (d: string) =>
+        d
+          ? new Date(d).toLocaleString("en-IN", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "—";
+
+      // ── Header ─────────────────────────────────────────
+      doc.setFontSize(20);
+      doc.setFont("helvetica", "bold");
+      doc.text("SCHOOL ADMISSION FORM", pageW / 2, 18, { align: "center" });
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      doc.text(data.form_title ?? "", pageW / 2, 25, { align: "center" });
+
+      // ── ADMISSION RECEIPT box ──────────────────────────
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.rect(55, 30, 100, 9);
+      doc.text("ADMISSION RECEIPT", pageW / 2, 37, { align: "center" });
+
+      // ── Info rows ──────────────────────────────────────
+      doc.setFontSize(9.5);
+      let y = 48;
+      const gap = 7;
+      const col2 = 70,
+        col3 = 115,
+        col4 = 148;
+
+      const row = (l1: string, v1: string, l2?: string, v2?: string) => {
+        doc.setFont("helvetica", "bold");
+        doc.text(l1, left, y);
+        doc.setFont("helvetica", "normal");
+        doc.text(`: ${v1}`, col2, y);
+        if (l2 && v2) {
+          doc.setFont("helvetica", "bold");
+          doc.text(l2, col3, y);
+          doc.setFont("helvetica", "normal");
+          doc.text(`: ${v2}`, col4, y);
+        }
+        y += gap;
+      };
+
+      row(
+        "Admission Number",
+        data.admission_number ?? "",
+        "Form Title",
+        data.form_title ?? "",
+      );
+      row(
+        "Status",
+        data.status
+          ? data.status.charAt(0).toUpperCase() + data.status.slice(1)
+          : "",
+      );
+      row(
+        "Pay Process",
+        data.pay_process ? "Yes" : "No",
+        "Username",
+        data.temp_user_data?.username ?? "",
+      );
+      row(
+        "Fee Amount",
+        data.fee_amount
+          ? `Rs. ${parseFloat(data.fee_amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`
+          : "—",
+        "Email",
+        data.temp_user_data?.email ?? "",
+      );
+      row(
+        "Submitted At",
+        fmt(data.submitted_at),
+        "Mobile",
+        data.temp_user_data?.mobile ?? "",
+      );
+
+      doc.line(left, y, pageW - left, y);
+      y += 6;
+
+      // ── STUDENT DETAILS ────────────────────────────────
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.text("STUDENT DETAILS", pageW / 2, y, { align: "center" });
+      y += 3;
+
+      autoTable(doc, {
+        startY: y,
+        head: [["Student Information", "Details"]],
+        body: (data.field_values ?? []).map((f: any) => [
+          f.field_name ?? "",
+          f.value ?? "",
+        ]),
+        styles: { fontSize: 9 },
+        headStyles: {
+          fillColor: [255, 255, 255],
+          textColor: 0,
+          fontStyle: "bold",
+          lineWidth: 0.3,
+        },
+        columnStyles: { 0: { cellWidth: 70 }, 1: { cellWidth: "auto" } },
+        theme: "grid",
+      });
+
+      y = (doc as any).lastAutoTable.finalY + 8;
+
+      // ── UPLOADED DOCUMENTS ─────────────────────────────
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.text("UPLOADED DOCUMENTS", pageW / 2, y, { align: "center" });
+      y += 3;
+
+      autoTable(doc, {
+  startY: y,
+  head: [["S.No.", "Document Name", "Uploaded At"]],
+  body: (data.documents ?? []).map((d: any, i: number) => [
+    i + 1, d.document_name ?? "", fmt(d.uploaded_at)
+  ]),
+  styles: { fontSize: 9 },
+  headStyles: { fillColor: [255,255,255], textColor: 0, fontStyle: "bold", lineWidth: 0.3 },
+  columnStyles: { 0: { cellWidth: 15 }, 1: { cellWidth: 100 }, 2: { cellWidth: "auto" } },
+  theme: "grid",
+});
+
+      y = (doc as any).lastAutoTable.finalY + 8;
+
+      // ── PAYMENT DETAILS ────────────────────────────────
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.text("PAYMENT DETAILS", pageW / 2, y, { align: "center" });
+      y += 3;
+
+      const pd = data.payment_detail ?? {};
+      autoTable(doc, {
+        startY: y,
+        body: [
+          ["Payment ID", String(pd.id ?? "—")],
+          [
+            "Amount",
+            pd.amount
+              ? `Rs. ${Number(pd.amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`
+              : "—",
+          ],
+          ["Currency", pd.currency ?? "INR"],
+          [
+            "Payment Mode",
+            pd.payment_mode
+              ? pd.payment_mode.charAt(0).toUpperCase() +
+                pd.payment_mode.slice(1)
+              : "—",
+          ],
+          [
+            "Payment Type",
+            pd.payment_type
+              ? pd.payment_type.charAt(0).toUpperCase() +
+                pd.payment_type.slice(1)
+              : "—",
+          ],
+          ["Razorpay Order ID", pd.razorpay_order_id ?? "—"],
+          ["Razorpay Payment ID", pd.razorpay_payment_id ?? "—"],
+          ["Fee Verify", pd.fee_verify ? "Yes" : "No"],
+          ["Created At", fmt(pd.created_at)],
+          ["Paid At", fmt(pd.paid_at)],
+        ],
+        styles: { fontSize: 9 },
+        columnStyles: { 0: { fontStyle: "bold", cellWidth: 58 } },
+        theme: "grid",
+      });
+
+      y = (doc as any).lastAutoTable.finalY + 16;
+
+      // ── Signatures ─────────────────────────────────────
+      doc.setFontSize(9.5);
+      doc.line(left, y, left + 60, y);
+      doc.line(pageW - left - 60, y, pageW - left, y);
+      y += 5;
+      doc.text("Parent / Guardian Signature", left, y);
+      doc.text("Authorized Signature", pageW - left - 60, y);
+
+      doc.save(`receipt-${data.admission_number}.pdf`);
+    });
+  });
+};
+
 // ─────────────────────────────────────────────
 // ChildrenList
 // ─────────────────────────────────────────────
@@ -252,6 +441,22 @@ function ChildrenList({
   children: any[];
 }) {
   const [receiptChild, setReceiptChild] = useState<any>(null);
+  const [receiptData, setReceiptData] = useState<any>(null);
+  const [receiptLoading, setReceiptLoading] = useState(false);
+
+  const handleReceiptOpen = async (child: any) => {
+    setReceiptChild(child);
+    setReceiptData(null);
+    setReceiptLoading(true);
+    try {
+      const data = await getAdmissionReceipt(child.admission_number);
+      setReceiptData(data[0] ?? data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setReceiptLoading(false);
+    }
+  };
 
   return (
     <motion.div
@@ -269,7 +474,10 @@ function ChildrenList({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setReceiptChild(null)}
+              onClick={() => {
+                setReceiptChild(null);
+                setReceiptData(null);
+              }}
               className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
             />
 
@@ -301,98 +509,185 @@ function ChildrenList({
                   </div>
                 </div>
 
-                {/* Modal body */}
                 <div className="px-7 py-6 space-y-4">
-                  {/* Student info */}
-                  <div className="bg-slate-50 rounded-2xl p-4 space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                        Student
-                      </span>
-                      <span className="text-sm font-black text-slate-800">
-                        {receiptChild.name}
-                      </span>
+                  {receiptLoading ? (
+                    <div className="flex items-center justify-center py-10">
+                      <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
                     </div>
-                    <div className="h-px bg-slate-200" />
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                        Admission No.
-                      </span>
-                      <span className="text-sm font-black text-indigo-600 font-mono">
-                        {receiptChild.admission_number || receiptChild.id}
-                      </span>
-                    </div>
-                    <div className="h-px bg-slate-200" />
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                        Class
-                      </span>
-                      <span className="text-sm font-black text-slate-800">
-                        {receiptChild.grade}
-                      </span>
-                    </div>
-                    <div className="h-px bg-slate-200" />
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                        Status
-                      </span>
-                      <span className="text-xs font-black uppercase tracking-wider text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
-                        ✓ Paid
-                      </span>
-                    </div>
-                  </div>
+                  ) : receiptData ? (
+                    <>
+                      {/* Student info */}
+                      <div className="bg-slate-50 rounded-2xl p-4 space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            Student
+                          </span>
+                          <span className="text-sm font-black text-slate-800">
+                            {receiptData.field_values?.find(
+                              (f: any) => f.field_name === "Student Name",
+                            )?.value || receiptChild?.name}
+                          </span>
+                        </div>
+                        <div className="h-px bg-slate-200" />
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            Admission No.
+                          </span>
+                          <span className="text-sm font-black text-indigo-600 font-mono">
+                            {receiptData.admission_number}
+                          </span>
+                        </div>
+                        <div className="h-px bg-slate-200" />
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            Form
+                          </span>
+                          <span className="text-sm font-black text-slate-800">
+                            {receiptData.form_title}
+                          </span>
+                        </div>
+                        <div className="h-px bg-slate-200" />
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            Amount Paid
+                          </span>
+                          <span className="text-sm font-black text-emerald-600">
+                            ₹
+                            {Number(
+                              receiptData.payment_detail?.amount,
+                            ).toLocaleString("en-IN")}{" "}
+                            {receiptData.payment_detail?.currency}
+                          </span>
+                        </div>
+                        <div className="h-px bg-slate-200" />
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            Payment Mode
+                          </span>
+                          <span className="text-xs font-black uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
+                            {receiptData.payment_detail?.payment_mode}
+                          </span>
+                        </div>
+                        <div className="h-px bg-slate-200" />
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            Paid At
+                          </span>
+                          <span className="text-xs font-bold text-slate-600">
+                            {receiptData.payment_detail?.paid_at
+                              ? new Date(
+                                  receiptData.payment_detail.paid_at,
+                                ).toLocaleString("en-IN")
+                              : "—"}
+                          </span>
+                        </div>
+                        <div className="h-px bg-slate-200" />
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                            Status
+                          </span>
+                          <span className="text-xs font-black uppercase tracking-wider text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+                            ✓ Paid
+                          </span>
+                        </div>
+                        {receiptData.payment_detail?.razorpay_payment_id && (
+                          <>
+                            <div className="h-px bg-slate-200" />
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                Payment ID
+                              </span>
+                              <span className="text-xs font-mono text-slate-500">
+                                {receiptData.payment_detail.razorpay_payment_id}
+                              </span>
+                            </div>
+                          </>
+                        )}
+                      </div>
 
-                  {/* Info note */}
-                  <div className="flex items-start gap-3 bg-indigo-50 border border-indigo-100 rounded-2xl px-4 py-3">
-                    <Shield
-                      size={15}
-                      className="text-indigo-500 shrink-0 mt-0.5"
-                    />
-                    <p className="text-xs text-indigo-600 font-medium leading-relaxed">
-                      Your official receipt has been generated. Download it for
-                      your records or collect it from the school office.
-                    </p>
-                  </div>
+                      {/* Documents */}
+                      {receiptData.documents?.length > 0 && (
+                        <div className="bg-slate-50 rounded-2xl p-4 space-y-2">
+                          <p className="text-xs font-black uppercase tracking-wider text-slate-400 mb-2">
+                            Documents Submitted
+                          </p>
+                          {receiptData.documents.map((doc: any) => (
+                            <div
+                              key={doc.id}
+                              className="flex items-center justify-between"
+                            >
+                              <span className="text-xs font-semibold text-slate-700">
+                                {doc.document_name}
+                              </span>
 
-                  {/* Action buttons */}
-                  <div className="flex gap-3 pt-1">
-                    <Button
-                      variant="outline"
-                      onClick={() => setReceiptChild(null)}
-                      className="flex-1 rounded-2xl h-11 font-bold border-slate-200 text-slate-600 hover:bg-slate-50 text-sm"
-                    >
-                      Close
-                    </Button>
-                    <motion.div
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.97 }}
-                      className="flex-1"
-                    >
-                      <Button
-                        onClick={() => {
-                          window.open(
-                            `/receipts/${receiptChild.admission_number || receiptChild.id}.pdf`,
-                            "_blank",
-                          );
-                        }}
-                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl h-11 font-bold shadow-lg shadow-emerald-200 flex items-center justify-center gap-2 text-sm transition-all"
-                      >
-                        <svg
-                          width="15"
-                          height="15"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
+                              <a
+                                href={doc.file}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-indigo-600 font-bold hover:underline"
+                              >
+                                View
+                              </a>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Info note */}
+                      <div className="flex items-start gap-3 bg-indigo-50 border border-indigo-100 rounded-2xl px-4 py-3">
+                        <Shield
+                          size={15}
+                          className="text-indigo-500 shrink-0 mt-0.5"
+                        />
+                        <p className="text-xs text-indigo-600 font-medium leading-relaxed">
+                          Your official receipt has been generated. Download it
+                          for your records or collect it from the school office.
+                        </p>
+                      </div>
+
+                      {/* Action buttons */}
+                      <div className="flex gap-3 pt-1">
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setReceiptChild(null);
+                            setReceiptData(null);
+                          }}
+                          className="flex-1 rounded-2xl h-11 font-bold border-slate-200 text-slate-600 hover:bg-slate-50 text-sm"
                         >
-                          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
-                        </svg>
-                        Download Receipt
-                      </Button>
-                    </motion.div>
-                  </div>
+                          Close
+                        </Button>
+                        <motion.div
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.97 }}
+                          className="flex-1"
+                        >
+                          <Button
+                            onClick={() => generateReceiptPDF(receiptData)}
+                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl h-11 font-bold shadow-lg shadow-emerald-200 flex items-center justify-center gap-2 text-sm transition-all"
+                          >
+                            <svg
+                              width="15"
+                              height="15"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+                            </svg>
+                            Download Receipt
+                          </Button>
+                        </motion.div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-center py-8 text-slate-400 text-sm font-medium">
+                      Failed to load receipt.
+                    </div>
+                  )}
                 </div>
               </div>
             </motion.div>
@@ -511,7 +806,8 @@ function ChildrenList({
           const badgeClass =
             STATUS_STYLES[child.status] ??
             "bg-slate-100 text-slate-500 border border-slate-200";
-          const isPaid = !!child.fee_data;
+          const isPaid =
+            child.pay_process === true && !!child.fee_data?.paid_at; // ← ONLY true when pay_process is true
 
           return (
             <motion.div
@@ -535,9 +831,10 @@ function ChildrenList({
               onClick={() => {
                 // ← KEY CHANGE: paid cards open receipt modal, not the form
                 if (isPaid) {
-                  setReceiptChild(child);
+                  handleReceiptOpen(child);
                   return;
                 }
+
                 const hasData = child?.sections?.some(
                   (s: any) => s?.field_values?.length > 0,
                 );
@@ -546,8 +843,9 @@ function ChildrenList({
                   currentStep: hasData ? 2 : 1,
                 });
               }}
-              className={`group bg-white border rounded-3xl p-5 cursor-pointer transition-colors duration-300 shadow-sm ${isPaid ? "border-emerald-200" : "border-slate-200"
-                }`}
+              className={`group bg-white border rounded-3xl p-5 cursor-pointer transition-colors duration-300 shadow-sm ${
+                isPaid ? "border-emerald-200" : "border-slate-200"
+              }`}
               style={{ willChange: "transform" }}
             >
               <div className="flex flex-col lg:flex-row lg:items-center gap-4">
@@ -624,7 +922,7 @@ function ChildrenList({
                       className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-4 h-10 font-semibold text-sm flex items-center gap-2 shadow-md shadow-emerald-100 transition-all"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setReceiptChild(child); // ← open modal on button click too
+                        handleReceiptOpen(child);
                       }}
                     >
                       <svg
@@ -706,6 +1004,8 @@ function MultiStepForm({
   onBack: () => void;
   onPaymentSuccess: (admissionNumber: string) => void; // ← ADD
 }) {
+  const [feeAmount, setFeeAmount] = useState<number | null>(null);
+
   // If field_values exist, student has completed step 1, start at step 2
   const hasExistingData = child?.sections?.some(
     (s: any) => s?.field_values?.length > 0,
@@ -727,7 +1027,7 @@ function MultiStepForm({
     return values;
   };
   const [formValues, setFormValues] = useState<any>(getInitialFormValues());
-  const [docValues, setDocValues] = useState<any>({});
+  const [docValues, setDocValues] = useState<Record<number, string | File>>({});
   const [docErrors, setDocErrors] = useState<any>({});
   const [errors, setErrors] = useState<any>({});
   const [submitting, setSubmitting] = useState(false);
@@ -764,7 +1064,6 @@ function MultiStepForm({
     try {
       setDocSubmitting(true);
 
-      // Build documents array from docValues: { [fieldId]: File }
       const documents = Object.entries(docValues)
         .filter(([_, file]) => file instanceof File)
         .map(([fieldId, file]) => ({
@@ -778,16 +1077,17 @@ function MultiStepForm({
           documents,
         });
 
-        // alert(response.message);
-
-        if (response?.message === "Documents uploaded successfully") {
-          setStep(3);
+        // ← capture fee_amount from API response
+        const fee = response?.["fee amount"] ?? response?.fee_amount ?? null;
+        if (fee !== null && fee !== undefined && Number(fee) > 0) {
+          setFeeAmount(Number(fee));
         }
       }
+
+      setStep(3);
     } catch (error) {
       console.error("Document submission failed:", error);
-
-      alert(
+      toast.error(
         error instanceof Error ? error.message : "Document submission failed",
       );
     } finally {
@@ -795,7 +1095,7 @@ function MultiStepForm({
     }
   };
 
-  // ✅ KEY FIX: sync formValues whenever child.sections loads
+  // KEY FIX: sync formValues whenever child.sections loads
   useEffect(() => {
     const values: any = {};
     child?.sections?.forEach((section: any) => {
@@ -886,14 +1186,14 @@ function MultiStepForm({
           return field?.map_to_student_field === "school_class";
         })
           ? formValues[
-          Object.keys(formValues).find((key) => {
-            const field = formData?.sections
-              ?.flatMap((s: any) => s.fields || [])
-              ?.find((f: any) => f.id === Number(key));
+              Object.keys(formValues).find((key) => {
+                const field = formData?.sections
+                  ?.flatMap((s: any) => s.fields || [])
+                  ?.find((f: any) => f.id === Number(key));
 
-            return field?.map_to_student_field === "school_class";
-          }) as any
-          ]
+                return field?.map_to_student_field === "school_class";
+              }) as any
+            ]
           : null,
       ),
 
@@ -904,7 +1204,7 @@ function MultiStepForm({
   // Inside MultiStepForm, BEFORE the return statement — add this:
   const payNow = async () => {
     try {
-      const amount = formData?.fees ? Number(formData.fees) : 0;
+      const amount = feeAmount ?? (formData?.fees ? Number(formData.fees) : 0);
 
       const admission_number = applicationId;
 
@@ -986,7 +1286,7 @@ function MultiStepForm({
 
   const payOffline = async () => {
     try {
-      const amount = formData?.fees ? Number(formData.fees) : 0;
+      const amount = feeAmount ?? (formData?.fees ? Number(formData.fees) : 0);
 
       const response = await createOfflinePayment({
         amount,
@@ -1146,12 +1446,13 @@ function MultiStepForm({
           {STEPS.map((s) => (
             <div
               key={s.id}
-              className={`h-2 rounded-full transition-all duration-300 ${step === s.id
+              className={`h-2 rounded-full transition-all duration-300 ${
+                step === s.id
                   ? "w-8 bg-indigo-600"
                   : step > s.id
                     ? "w-2 bg-emerald-500"
                     : "w-2 bg-slate-200"
-                }`}
+              }`}
             />
           ))}
         </div>
@@ -1208,20 +1509,22 @@ function MultiStepForm({
                     opacity: isCurrent ? 1 : isCompleted ? 0.9 : 0.45,
                   }}
                   transition={{ duration: 0.3 }}
-                  className={`flex items-center gap-4 p-4 rounded-2xl transition-all ${isCurrent
+                  className={`flex items-center gap-4 p-4 rounded-2xl transition-all ${
+                    isCurrent
                       ? "bg-white shadow-md shadow-slate-100 border border-indigo-100"
                       : isCompleted
                         ? "bg-emerald-50/60"
                         : ""
-                    }`}
+                  }`}
                 >
                   <div
-                    className={`size-11 rounded-xl flex items-center justify-center transition-all duration-300 shadow-sm ${isCompleted
+                    className={`size-11 rounded-xl flex items-center justify-center transition-all duration-300 shadow-sm ${
+                      isCompleted
                         ? "bg-emerald-500 text-white"
                         : isCurrent
                           ? "bg-indigo-600 text-white shadow-md shadow-indigo-200"
                           : "bg-slate-200 text-slate-400"
-                      }`}
+                    }`}
                   >
                     {isCompleted ? (
                       <CheckCircle2 size={20} />
@@ -1317,6 +1620,7 @@ function MultiStepForm({
                     formData={formData}
                     paymentMode={paymentMode}
                     setPaymentMode={setPaymentMode}
+                    feeAmount={feeAmount}
                   />
                 )}
               </AnimatePresence>
@@ -1329,10 +1633,11 @@ function MultiStepForm({
               <Button
                 variant="ghost"
                 onClick={() => (step === 1 ? onBack() : setStep(step - 1))}
-                className={`font-bold rounded-2xl h-13 px-7 text-sm transition-all ${step === 1
+                className={`font-bold rounded-2xl h-13 px-7 text-sm transition-all ${
+                  step === 1
                     ? "text-slate-500 hover:text-slate-900 hover:bg-slate-100"
                     : "text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
-                  }`}
+                }`}
               >
                 {step === 1 ? "Cancel" : "← Previous Step"}
               </Button>
@@ -1399,9 +1704,9 @@ function MultiStepForm({
                   >
                     <Shield size={16} />
                     Confirm & Pay ₹
-                    {formData?.fees
-                      ? Number(formData.fees).toLocaleString("en-IN")
-                      : "1,500"}
+                    {(
+                      feeAmount ?? (formData?.fees ? Number(formData.fees) : 0)
+                    ).toLocaleString("en-IN")}
                   </Button>
                 </motion.div>
               )}
@@ -1517,9 +1822,9 @@ function StudentDetailsStep({
                   const updatedField =
                     field.map_to_student_field === "school_class"
                       ? {
-                        ...field,
-                        options: classOptions,
-                      }
+                          ...field,
+                          options: classOptions,
+                        }
                       : field;
 
                   return (
@@ -1584,22 +1889,25 @@ function SectionCompletionBar({
 
   return (
     <div
-      className={`px-6 py-3 border-t flex items-center gap-3 transition-colors duration-500 ${allDone
+      className={`px-6 py-3 border-t flex items-center gap-3 transition-colors duration-500 ${
+        allDone
           ? "border-emerald-100 bg-emerald-50/60"
           : "border-slate-100 bg-slate-50/50"
-        }`}
+      }`}
     >
       <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
         <motion.div
           animate={{ width: `${pct}%` }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className={`h-full rounded-full transition-colors duration-500 ${allDone ? "bg-emerald-400" : "bg-indigo-400"
-            }`}
+          className={`h-full rounded-full transition-colors duration-500 ${
+            allDone ? "bg-emerald-400" : "bg-indigo-400"
+          }`}
         />
       </div>
       <span
-        className={`text-[10px] font-black tabular-nums whitespace-nowrap transition-colors duration-300 ${allDone ? "text-emerald-500" : "text-slate-400"
-          }`}
+        className={`text-[10px] font-black tabular-nums whitespace-nowrap transition-colors duration-300 ${
+          allDone ? "text-emerald-500" : "text-slate-400"
+        }`}
       >
         {filled}/{fields.length} filled{allDone && " ✓"}
       </span>
@@ -1829,9 +2137,9 @@ function DocumentsStep({
 
   // const [docValues, setDocValues] = useState<Record<number, string | File>>({});
   const handleFile = (id: number, file: File) =>
-    setDocValues((p) => ({ ...p, [id]: file }));
+    setDocValues((p: Record<number, string | File>) => ({ ...p, [id]: file }));
   const handleText = (id: number, val: string) =>
-    setDocValues((p) => ({ ...p, [id]: val }));
+    setDocValues((p: Record<number, string | File>) => ({ ...p, [id]: val }));
 
   return (
     <motion.div
@@ -1912,21 +2220,23 @@ function DocRow({
 
   return (
     <div
-      className={`flex items-center justify-between p-6 border-2 rounded-3xl group transition-all duration-200 ${error
+      className={`flex items-center justify-between p-6 border-2 rounded-3xl group transition-all duration-200 ${
+        error
           ? "bg-rose-50 border-rose-400"
           : isFilled
             ? "bg-emerald-50 border-emerald-200"
             : focused
               ? "border-indigo-300 bg-white"
               : "bg-white border-slate-100 hover:border-indigo-200 hover:bg-indigo-50/30"
-        }`}
+      }`}
     >
       <div className="flex items-center gap-5">
         <div
-          className={`size-14 rounded-2xl flex items-center justify-center transition-colors shadow-sm ${isFilled
+          className={`size-14 rounded-2xl flex items-center justify-center transition-colors shadow-sm ${
+            isFilled
               ? "bg-emerald-500 text-white"
               : "bg-slate-100 text-slate-400 group-hover:bg-indigo-100 group-hover:text-indigo-600"
-            }`}
+          }`}
         >
           {isFilled ? <CheckCircle2 size={24} /> : <Upload size={22} />}
         </div>
@@ -1976,10 +2286,11 @@ function DocRow({
         />
         <Button
           variant={isFilled ? "ghost" : "outline"}
-          className={`rounded-xl font-bold h-11 px-6 text-sm transition-all min-w-[110px] ${isFilled
+          className={`rounded-xl font-bold h-11 px-6 text-sm transition-all min-w-[110px] ${
+            isFilled
               ? "text-emerald-600 hover:bg-emerald-100"
               : "border-slate-200 hover:bg-indigo-600 hover:text-white hover:border-indigo-600"
-            }`}
+          }`}
           onClick={() => fileRef.current?.click()}
         >
           {isFilled ? "✓ Uploaded" : "Choose File"}
@@ -1995,27 +2306,19 @@ function ReviewStep({
   formData,
   paymentMode,
   setPaymentMode,
+  feeAmount,
 }: {
   formData: any;
   paymentMode: "online" | "offline";
   setPaymentMode: React.Dispatch<React.SetStateAction<"online" | "offline">>;
+  feeAmount: number | null;
 }) {
-  const fees =
-    formData?.fee_structures?.length > 0
-      ? formData.fee_structures
-      : formData?.fees
-        ? [{ label: "Admission Fee", amount: formData.fees }]
-        : [
-          { label: "Registration Fee", amount: "1,200" },
-          { label: "Prospectus Fee", amount: "300" },
-        ];
+  // Replace the fees/total logic at the top with this:
+  const resolvedAmount =
+    feeAmount ?? (formData?.fees ? Number(formData.fees) : 0);
 
-  const total = formData?.fees
-    ? Number(formData.fees).toFixed(2)
-    : fees
-      .reduce((sum: number, f: any) => sum + Number(f.amount), 0)
-      .toFixed(2);
-
+  const fees = [{ label: "Admission Fee", amount: resolvedAmount }];
+  const total = resolvedAmount.toFixed(2);
   const feesEnabled = formData?.fees_enable !== false;
 
   return (
@@ -2087,10 +2390,11 @@ function ReviewStep({
             <button
               type="button"
               onClick={() => setPaymentMode("online")}
-              className={`px-5 py-3 rounded-2xl border-2 font-bold transition-all ${paymentMode === "online"
+              className={`px-5 py-3 rounded-2xl border-2 font-bold transition-all ${
+                paymentMode === "online"
                   ? "bg-indigo-600 text-white border-indigo-600"
                   : "bg-white text-slate-600 border-slate-200"
-                }`}
+              }`}
             >
               Online Payment
             </button>
@@ -2098,10 +2402,11 @@ function ReviewStep({
             <button
               type="button"
               onClick={() => setPaymentMode("offline")}
-              className={`px-5 py-3 rounded-2xl border-2 font-bold transition-all ${paymentMode === "offline"
+              className={`px-5 py-3 rounded-2xl border-2 font-bold transition-all ${
+                paymentMode === "offline"
                   ? "bg-emerald-600 text-white border-emerald-600"
                   : "bg-white text-slate-600 border-slate-200"
-                }`}
+              }`}
             >
               Offline Payment
             </button>
@@ -2289,17 +2594,19 @@ function UploadRow({
 
   return (
     <div
-      className={`flex items-center justify-between p-6 border-2 rounded-3xl group transition-all duration-200 ${uploaded
+      className={`flex items-center justify-between p-6 border-2 rounded-3xl group transition-all duration-200 ${
+        uploaded
           ? "bg-emerald-50 border-emerald-200"
           : "bg-white border-slate-100 hover:border-indigo-200 hover:bg-indigo-50/30"
-        }`}
+      }`}
     >
       <div className="flex items-center gap-5">
         <div
-          className={`size-14 rounded-2xl flex items-center justify-center transition-colors shadow-sm ${uploaded
+          className={`size-14 rounded-2xl flex items-center justify-center transition-colors shadow-sm ${
+            uploaded
               ? "bg-emerald-500 text-white"
               : "bg-slate-100 text-slate-400 group-hover:bg-indigo-100 group-hover:text-indigo-600"
-            }`}
+          }`}
         >
           {uploaded ? <CheckCircle2 size={24} /> : <Upload size={22} />}
         </div>
@@ -2321,10 +2628,11 @@ function UploadRow({
       </div>
       <Button
         variant={uploaded ? "ghost" : "outline"}
-        className={`rounded-xl font-bold h-11 px-6 text-sm transition-all min-w-[110px] ${uploaded
+        className={`rounded-xl font-bold h-11 px-6 text-sm transition-all min-w-[110px] ${
+          uploaded
             ? "text-emerald-600 hover:bg-emerald-100"
             : "border-slate-200 hover:bg-indigo-600 hover:text-white hover:border-indigo-600"
-          }`}
+        }`}
         onClick={() => setUploaded(!uploaded)}
       >
         {uploaded ? "✓ Uploaded" : "Choose File"}

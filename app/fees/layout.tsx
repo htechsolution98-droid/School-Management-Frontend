@@ -46,7 +46,7 @@ const sidebarLinks = [
     icon: Tags 
   },
   { title: "Fee Structure", href: "/fees/fee-structure", icon: LayoutDashboard },
-  { title: "Fee Structure", href: "/fees/Genrate-Fees", icon: LayoutDashboard }
+  { title: "Genrate Fee", href: "/fees/Genrate-Fees", icon: LayoutDashboard }
 ];
 
 export default function FeesLayout({
