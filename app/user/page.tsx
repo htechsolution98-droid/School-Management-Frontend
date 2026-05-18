@@ -244,10 +244,15 @@ const generateReceiptPDF = (data: any) => {
       const left = 14;
 
       const fmt = (d: string) =>
-        d ? new Date(d).toLocaleString("en-IN", {
-          day: "2-digit", month: "short", year: "numeric",
-          hour: "2-digit", minute: "2-digit",
-        }) : "—";
+        d
+          ? new Date(d).toLocaleString("en-IN", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "—";
 
       // ── Header ─────────────────────────────────────────
       doc.setFontSize(20);
@@ -267,77 +272,138 @@ const generateReceiptPDF = (data: any) => {
       doc.setFontSize(9.5);
       let y = 48;
       const gap = 7;
-      const col2 = 70, col3 = 115, col4 = 148;
+      const col2 = 70,
+        col3 = 115,
+        col4 = 148;
 
       const row = (l1: string, v1: string, l2?: string, v2?: string) => {
-        doc.setFont("helvetica", "bold");   doc.text(l1, left, y);
-        doc.setFont("helvetica", "normal"); doc.text(`: ${v1}`, col2, y);
+        doc.setFont("helvetica", "bold");
+        doc.text(l1, left, y);
+        doc.setFont("helvetica", "normal");
+        doc.text(`: ${v1}`, col2, y);
         if (l2 && v2) {
-          doc.setFont("helvetica", "bold");   doc.text(l2, col3, y);
-          doc.setFont("helvetica", "normal"); doc.text(`: ${v2}`, col4, y);
+          doc.setFont("helvetica", "bold");
+          doc.text(l2, col3, y);
+          doc.setFont("helvetica", "normal");
+          doc.text(`: ${v2}`, col4, y);
         }
         y += gap;
       };
 
-      row("Admission Number", data.admission_number ?? "", "Form Title", data.form_title ?? "");
-      row("Status", data.status ? (data.status.charAt(0).toUpperCase() + data.status.slice(1)) : "");
-      row("Pay Process", data.pay_process ? "Yes" : "No", "Username", data.temp_user_data?.username ?? "");
+      row(
+        "Admission Number",
+        data.admission_number ?? "",
+        "Form Title",
+        data.form_title ?? "",
+      );
+      row(
+        "Status",
+        data.status
+          ? data.status.charAt(0).toUpperCase() + data.status.slice(1)
+          : "",
+      );
+      row(
+        "Pay Process",
+        data.pay_process ? "Yes" : "No",
+        "Username",
+        data.temp_user_data?.username ?? "",
+      );
       row(
         "Fee Amount",
-        data.fee_amount ? `Rs. ${parseFloat(data.fee_amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}` : "—",
-        "Email", data.temp_user_data?.email ?? ""
+        data.fee_amount
+          ? `Rs. ${parseFloat(data.fee_amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`
+          : "—",
+        "Email",
+        data.temp_user_data?.email ?? "",
       );
-      row("Submitted At", fmt(data.submitted_at), "Mobile", data.temp_user_data?.mobile ?? "");
+      row(
+        "Submitted At",
+        fmt(data.submitted_at),
+        "Mobile",
+        data.temp_user_data?.mobile ?? "",
+      );
 
-      doc.line(left, y, pageW - left, y); y += 6;
+      doc.line(left, y, pageW - left, y);
+      y += 6;
 
       // ── STUDENT DETAILS ────────────────────────────────
-      doc.setFont("helvetica", "bold"); doc.setFontSize(11);
-      doc.text("STUDENT DETAILS", pageW / 2, y, { align: "center" }); y += 3;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.text("STUDENT DETAILS", pageW / 2, y, { align: "center" });
+      y += 3;
 
       autoTable(doc, {
         startY: y,
-        head: [["Section Name", "Field Name", "Value"]],
+        head: [["Student Information", "Details"]],
         body: (data.field_values ?? []).map((f: any) => [
-          f.section_name ?? "", f.field_name ?? "", f.value ?? ""
+          f.field_name ?? "",
+          f.value ?? "",
         ]),
         styles: { fontSize: 9 },
-        headStyles: { fillColor: [255,255,255], textColor: 0, fontStyle: "bold", lineWidth: 0.3 },
+        headStyles: {
+          fillColor: [255, 255, 255],
+          textColor: 0,
+          fontStyle: "bold",
+          lineWidth: 0.3,
+        },
+        columnStyles: { 0: { cellWidth: 70 }, 1: { cellWidth: "auto" } },
         theme: "grid",
       });
 
       y = (doc as any).lastAutoTable.finalY + 8;
 
       // ── UPLOADED DOCUMENTS ─────────────────────────────
-      doc.setFont("helvetica", "bold"); doc.setFontSize(11);
-      doc.text("UPLOADED DOCUMENTS", pageW / 2, y, { align: "center" }); y += 3;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.text("UPLOADED DOCUMENTS", pageW / 2, y, { align: "center" });
+      y += 3;
 
       autoTable(doc, {
-        startY: y,
-        head: [["S.No.", "Document Name", "File", "Uploaded At"]],
-        body: (data.documents ?? []).map((d: any, i: number) => [
-          i + 1, d.document_name ?? "", d.file ?? "", fmt(d.uploaded_at)
-        ]),
-        styles: { fontSize: 9 },
-        headStyles: { fillColor: [255,255,255], textColor: 0, fontStyle: "bold", lineWidth: 0.3 },
-        theme: "grid",
-      });
+  startY: y,
+  head: [["S.No.", "Document Name", "Uploaded At"]],
+  body: (data.documents ?? []).map((d: any, i: number) => [
+    i + 1, d.document_name ?? "", fmt(d.uploaded_at)
+  ]),
+  styles: { fontSize: 9 },
+  headStyles: { fillColor: [255,255,255], textColor: 0, fontStyle: "bold", lineWidth: 0.3 },
+  columnStyles: { 0: { cellWidth: 15 }, 1: { cellWidth: 100 }, 2: { cellWidth: "auto" } },
+  theme: "grid",
+});
 
       y = (doc as any).lastAutoTable.finalY + 8;
 
       // ── PAYMENT DETAILS ────────────────────────────────
-      doc.setFont("helvetica", "bold"); doc.setFontSize(11);
-      doc.text("PAYMENT DETAILS", pageW / 2, y, { align: "center" }); y += 3;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.text("PAYMENT DETAILS", pageW / 2, y, { align: "center" });
+      y += 3;
 
       const pd = data.payment_detail ?? {};
       autoTable(doc, {
         startY: y,
         body: [
           ["Payment ID", String(pd.id ?? "—")],
-          ["Amount", pd.amount ? `Rs. ${Number(pd.amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}` : "—"],
+          [
+            "Amount",
+            pd.amount
+              ? `Rs. ${Number(pd.amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`
+              : "—",
+          ],
           ["Currency", pd.currency ?? "INR"],
-          ["Payment Mode", pd.payment_mode ? (pd.payment_mode.charAt(0).toUpperCase() + pd.payment_mode.slice(1)) : "—"],
-          ["Payment Type", pd.payment_type ? (pd.payment_type.charAt(0).toUpperCase() + pd.payment_type.slice(1)) : "—"],
+          [
+            "Payment Mode",
+            pd.payment_mode
+              ? pd.payment_mode.charAt(0).toUpperCase() +
+                pd.payment_mode.slice(1)
+              : "—",
+          ],
+          [
+            "Payment Type",
+            pd.payment_type
+              ? pd.payment_type.charAt(0).toUpperCase() +
+                pd.payment_type.slice(1)
+              : "—",
+          ],
           ["Razorpay Order ID", pd.razorpay_order_id ?? "—"],
           ["Razorpay Payment ID", pd.razorpay_payment_id ?? "—"],
           ["Fee Verify", pd.fee_verify ? "Yes" : "No"],

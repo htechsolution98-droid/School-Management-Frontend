@@ -234,7 +234,6 @@ const CreateFeeModal = ({
   const [feeType, setFeeType] = useState<"monthly" | "single">(activeTab);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [selectedClass, setSelectedClass] = useState("");
   const [toast, setToast] = useState<{
     type: "success" | "error";
     message: string;
@@ -254,14 +253,27 @@ const CreateFeeModal = ({
     setFeeType(activeTab);
   }, [activeTab]);
 
+  useEffect(() => {
+    if (isOpen) {
+      setForm({
+        student: "",
+        academic_year: "",
+        fee_wise_class: "",
+        feetype: "",
+        billing_period: new Date().toISOString().slice(0, 7),
+        due_date: "",
+        selected_class: "",
+      });
+      setErrors({});
+      setToast(null);
+    }
+  }, [isOpen]);
+
   const uniqueClassOptions = Array.from(
     new Map(
       feeWiseClasses.map((fc) => [fc.school_class, fc.school_class_name]),
     ).entries(),
   ).map(([id, name]) => ({ id, name }));
-  const filteredStudents = selectedClass
-    ? students.filter((s) => String(s.school_class) === selectedClass)
-    : students;
 
   const filteredFeeClasses = feeWiseClasses;
 
@@ -799,7 +811,9 @@ export default function GenerateFeesPage() {
 
   // Filters
   const [filterClass, setFilterClass] = useState("");
-  const [filterPeriod, setFilterPeriod] = useState("2026-04");
+  const [filterPeriod, setFilterPeriod] = useState(
+    new Date().toISOString().slice(0, 7),
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 8;
@@ -853,18 +867,13 @@ export default function GenerateFeesPage() {
 
   // Client-side filtering for mock data
   const filteredFees = fees.filter((fee) => {
-    const matchClass = !filterClass || fee.class_name === filterClass;
-    const matchPeriod = !filterPeriod || fee.billing_period === filterPeriod;
-    const matchSearch =
-      !searchQuery ||
-      fee.student_name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchTab =
-      activeTab === "monthly"
-        ? fee.billing_period !== "" && fee.billing_period != null
-        : fee.billing_period === "" || fee.billing_period == null;
+  const matchTab =
+    activeTab === "monthly"
+      ? fee.billing_period !== "" && fee.billing_period != null
+      : fee.billing_period === "" || fee.billing_period == null;
+  return matchTab;
+});
 
-    return matchClass && matchPeriod && matchSearch && matchTab;
-  });
 
   const paginatedFees = filteredFees.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,

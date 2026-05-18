@@ -83,6 +83,23 @@ interface FormDataType {
   end_time: string;
   academicYear: string;
 }
+interface TimetableRecord {
+  id: number;
+  day: string;
+  class_division: number;
+  total_lecture: number;
+  start_time: string;
+  end_time: string;
+  slots: {
+    slot_number: number;
+    is_lecture: boolean;
+    is_break: boolean;
+    slot_start_time: string;
+    slot_end_time: string;
+    subject: number | null;
+    teacher: number | null;
+  }[];
+}
 
 interface ToastData {
   msg: string;
@@ -1407,9 +1424,9 @@ function SuccessView({
           </p>
         </div>
         <div className="flex gap-2 flex-shrink-0">
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-emerald-200 text-emerald-700 rounded-xl text-xs font-bold hover:bg-emerald-50 transition-all">
+          {/* <button className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-emerald-200 text-emerald-700 rounded-xl text-xs font-bold hover:bg-emerald-50 transition-all">
             <Share2 size={12} /> Share
-          </button>
+          </button> */}
           <button
             onClick={onCreateNew}
             className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-emerald-200"
@@ -1484,6 +1501,195 @@ function SuccessView({
 // ═══════════════════════════════════════════════════════════════════
 // ROOT EXPORT — CreateTimetablePage
 // ═══════════════════════════════════════════════════════════════════
+function TimetablePreviewModal({
+  isOpen,
+  onClose,
+  classDivision,
+  divisions,
+  subjects,
+  teachers,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  classDivision: string | number;
+  divisions: Division[];
+  subjects: Subject[];
+  teachers: Teacher[];
+}) {
+  const [data, setData] = useState<TimetableRecord[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen || !classDivision) return;
+    setLoading(true);
+    getTimetable(Number(classDivision))
+      .then((res) => setData(Array.isArray(res) ? res : []))
+      .catch(() => setData([]))
+      .finally(() => setLoading(false));
+  }, [isOpen, classDivision]);
+
+  if (!isOpen) return null;
+
+  const divName = divisions.find((d) => d.id === Number(classDivision));
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-5 border-b border-gray-100 sticky top-0 bg-white z-10">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">
+              Timetable Preview
+            </h2>
+            {divName && (
+              <p className="text-sm text-gray-400 mt-0.5">
+                {divName.class_name} - {divName.division}
+              </p>
+            )}
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-lg"
+          >
+            <X size={18} className="text-gray-500" />
+          </button>
+        </div>
+
+        <div className="p-5">
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 size={32} className="animate-spin text-violet-500" />
+            </div>
+          ) : data.length === 0 ? (
+            <div className="text-center py-20 text-gray-400">
+              <Calendar size={40} className="mx-auto mb-3 opacity-30" />
+              <p className="font-medium">No timetable found</p>
+              <p className="text-sm mt-1">
+                Select a class and create a timetable first
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-violet-50">
+                    <th className="px-4 py-3 text-left text-xs font-bold text-violet-700 uppercase tracking-wide border border-violet-100 w-28">
+                      Slot
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-bold text-violet-700 uppercase tracking-wide border border-violet-100 w-28">
+                      Time
+                    </th>
+                    {data.map((d) => (
+                      <th
+                        key={d.id}
+                        className="px-4 py-3 text-center text-xs font-bold text-violet-700 uppercase tracking-wide border border-violet-100"
+                      >
+                        {DAY_FULL[d.day] ?? d.day}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {(() => {
+                    const firstDay = data[0];
+                    return firstDay.slots
+                      .sort((a, b) => a.slot_number - b.slot_number)
+                      .map((templateSlot) => {
+                        const isBreak = templateSlot.is_break;
+                        return (
+                          <tr
+                            key={templateSlot.slot_number}
+                            className={
+                              isBreak ? "bg-orange-50" : "hover:bg-gray-50"
+                            }
+                          >
+                            <td className="px-4 py-3 border border-gray-100 text-center">
+                              <div
+                                className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black text-white mx-auto ${isBreak ? "bg-orange-400" : "bg-violet-600"}`}
+                              >
+                                {templateSlot.slot_number}
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 border border-gray-100">
+                              <p className="text-xs font-semibold text-gray-700">
+                                {fmtTime(
+                                  templateSlot.slot_start_time?.slice(0, 5),
+                                )}
+                              </p>
+                              <p className="text-[10px] text-gray-400">
+                                {fmtTime(
+                                  templateSlot.slot_end_time?.slice(0, 5),
+                                )}
+                              </p>
+                            </td>
+                            {data.map((dayRecord) => {
+                              const slot = dayRecord.slots.find(
+                                (s) =>
+                                  s.slot_number === templateSlot.slot_number,
+                              );
+                              if (!slot)
+                                return (
+                                  <td
+                                    key={dayRecord.id}
+                                    className="px-4 py-3 border border-gray-100 text-center text-gray-300 text-xs"
+                                  >
+                                    —
+                                  </td>
+                                );
+                              if (slot.is_break)
+                                return (
+                                  <td
+                                    key={dayRecord.id}
+                                    className="px-4 py-3 border border-orange-100 text-center"
+                                  >
+                                    <div className="flex items-center justify-center gap-1 text-orange-500">
+                                      <Coffee size={13} />
+                                      <span className="text-xs font-bold">
+                                        Break
+                                      </span>
+                                    </div>
+                                  </td>
+                                );
+                              const subj = subjects.find(
+                                (s) => s.id === slot.subject,
+                              );
+                              const tchr = teachers.find(
+                                (t) => t.id === slot.teacher,
+                              );
+                              return (
+                                <td
+                                  key={dayRecord.id}
+                                  className="px-4 py-3 border border-gray-100"
+                                >
+                                  <p className="text-xs font-bold text-gray-800 truncate max-w-[120px]">
+                                    {subj?.name ??
+                                      (slot.subject
+                                        ? `Subject ${slot.subject}`
+                                        : "—")}
+                                  </p>
+                                  <p className="text-[10px] text-gray-400 truncate max-w-[120px] mt-0.5">
+                                    {tchr?.name ??
+                                      (slot.teacher
+                                        ? `Teacher ${slot.teacher}`
+                                        : "—")}
+                                  </p>
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        );
+                      });
+                  })()}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function CreateTimetablePage() {
   const [divisions, setDivisions] = useState<Division[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -1510,9 +1716,32 @@ export default function CreateTimetablePage() {
   const [existingId, setExistingId] = useState<number | null>(null);
   const [savedRecord, setSavedRecord] = useState<{ id?: number } | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [divRes, subRes, tchRes] = await Promise.all([
+          getDivisions(),
+          getSubjects(),
+          getTeachers(),
+        ]);
+        setDivisions(Array.isArray(divRes) ? (divRes as Division[]) : []);
+        setSubjects(Array.isArray(subRes) ? (subRes as Subject[]) : []);
+        setTeachers(Array.isArray(tchRes) ? (tchRes as Teacher[]) : []);
+      } catch (e: unknown) {
+        setLoadErr(e instanceof Error ? e.message : "Failed to load data");
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
 
   useEffect(() => {
     if (!form.class_division) return;
+    setSlots([]); // ← ADD THIS — clear slots when class changes
+    setExistingId(null); // ← ADD THIS — reset existing ID
     (async () => {
       try {
         const assigned = await getAssignedTeachers(form.class_division);
@@ -1584,66 +1813,27 @@ export default function CreateTimetablePage() {
           });
 
           setSlots(restored);
+          const actualLectureCount = restored.filter(
+            (s) => s.is_lecture,
+          ).length;
+          const actualBreakCount = restored.filter((s) => s.is_break).length;
+
           setForm((f) => ({
             ...f,
-            total_lecture: (match.total_lecture as number) ?? f.total_lecture,
+            total_lecture:
+              actualLectureCount ||
+              (match.total_lecture as number) ||
+              f.total_lecture,
+            total_breaks: actualBreakCount,
             start_time: match.start_time?.slice(0, 5) ?? f.start_time,
             end_time: match.end_time?.slice(0, 5) ?? f.end_time,
           }));
         } else {
           setExistingId(null);
+          setSlots([]); // ← ADD THIS
         }
       } catch {
         // Silently ignore — timetable may not exist yet
-      }
-    })();
-  }, [form.class_division, form.day, subjects, teachers]);
-
-  useEffect(() => {
-    if (!form.class_division) return;
-    (async () => {
-      try {
-        const records = await getTimetable(Number(form.class_division));
-        const list = Array.isArray(records) ? records : [];
-        const match = list.find((r: { day: string }) => r.day === form.day);
-        if (match) {
-          setExistingId(match.id);
-          const restored: Slot[] = (match.slots ?? []).map(
-            (s: {
-              slot_number: number;
-              is_lecture: boolean;
-              is_break: boolean;
-              slot_start_time: string;
-              slot_end_time: string;
-              subject: number | null;
-              teacher: number | null;
-            }) => ({
-              id: genId(),
-              slot_number: s.slot_number,
-              is_lecture: !!s.is_lecture,
-              is_break: !!s.is_break,
-              slot_start_time: s.slot_start_time?.slice(0, 5) ?? "",
-              slot_end_time: s.slot_end_time?.slice(0, 5) ?? "",
-              subject: s.subject ?? "",
-              teacher: s.teacher ?? "",
-              subject_name:
-                subjects.find((x) => x.id === s.subject)?.name ?? "",
-              teacher_name:
-                teachers.find((x) => x.id === s.teacher)?.name ?? "",
-            }),
-          );
-          setSlots(restored);
-          setForm((f) => ({
-            ...f,
-            total_lecture: match.total_lecture ?? f.total_lecture,
-            start_time: match.start_time?.slice(0, 5) ?? f.start_time,
-            end_time: match.end_time?.slice(0, 5) ?? f.end_time,
-          }));
-        } else {
-          setExistingId(null);
-        }
-      } catch {
-        // Silently ignore
       }
     })();
   }, [form.class_division, form.day, subjects, teachers]);
@@ -1819,9 +2009,13 @@ export default function CreateTimetablePage() {
                 <RefreshCw size={12} /> Editing existing timetable
               </div>
             )}
-            <button className="w-full sm:w-auto justify-center flex items-center gap-2 px-4 py-2.5 border-2 border-violet-200 text-violet-700 bg-white rounded-xl text-sm font-bold hover:bg-violet-50 transition-all">
+            <button
+              onClick={() => setShowPreview(true)}
+              className="w-full sm:w-auto justify-center flex items-center gap-2 px-4 py-2.5 border-2 border-violet-200 text-violet-700 bg-white rounded-xl text-sm font-bold hover:bg-violet-50 transition-all"
+            >
               <Eye size={15} /> Preview
             </button>
+
             <button
               onClick={() => {
                 if (!showSuccess && step < 3) setStep(3);
@@ -1911,6 +2105,14 @@ export default function CreateTimetablePage() {
           </div>
         </div>
       </div>
+      <TimetablePreviewModal
+        isOpen={showPreview}
+        onClose={() => setShowPreview(false)}
+        classDivision={form.class_division}
+        divisions={divisions}
+        subjects={subjects}
+        teachers={teachers}
+      />
     </div>
   );
 }

@@ -246,7 +246,7 @@ export interface Division {
 }
 
 export async function getDivisions(): Promise<Division[]> {
-  const url = `${API_BASE_URL}${API_ENDPOINTS.DIVISION_LIST}`
+  const url = `${API_BASE_URL}${API_ENDPOINTS.DIVISION_SET}`
   const response = await fetchWithAuth(url)
 
   if (!response.ok) {
@@ -1470,7 +1470,7 @@ export async function getTimetable(
   params.set("class_division", String(classDivision));
   if (day) params.set("day", day);
 
-  const url = `${API_BASE_URL}/api/timetable/?${params.toString()}`;
+  const url = `${API_BASE_URL}/timetable/${params.toString() ? `?${params.toString()}` : ""}`;
   const response = await fetchWithAuth(url);
 
   if (!response.ok) {
