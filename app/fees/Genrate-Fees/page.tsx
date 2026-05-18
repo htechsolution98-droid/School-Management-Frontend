@@ -71,7 +71,7 @@ const StatusBadge = ({ status }: { status: StudentFee["status"] }) => {
       icon: AlertCircle,
     },
   };
-  const { label, className, icon: Icon } = config[status] || config.unpaid;
+  const { label, className, icon: Icon } = config[status as keyof typeof config] || config.unpaid;
   return (
     <span
       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${className}`}

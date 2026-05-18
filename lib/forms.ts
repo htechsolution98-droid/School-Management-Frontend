@@ -182,8 +182,8 @@ export async function getPublishedFormLink(): Promise<{ form_link: string }> {
 
   if (data.form_link && data.form_link.startsWith("/")) {
     const baseUrl = (API_BASE_URL || "").endsWith("/")
-  ? (API_BASE_URL || "").slice(0, -1)
-  : (API_BASE_URL || "")
+      ? (API_BASE_URL || "").slice(0, -1)
+      : (API_BASE_URL || "")
 
     data.form_link = `${baseUrl}${data.form_link}`
   }
@@ -209,7 +209,7 @@ export async function fetchDashboardCount(): Promise<DashboardCount> {
     try {
       const err = await response.json();
       message = err?.detail || err?.message || message;
-    } catch {}
+    } catch { }
     throw new Error(message);
   }
 
@@ -608,13 +608,13 @@ export async function submitDocuments(payload: {
     try {
       const err = await response.json();
       message = err?.detail || err?.message || message;
-    } catch {}
+    } catch { }
     throw new Error(message);
   }
 
   const data = await response.json();
   // console.log("SUBMIT DOCUMENTS RESPONSE:", data); // ← check what comes back
-  
+
   // handle if response is array, take first item
   return Array.isArray(data) ? data[0] : data;
 }
@@ -625,7 +625,7 @@ export async function createRazorOrder(payload: {
 }) {
   const response = await fetchWithAuth(
     `${API_BASE_URL}${API_ENDPOINTS.RAZOR_ORDER}`,
-     {
+    {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -655,7 +655,7 @@ export async function verifyRazorPayment(payload: {
   razorpay_payment_id: string;
   razorpay_signature: string;
   admission_number: string;
-  pay_process?: boolean;  
+  pay_process?: boolean;
 }) {
   const response = await fetchWithAuth(
     `${API_BASE_URL}${API_ENDPOINTS.PAYMENT_VERIFY}`,
@@ -1513,7 +1513,7 @@ export async function updateTimetable(
   id: number,
   payload: TimetablePayload
 ): Promise<TimetableRecord> {
-  const response = await fetchWithAuth(`${API_BASE_URL}/api/timetable/${id}/`, {
+  const response = await fetchWithAuth(`${API_BASE_URL}/timetable/${id}/`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -1624,7 +1624,7 @@ export async function submitStudentAttendance(
       try {
         const err = await res.json();
         message = err?.detail || err?.message || message;
-      } catch {}
+      } catch { }
       throw new Error(message);
     }
   }
@@ -1680,7 +1680,7 @@ export async function getStudentHomework(): Promise<HomeworkItem[]> {
     try {
       const err = await response.json();
       message = err?.detail || err?.message || message;
-    } catch {}
+    } catch { }
     throw new Error(message);
   }
 
@@ -1698,7 +1698,7 @@ export async function getMySubmissions(): Promise<HomeworkSubmission[]> {
     try {
       const err = await response.json();
       message = err?.detail || err?.message || message;
-    } catch {}
+    } catch { }
     throw new Error(message);
   }
 
@@ -1753,7 +1753,7 @@ export async function getTeacherHomework(): Promise<HomeworkItem[]> {
     try {
       const err = await response.json();
       message = err?.detail || err?.message || message;
-    } catch {}
+    } catch { }
     throw new Error(message);
   }
 
@@ -1774,7 +1774,7 @@ export async function getHomeworkSubmissions(
     try {
       const err = await response.json();
       message = err?.detail || err?.message || message;
-    } catch {}
+    } catch { }
     throw new Error(message);
   }
 
@@ -1807,7 +1807,7 @@ export async function createHomework(
     try {
       const err = await response.json();
       message = err?.detail || err?.message || JSON.stringify(err) || message;
-    } catch {}
+    } catch { }
     throw new Error(message);
   }
 
@@ -1831,7 +1831,7 @@ export async function updateHomework(
     try {
       const err = await response.json();
       message = err?.detail || err?.message || JSON.stringify(err) || message;
-    } catch {}
+    } catch { }
     throw new Error(message);
   }
 
@@ -1849,7 +1849,7 @@ export async function deleteHomework(id: number): Promise<void> {
     try {
       const err = await response.json();
       message = err?.detail || err?.message || message;
-    } catch {}
+    } catch { }
     throw new Error(message);
   }
 }
@@ -1881,7 +1881,7 @@ export async function gradeSubmission(
     try {
       const err = await response.json();
       message = err?.detail || err?.message || message;
-    } catch {}
+    } catch { }
     throw new Error(message);
   }
 
@@ -1944,7 +1944,7 @@ export async function getAcademicYears(): Promise<AcademicYear[]> {
     try {
       const err = await response.json();
       message = err?.detail || err?.message || message;
-    } catch {}
+    } catch { }
     throw new Error(message);
   }
 
@@ -1990,11 +1990,11 @@ export interface FeeTypeFormData {
 }
 
 export const billingCycleOptions = [
-  { value: "single",      label: "One-time"     },
-  { value: "monthly",     label: "Monthly"      },
-  { value: "quarterly",   label: "Quarterly"    },
-  { value: "half_yearly", label: "Half Yearly"  },
-  { value: "yearly",      label: "Yearly"       },
+  { value: "single", label: "One-time" },
+  { value: "monthly", label: "Monthly" },
+  { value: "quarterly", label: "Quarterly" },
+  { value: "half_yearly", label: "Half Yearly" },
+  { value: "yearly", label: "Yearly" },
 ] as const;
 
 // Helper — "monthly" → "Monthly"
@@ -2005,11 +2005,11 @@ export function getBillingCycleLabel(cycle: string): string {
 // Helper — badge color per billing cycle
 export function getBillingCycleBadgeColor(cycle: string): string {
   const map: Record<string, string> = {
-    single:      "bg-blue-50    text-blue-700    border border-blue-200",
-    monthly:     "bg-purple-50  text-purple-700  border border-purple-200",
-    quarterly:   "bg-orange-50  text-orange-700  border border-orange-200",
+    single: "bg-blue-50    text-blue-700    border border-blue-200",
+    monthly: "bg-purple-50  text-purple-700  border border-purple-200",
+    quarterly: "bg-orange-50  text-orange-700  border border-orange-200",
     half_yearly: "bg-teal-50    text-teal-700    border border-teal-200",
-    yearly:      "bg-green-50   text-green-700   border border-green-200",
+    yearly: "bg-green-50   text-green-700   border border-green-200",
   };
   return map[cycle] ?? "bg-gray-50 text-gray-600 border border-gray-200";
 }
@@ -2017,11 +2017,11 @@ export function getBillingCycleBadgeColor(cycle: string): string {
 // Helper — icon background per fee name
 export function getFeeTypeIconBg(name: string): string {
   const lower = name.toLowerCase();
-  if (lower.includes("tuition"))   return "bg-purple-50";
+  if (lower.includes("tuition")) return "bg-purple-50";
   if (lower.includes("transport")) return "bg-orange-50";
-  if (lower.includes("exam"))      return "bg-blue-50";
-  if (lower.includes("library"))   return "bg-emerald-50";
-  if (lower.includes("lab"))       return "bg-violet-50";
+  if (lower.includes("exam")) return "bg-blue-50";
+  if (lower.includes("library")) return "bg-emerald-50";
+  if (lower.includes("lab")) return "bg-violet-50";
   if (lower.includes("admission")) return "bg-rose-50";
   return "bg-indigo-50";
 }
@@ -2037,7 +2037,7 @@ export async function getFeeTypes(): Promise<FeeType[]> {
     try {
       const err = await response.json();
       message = err?.detail || err?.message || message;
-    } catch {}
+    } catch { }
     throw new Error(message);
   }
 
@@ -2100,7 +2100,7 @@ export async function deleteFeeType(id: number): Promise<void> {
     try {
       const err = await response.json();
       message = err?.detail || err?.message || message;
-    } catch {}
+    } catch { }
     throw new Error(message);
   }
 }
@@ -2156,19 +2156,26 @@ export interface StudentFee {
   student_name: string;
   student_surname: string | null;
   academic_year: number;
-  academic_year_name: string;        
+  academic_year_name: string;
   fee_wise_class: number;
-  fee_wise_class_name: string;        
+  fee_wise_class_name: string;
   feetype_name: string;
-  class_name: string;                 
+  class_name: string;
   billing_period: string;
   due_date: string;
   amount: string;
-  payable_amount: string;              
-  discount_amount: string;             
+  payable_amount: string;
+  discount_amount: string;
   discount_reference: string | null;
   discount_note: string | null;
-  status: "paid" | "unpaid" | "partially_paid" | "overdue";
+  status: "paid" | "unpaid" | "partially_paid" | "overdue" | "pending" | "partial" | "cancelled";
+
+  // ── fields used by pay-fees page ──
+  fine_amount: string;
+  paid_amount: string;
+  actual_payable_amount: string;
+  balance_amount: string;
+  payments?: Payment[];
 }
 
 export interface StudentFeePayload {
@@ -2203,7 +2210,7 @@ export async function getFeeWiseClasses(filters?: {
     try {
       const err = await response.json();
       message = err?.detail || err?.message || message;
-    } catch {}
+    } catch { }
     throw new Error(message);
   }
 
@@ -2269,7 +2276,7 @@ export async function deleteFeeWiseClass(id: number): Promise<void> {
     try {
       const err = await response.json();
       message = err?.detail || err?.message || message;
-    } catch {}
+    } catch { }
     throw new Error(message);
   }
 }
@@ -2353,16 +2360,16 @@ export async function getStudentsByFeeWiseClass(
 ): Promise<StudentForFee[]> {
   const url = `${API_BASE_URL}/fee-wise-class/?school_class=${schoolClassId}`;
   const response = await fetchWithAuth(url);
- 
+
   if (!response.ok) {
     let message = "Failed to fetch students.";
     try {
       const err = await response.json();
       message = err?.detail || err?.message || message;
-    } catch {}
+    } catch { }
     throw new Error(message);
   }
- 
+
   const data = await response.json();
   return Array.isArray(data) ? data : (data.results ?? data.data ?? []);
 }
@@ -2399,35 +2406,34 @@ export async function getExistingStudentFees(filters: {
   fee_wise_class?: number;   // ← NEW
 }): Promise<StudentFee[]> {
   const params = new URLSearchParams();
- 
+
   if (filters.school_class)
     params.set("school_class", String(filters.school_class));
- 
+
   // billing_period can be "" for single fees — still send it
   if (filters.billing_period !== undefined)
     params.set("billing_period", filters.billing_period);
- 
+
   if (filters.academic_year)
     params.set("academic_year", String(filters.academic_year));
- 
+
   if (filters.fee_wise_class)                                     // ← NEW
     params.set("fee_wise_class", String(filters.fee_wise_class)); // ← NEW
- 
-  const url = `${API_BASE_URL}/fee-wise-class/${
-    params.toString() ? `?${params.toString()}` : ""
-  }`;
- 
+
+  const url = `${API_BASE_URL}/fee-wise-class/${params.toString() ? `?${params.toString()}` : ""
+    }`;
+
   const response = await fetchWithAuth(url);
- 
+
   if (!response.ok) {
     let message = "Failed to fetch existing student fees.";
     try {
       const err = await response.json();
       message = err?.detail || err?.message || message;
-    } catch {}
+    } catch { }
     throw new Error(message);
   }
- 
+
   const data = await response.json();
   return Array.isArray(data) ? data : (data.results ?? data.data ?? []);
 }
@@ -2754,4 +2760,365 @@ export async function getAdmissionReceipt(admission_number: string) {
     throw new Error(data?.error || "Failed to fetch receipt");
   }
   return data;
+}
+
+// app/student/pay-fees/forms.ts
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+export type FeeStatus = "pending" | "partial" | "paid" | "cancelled";
+export type PaymentMode = "cash" | "online" | "cheque" | "bank_transfer" | "upi";
+
+export interface Payment {
+  id: number;
+  student_fee: number;
+  amount: string;
+  payment_mode: PaymentMode;
+  receipt_number: string;
+  note?: string;
+  is_verified: boolean;
+  date: string;
+  created_at?: string;
+}
+
+export interface FeeSummary {
+  totalFees: number;
+  paidAmount: number;
+  pendingAmount: number;
+  remainingBalance: number;
+}
+
+export interface RazorpayOrderResponse {
+  order_id: string;
+  amount: number; // in paise
+  currency: string;
+  key: string;
+}
+
+export interface RazorpayVerifyPayload {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}
+
+export interface OfflinePaymentPayload {
+  student_fee: number;
+  amount: string;
+  payment_mode: PaymentMode;
+  receipt_number: string;
+  note?: string;
+  is_verified?: boolean;
+}
+
+export interface FeeFilters {
+  student?: number;
+  school_class?: number;
+  academic_year?: number;
+  status?: FeeStatus | "all";
+  billing_period?: string; // "2026-04"
+}
+
+// Rename to avoid conflict
+export interface MyStudentFee {
+  id: number;
+  student: number;
+  school_class?: number;
+  academic_year?: number;
+  billing_period: string;
+  status: FeeStatus;
+  amount: string;
+  discount_amount: string;
+  fine_amount: string;
+  paid_amount: string;
+  actual_payable_amount: string;
+  balance_amount: string;
+  payments: Payment[];
+}
+
+export interface PaymentFilters {
+  student_fee?: number;
+  student?: number;
+  school_class?: number;
+  payment_mode?: PaymentMode;
+  date_from?: string; // "2026-04-01"
+  date_to?: string;   // "2026-04-30"
+}
+// ─── Internal API helpers ─────────────────────────────────────────────────────
+
+/**
+ * Generic authenticated fetch wrapper.
+ * Automatically adds Bearer token via fetchWithAuth.
+ */
+async function apiFetch<T>(
+  path: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const url = path.startsWith("http")
+  ? path
+  : `${API_BASE_URL}${path.replace(/^\/api/, "")}`;
+
+  const response = await fetchWithAuth(url, {
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers ?? {}),
+    },
+    ...options,
+  });
+
+  if (!response.ok) {
+    let message = `Request failed: ${response.statusText}`;
+    try {
+      const err = await response.json();
+      message = err?.detail || err?.message || JSON.stringify(err) || message;
+    } catch { }
+    throw new Error(message);
+  }
+
+  // 204 No Content
+  if (response.status === 204) return undefined as unknown as T;
+
+  return response.json();
+}
+
+/**
+ * Build a query string from an object, skipping undefined/null values.
+ * Example: buildQuery({ page: 1, status: "paid" }) → "?page=1&status=paid"
+ */
+function buildQuery(
+  params: Record<string, string | number | boolean | undefined | null>
+): string {
+  const qs = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== null && value !== "") {
+      qs.set(key, String(value));
+    }
+  }
+  const str = qs.toString();
+  return str ? `?${str}` : "";
+}
+// ─── Student Fees API ─────────────────────────────────────────────────────────
+// Change these function signatures:
+
+export async function getMyFees(): Promise<MyStudentFee[]> {
+  return apiFetch<MyStudentFee[]>("/my-fees/");
+}
+
+export async function getStudentFees(
+  filters: FeeFilters = {}
+): Promise<MyStudentFee[]> {
+  const query = buildQuery({
+    student: filters.student,
+    school_class: filters.school_class,
+    academic_year: filters.academic_year,
+    status: filters.status !== "all" ? filters.status : undefined,
+    billing_period: filters.billing_period,
+  });
+  return apiFetch<MyStudentFee[]>(`/student-fee/${query}`);
+}
+
+export function computeFeeSummary(fees: MyStudentFee[]): FeeSummary {
+  return fees.reduce<FeeSummary>(
+    (acc, fee) => {
+      const payable = parseFloat(fee.actual_payable_amount);
+      const paid = parseFloat(fee.paid_amount);
+      const balance = parseFloat(fee.balance_amount);
+
+      acc.totalFees += payable;
+      acc.paidAmount += paid;
+      acc.pendingAmount += fee.status === "pending" ? balance : 0;
+      acc.remainingBalance += balance;
+      return acc;
+    },
+    { totalFees: 0, paidAmount: 0, pendingAmount: 0, remainingBalance: 0 }
+  );
+}
+
+export async function updateFeeStatus(
+  feeId: number,
+  status: FeeStatus
+): Promise<MyStudentFee> {
+  return apiFetch<MyStudentFee>(`/student-fee/${feeId}/`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
+  });
+}
+// ─── Razorpay API ─────────────────────────────────────────────────────────────
+
+/**
+ * Create a Razorpay order for a student fee.
+ * POST /api/student-fee/razor/order/
+ *
+ * @param studentFeeId - The student fee record id.
+ * @param partialAmount - Optional partial amount (omit for full balance).
+ */
+export async function createRazorpayOrder(
+  studentFeeId: number,
+  partialAmount?: string
+): Promise<RazorpayOrderResponse> {
+  const body: { student_fee: number; amount?: string } = {
+    student_fee: studentFeeId,
+  };
+  if (partialAmount) body.amount = partialAmount;
+
+  return apiFetch<RazorpayOrderResponse>("/student-fee/razor/order/", {
+
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+/**
+ * Verify a Razorpay payment after the checkout modal closes successfully.
+ * POST /api/student-fee/razor/verify/
+ */
+export async function verifyRazorpayPayment(
+  payload: RazorpayVerifyPayload
+): Promise<{ success: boolean; message?: string }> {
+  return apiFetch("/student-fee/razor/verify/", {
+
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * Full Razorpay pay-now flow:
+ *  1. Create order on backend
+ *  2. Open Razorpay checkout
+ *  3. Verify signature on backend
+ *
+ * @param studentFeeId - Fee to pay.
+ * @param partialAmount - Optional partial amount string, e.g. "500.00".
+ * @param studentName - Prefill name in Razorpay checkout.
+ * @param studentEmail - Prefill email.
+ * @param studentContact - Prefill phone.
+ * @param onSuccess - Called after successful verification.
+ * @param onFailure - Called on any error.
+ */
+export async function initiateRazorpayPayment({
+  studentFeeId,
+  partialAmount,
+  studentName = "",
+  studentEmail = "",
+  studentContact = "",
+  onSuccess,
+  onFailure,
+}: {
+  studentFeeId: number;
+  partialAmount?: string;
+  studentName?: string;
+  studentEmail?: string;
+  studentContact?: string;
+  onSuccess: () => void;
+  onFailure: (error: string) => void;
+}): Promise<void> {
+  try {
+    const order = await createRazorpayOrder(studentFeeId, partialAmount);
+
+    // Razorpay checkout is loaded via CDN script in your _document or layout.
+    // Add <script src="https://checkout.razorpay.com/v1/checkout.js" /> to your layout.
+    const Razorpay = (window as typeof window & { Razorpay: new (opts: unknown) => { open(): void } }).Razorpay;
+
+    const rzp = new Razorpay({
+      key: order.key,
+      amount: order.amount,
+      currency: order.currency,
+      order_id: order.order_id,
+      name: "School Fees",
+      description: "Fee Payment",
+      prefill: {
+        name: studentName,
+        email: studentEmail,
+        contact: studentContact,
+      },
+      handler: async (response: {
+        razorpay_order_id: string;
+        razorpay_payment_id: string;
+        razorpay_signature: string;
+      }) => {
+        try {
+          await verifyRazorpayPayment({
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+          });
+          onSuccess();
+        } catch (err) {
+          onFailure((err as Error).message ?? "Payment verification failed");
+        }
+      },
+      modal: {
+        ondismiss: () => onFailure("Payment cancelled by user"),
+      },
+    });
+
+    rzp.open();
+  } catch (err) {
+    onFailure((err as Error).message ?? "Failed to create payment order");
+  }
+}
+
+// ─── Payment History API ──────────────────────────────────────────────────────
+
+/**
+ * Fetch payment history with optional filters.
+ * GET /api/student-fee-payment/
+ */
+export async function getPaymentHistory(
+  filters: PaymentFilters = {}
+): Promise<Payment[]> {
+  const query = buildQuery({
+    student_fee: filters.student_fee,
+    student: filters.student,
+    school_class: filters.school_class,
+    payment_mode: filters.payment_mode,
+    date_from: filters.date_from,
+    date_to: filters.date_to,
+  });
+  return apiFetch<Payment[]>(`/student-fee-payment/${query}`);
+
+}
+/**
+ * Record an offline payment (cash / cheque / bank transfer etc.).
+ * POST /api/student-fee-payment/
+ */
+export async function createOfflineStudentFeePayment(
+  payload: OfflinePaymentPayload
+): Promise<Payment> {
+  return apiFetch<Payment>("/student-fee-payment/", {
+
+    method: "POST",
+    body: JSON.stringify({ is_verified: true, ...payload }),
+  });
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/** Format a numeric string or number as Indian Rupee display value. */
+export function formatINR(value: string | number): string {
+  const num = typeof value === "string" ? parseFloat(value) : value;
+  return `₹ ${num.toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+/** Convert a billing_period string "2026-04" to a display label "April 2026". */
+export function billingPeriodToLabel(period: string): string {
+  const [year, month] = period.split("-");
+  const date = new Date(Number(year), Number(month) - 1, 1);
+  return date.toLocaleDateString("en-IN", { month: "long", year: "numeric" });
+}
+
+/** Normalize API FeeStatus to the badge label used in the UI. */
+export function feeStatusLabel(status: FeeStatus): string {
+  return status.toUpperCase();
+}
+
+/** Map a billing_period "2026-04" to a month name for filter dropdowns. */
+export function periodToMonthName(period: string): string {
+  const [, month] = period.split("-");
+  return new Date(2000, Number(month) - 1, 1).toLocaleString("en-IN", {
+    month: "long",
+  });
 }

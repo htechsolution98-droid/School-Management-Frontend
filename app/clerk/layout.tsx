@@ -20,8 +20,8 @@ const sidebarLinks = [
   { title: "Subjects", href: "/clerk/subjects", icon: BookOpen },
   { title: "Syllabus", href: "/clerk/syllabus", icon: FileText },
   { title: "Attendance Zone", href: "/clerk/location-settings", icon: MapPin },
-  { title: "Timetable", href: "/clerk/timetable", icon: Calendar },
   { title: "Assign Teacher", href: "/clerk/assign-teacher", icon: Plus },
+  { title: "Timetable", href: "/clerk/timetable", icon: Calendar },
 ];
 
 export default function ClerkLayout({ children }: { children: React.ReactNode }) {
