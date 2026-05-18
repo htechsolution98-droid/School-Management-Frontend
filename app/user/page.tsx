@@ -235,6 +235,135 @@ const STATUS_STYLES: Record<string, string> = {
   completed: "bg-emerald-50 text-emerald-600 border border-emerald-200", // ← ADD
 };
 
+const generateReceiptPDF = (data: any) => {
+  // dynamic import to avoid SSR issues in Next.js
+  import("jspdf").then(({ default: jsPDF }) => {
+    import("jspdf-autotable").then(({ default: autoTable }) => {
+      const doc = new jsPDF();
+      const pageW = doc.internal.pageSize.getWidth();
+      const left = 14;
+
+      const fmt = (d: string) =>
+        d ? new Date(d).toLocaleString("en-IN", {
+          day: "2-digit", month: "short", year: "numeric",
+          hour: "2-digit", minute: "2-digit",
+        }) : "—";
+
+      // ── Header ─────────────────────────────────────────
+      doc.setFontSize(20);
+      doc.setFont("helvetica", "bold");
+      doc.text("SCHOOL ADMISSION FORM", pageW / 2, 18, { align: "center" });
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      doc.text(data.form_title ?? "", pageW / 2, 25, { align: "center" });
+
+      // ── ADMISSION RECEIPT box ──────────────────────────
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.rect(55, 30, 100, 9);
+      doc.text("ADMISSION RECEIPT", pageW / 2, 37, { align: "center" });
+
+      // ── Info rows ──────────────────────────────────────
+      doc.setFontSize(9.5);
+      let y = 48;
+      const gap = 7;
+      const col2 = 70, col3 = 115, col4 = 148;
+
+      const row = (l1: string, v1: string, l2?: string, v2?: string) => {
+        doc.setFont("helvetica", "bold");   doc.text(l1, left, y);
+        doc.setFont("helvetica", "normal"); doc.text(`: ${v1}`, col2, y);
+        if (l2 && v2) {
+          doc.setFont("helvetica", "bold");   doc.text(l2, col3, y);
+          doc.setFont("helvetica", "normal"); doc.text(`: ${v2}`, col4, y);
+        }
+        y += gap;
+      };
+
+      row("Admission Number", data.admission_number ?? "", "Form Title", data.form_title ?? "");
+      row("Status", data.status ? (data.status.charAt(0).toUpperCase() + data.status.slice(1)) : "");
+      row("Pay Process", data.pay_process ? "Yes" : "No", "Username", data.temp_user_data?.username ?? "");
+      row(
+        "Fee Amount",
+        data.fee_amount ? `Rs. ${parseFloat(data.fee_amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}` : "—",
+        "Email", data.temp_user_data?.email ?? ""
+      );
+      row("Submitted At", fmt(data.submitted_at), "Mobile", data.temp_user_data?.mobile ?? "");
+
+      doc.line(left, y, pageW - left, y); y += 6;
+
+      // ── STUDENT DETAILS ────────────────────────────────
+      doc.setFont("helvetica", "bold"); doc.setFontSize(11);
+      doc.text("STUDENT DETAILS", pageW / 2, y, { align: "center" }); y += 3;
+
+      autoTable(doc, {
+        startY: y,
+        head: [["Section Name", "Field Name", "Value"]],
+        body: (data.field_values ?? []).map((f: any) => [
+          f.section_name ?? "", f.field_name ?? "", f.value ?? ""
+        ]),
+        styles: { fontSize: 9 },
+        headStyles: { fillColor: [255,255,255], textColor: 0, fontStyle: "bold", lineWidth: 0.3 },
+        theme: "grid",
+      });
+
+      y = (doc as any).lastAutoTable.finalY + 8;
+
+      // ── UPLOADED DOCUMENTS ─────────────────────────────
+      doc.setFont("helvetica", "bold"); doc.setFontSize(11);
+      doc.text("UPLOADED DOCUMENTS", pageW / 2, y, { align: "center" }); y += 3;
+
+      autoTable(doc, {
+        startY: y,
+        head: [["S.No.", "Document Name", "File", "Uploaded At"]],
+        body: (data.documents ?? []).map((d: any, i: number) => [
+          i + 1, d.document_name ?? "", d.file ?? "", fmt(d.uploaded_at)
+        ]),
+        styles: { fontSize: 9 },
+        headStyles: { fillColor: [255,255,255], textColor: 0, fontStyle: "bold", lineWidth: 0.3 },
+        theme: "grid",
+      });
+
+      y = (doc as any).lastAutoTable.finalY + 8;
+
+      // ── PAYMENT DETAILS ────────────────────────────────
+      doc.setFont("helvetica", "bold"); doc.setFontSize(11);
+      doc.text("PAYMENT DETAILS", pageW / 2, y, { align: "center" }); y += 3;
+
+      const pd = data.payment_detail ?? {};
+      autoTable(doc, {
+        startY: y,
+        body: [
+          ["Payment ID", String(pd.id ?? "—")],
+          ["Amount", pd.amount ? `Rs. ${Number(pd.amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}` : "—"],
+          ["Currency", pd.currency ?? "INR"],
+          ["Payment Mode", pd.payment_mode ? (pd.payment_mode.charAt(0).toUpperCase() + pd.payment_mode.slice(1)) : "—"],
+          ["Payment Type", pd.payment_type ? (pd.payment_type.charAt(0).toUpperCase() + pd.payment_type.slice(1)) : "—"],
+          ["Razorpay Order ID", pd.razorpay_order_id ?? "—"],
+          ["Razorpay Payment ID", pd.razorpay_payment_id ?? "—"],
+          ["Fee Verify", pd.fee_verify ? "Yes" : "No"],
+          ["Created At", fmt(pd.created_at)],
+          ["Paid At", fmt(pd.paid_at)],
+        ],
+        styles: { fontSize: 9 },
+        columnStyles: { 0: { fontStyle: "bold", cellWidth: 58 } },
+        theme: "grid",
+      });
+
+      y = (doc as any).lastAutoTable.finalY + 16;
+
+      // ── Signatures ─────────────────────────────────────
+      doc.setFontSize(9.5);
+      doc.line(left, y, left + 60, y);
+      doc.line(pageW - left - 60, y, pageW - left, y);
+      y += 5;
+      doc.text("Parent / Guardian Signature", left, y);
+      doc.text("Authorized Signature", pageW - left - 60, y);
+
+      doc.save(`receipt-${data.admission_number}.pdf`);
+    });
+  });
+};
+
 // ─────────────────────────────────────────────
 // ChildrenList
 // ─────────────────────────────────────────────
@@ -468,12 +597,7 @@ function ChildrenList({
                           className="flex-1"
                         >
                           <Button
-                            onClick={() =>
-                              window.open(
-                                `/receipts/${receiptData.admission_number}.pdf`,
-                                "_blank",
-                              )
-                            }
+                            onClick={() => generateReceiptPDF(receiptData)}
                             className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl h-11 font-bold shadow-lg shadow-emerald-200 flex items-center justify-center gap-2 text-sm transition-all"
                           >
                             <svg
@@ -814,6 +938,8 @@ function MultiStepForm({
   onBack: () => void;
   onPaymentSuccess: (admissionNumber: string) => void; // ← ADD
 }) {
+  const [feeAmount, setFeeAmount] = useState<number | null>(null);
+
   // If field_values exist, student has completed step 1, start at step 2
   const hasExistingData = child?.sections?.some(
     (s: any) => s?.field_values?.length > 0,
@@ -880,21 +1006,22 @@ function MultiStepForm({
         }));
 
       if (documents.length > 0) {
-        await submitDocuments({
-          // ← no need to capture response
+        const response = await submitDocuments({
           admission_number: applicationId,
           documents,
         });
 
-        // ← REMOVE the alert() line, just go to step 3
-        setStep(3);
-      } else {
-        setStep(3); // ← also handle zero-docs case
+        // ← capture fee_amount from API response
+        const fee = response?.["fee amount"] ?? response?.fee_amount ?? null;
+        if (fee !== null && fee !== undefined && Number(fee) > 0) {
+          setFeeAmount(Number(fee));
+        }
       }
+
+      setStep(3);
     } catch (error) {
       console.error("Document submission failed:", error);
       toast.error(
-        // ← use toast instead of alert
         error instanceof Error ? error.message : "Document submission failed",
       );
     } finally {
@@ -1011,7 +1138,7 @@ function MultiStepForm({
   // Inside MultiStepForm, BEFORE the return statement — add this:
   const payNow = async () => {
     try {
-      const amount = formData?.fees ? Number(formData.fees) : 0;
+      const amount = feeAmount ?? (formData?.fees ? Number(formData.fees) : 0);
 
       const admission_number = applicationId;
 
@@ -1093,7 +1220,7 @@ function MultiStepForm({
 
   const payOffline = async () => {
     try {
-      const amount = formData?.fees ? Number(formData.fees) : 0;
+      const amount = feeAmount ?? (formData?.fees ? Number(formData.fees) : 0);
 
       const response = await createOfflinePayment({
         amount,
@@ -1427,6 +1554,7 @@ function MultiStepForm({
                     formData={formData}
                     paymentMode={paymentMode}
                     setPaymentMode={setPaymentMode}
+                    feeAmount={feeAmount}
                   />
                 )}
               </AnimatePresence>
@@ -1510,9 +1638,9 @@ function MultiStepForm({
                   >
                     <Shield size={16} />
                     Confirm & Pay ₹
-                    {formData?.fees
-                      ? Number(formData.fees).toLocaleString("en-IN")
-                      : "1,500"}
+                    {(
+                      feeAmount ?? (formData?.fees ? Number(formData.fees) : 0)
+                    ).toLocaleString("en-IN")}
                   </Button>
                 </motion.div>
               )}
@@ -2112,27 +2240,19 @@ function ReviewStep({
   formData,
   paymentMode,
   setPaymentMode,
+  feeAmount,
 }: {
   formData: any;
   paymentMode: "online" | "offline";
   setPaymentMode: React.Dispatch<React.SetStateAction<"online" | "offline">>;
+  feeAmount: number | null;
 }) {
-  const fees =
-    formData?.fee_structures?.length > 0
-      ? formData.fee_structures
-      : formData?.fees
-        ? [{ label: "Admission Fee", amount: formData.fees }]
-        : [
-            { label: "Registration Fee", amount: "1,200" },
-            { label: "Prospectus Fee", amount: "300" },
-          ];
+  // Replace the fees/total logic at the top with this:
+  const resolvedAmount =
+    feeAmount ?? (formData?.fees ? Number(formData.fees) : 0);
 
-  const total = formData?.fees
-    ? Number(formData.fees).toFixed(2)
-    : fees
-        .reduce((sum: number, f: any) => sum + Number(f.amount), 0)
-        .toFixed(2);
-
+  const fees = [{ label: "Admission Fee", amount: resolvedAmount }];
+  const total = resolvedAmount.toFixed(2);
   const feesEnabled = formData?.fees_enable !== false;
 
   return (

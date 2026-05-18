@@ -587,35 +587,37 @@ export async function submitDocuments(payload: {
   admission_number: string;
   documents: { document_field: number; file: File }[];
 }): Promise<any> {
+  const formData = new FormData();
+  formData.append("admission_number", payload.admission_number);
 
-  for (const doc of payload.documents) {
-    const formData = new FormData();
-    formData.append("admission_number", payload.admission_number);
+  payload.documents.forEach((doc) => {
     formData.append("document_field", String(doc.document_field));
     formData.append("file", doc.file);
+  });
 
-    try {
-      const response = await fetchWithAuth(
-        `${API_BASE_URL}/documentsubmission/`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      if (!response.ok) {
-        console.warn(`Doc ${doc.document_field} upload failed with status ${response.status}`);
-        // ← don't throw, continue to next doc
-      }
-    } catch (error) {
-      console.warn(`Doc ${doc.document_field} upload error:`, error);
-      // ← don't throw, continue to next doc
+  const response = await fetchWithAuth(
+    `${API_BASE_URL}/documentsubmission/`,
+    {
+      method: "POST",
+      body: formData,
     }
+  );
+
+  if (!response.ok) {
+    let message = "Document submission failed";
+    try {
+      const err = await response.json();
+      message = err?.detail || err?.message || message;
+    } catch {}
+    throw new Error(message);
   }
 
-  return { message: "Documents uploaded successfully" };
+  const data = await response.json();
+  // console.log("SUBMIT DOCUMENTS RESPONSE:", data); // ← check what comes back
+  
+  // handle if response is array, take first item
+  return Array.isArray(data) ? data[0] : data;
 }
-
 
 export async function createRazorOrder(payload: {
   amount: number;

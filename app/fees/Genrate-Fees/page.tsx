@@ -234,6 +234,7 @@ const CreateFeeModal = ({
   const [feeType, setFeeType] = useState<"monthly" | "single">(activeTab);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [selectedClass, setSelectedClass] = useState("");
   const [toast, setToast] = useState<{
     type: "success" | "error";
     message: string;
@@ -243,16 +244,26 @@ const CreateFeeModal = ({
     student: "",
     academic_year: "",
     fee_wise_class: "",
+    feetype: "",
     billing_period: new Date().toISOString().slice(0, 7),
     due_date: "",
+    selected_class: "", // ADD THIS ONLY
   });
 
   useEffect(() => {
     setFeeType(activeTab);
   }, [activeTab]);
 
-  const filteredFeeClasses = feeWiseClasses;
+  const uniqueClassOptions = Array.from(
+    new Map(
+      feeWiseClasses.map((fc) => [fc.school_class, fc.school_class_name]),
+    ).entries(),
+  ).map(([id, name]) => ({ id, name }));
+  const filteredStudents = selectedClass
+    ? students.filter((s) => String(s.school_class) === selectedClass)
+    : students;
 
+  const filteredFeeClasses = feeWiseClasses;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -269,6 +280,7 @@ const CreateFeeModal = ({
         student: parseInt(form.student),
         academic_year: parseInt(form.academic_year),
         fee_wise_class: parseInt(form.fee_wise_class),
+        feetype: parseInt(form.feetype),
         billing_period: feeType === "monthly" ? form.billing_period : "",
         due_date: form.due_date,
       };
@@ -340,19 +352,44 @@ const CreateFeeModal = ({
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* UI-only class filter */}
+        <FormField label="Class" required>
+          <select
+            className={selectClass}
+            value={form.selected_class}
+            onChange={(e) => {
+              update("selected_class", e.target.value);
+              update("student", ""); // reset student on class change
+            }}
+          >
+            <option value="">Select class...</option>
+            {[...new Set(students.map((s) => s.class_name).filter(Boolean))]
+              .sort()
+              .map((cls) => (
+                <option key={cls} value={cls!}>
+                  {cls}
+                </option>
+              ))}
+          </select>
+        </FormField>
+
         <FormField label="Student" error={errors.student} required>
           <select
             className={selectClass}
             value={form.student}
             onChange={(e) => update("student", e.target.value)}
+            disabled={!form.selected_class}
           >
-            <option value="">Select student...</option>
-            {students.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name} {s.surname || ""}{" "}
-                {s.class_name ? `(${s.class_name})` : ""}
-              </option>
-            ))}
+            <option value="">
+              {form.selected_class ? "Select student..." : "Select class first"}
+            </option>
+            {students
+              .filter((s) => s.class_name === form.selected_class)
+              .map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name} {s.surname || ""}
+                </option>
+              ))}
           </select>
         </FormField>
 
@@ -375,7 +412,17 @@ const CreateFeeModal = ({
           <select
             className={selectClass}
             value={form.fee_wise_class}
-            onChange={(e) => update("fee_wise_class", e.target.value)}
+            onChange={(e) => {
+              const selectedId = e.target.value;
+              const selectedFeeClass = feeWiseClasses.find(
+                (fc) => fc.id === Number(selectedId),
+              );
+              update("fee_wise_class", selectedId);
+              update(
+                "feetype",
+                selectedFeeClass ? String(selectedFeeClass.feetype) : "",
+              );
+            }}
           >
             <option value="">Select fee structure...</option>
             {filteredFeeClasses.map((fc) => (
@@ -787,8 +834,8 @@ export default function GenerateFeesPage() {
       if (studentsRes.success && studentsRes.data)
         setStudents(studentsRes.data);
       if (feesRes.success && feesRes.data) {
-  setFees(feesRes.data.results);
-}
+        setFees(feesRes.data.results);
+      }
 
       if (yearsRes.success && yearsRes.data) setAcademicYears(yearsRes.data);
       if (feeClassesRes.success && feeClassesRes.data)
@@ -1229,7 +1276,10 @@ export default function GenerateFeesPage() {
                     <div className="bg-green-50 rounded-lg p-2 text-center">
                       <p className="text-xs text-gray-400">Discount</p>
                       <p className="text-sm font-bold text-green-600">
-                        ₹{parseFloat(fee.discount_amount ?? "0").toLocaleString()}
+                        ₹
+                        {parseFloat(
+                          fee.discount_amount ?? "0",
+                        ).toLocaleString()}
                       </p>
                     </div>
                     <div className="bg-blue-50 rounded-lg p-2 text-center">
