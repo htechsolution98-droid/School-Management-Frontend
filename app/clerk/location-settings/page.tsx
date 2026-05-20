@@ -2054,7 +2054,7 @@ function InteractiveMap({
         setLocating(false);
       },
       (err: GeolocationPositionError) => {
-        const msgs = {
+        const msgs: Record<number, string> = {
           [err.PERMISSION_DENIED]: "Location permission denied.",
           [err.POSITION_UNAVAILABLE]:
             "Location unavailable. Set manually on the map.",

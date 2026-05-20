@@ -815,7 +815,7 @@ export default function StudentRecordsPage() {
                       onValueChange={(value) =>
                         setEditedFields((prev) => ({
                           ...prev,
-                          [String(fv.field)]: value,
+                          [String(fv.field)]: value || "",
                         }))
                       }
                     >

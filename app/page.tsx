@@ -21,6 +21,7 @@ import {
   CreditCard,
   ArrowRight,
   CheckCircle2,
+  ChevronDown,
   Sparkles,
   Menu,
   Star,
@@ -38,6 +39,8 @@ import { toast } from "sonner";
 
 export default function LandingPage() {
   const [formLink, setFormLink] = useState("");
+  const [activePanelIndex, setActivePanelIndex] = useState(0);
+  const [activeChooseIdx, setActiveChooseIdx] = useState<number | null>(0);
 
   useEffect(() => {
     getPublishedFormLink()
@@ -481,108 +484,321 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Role-Based Modules */}
-      <section id="modules" className="py-20 bg-[#F8FAFC]">
-        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <Badge className="rounded-lg px-4 py-2 bg-[#1D496C]/5 text-[#1D496C] border-0 mb-4">
-              <Users className="mr-2 h-3 w-3 text-[#1D496C]" />
-              Role-Based Access
+      {/* Interactive Panels Section */}
+      <section id="modules" className="py-24 bg-gradient-to-b from-[#F8FAFC] via-[#F1F5F9] to-white relative overflow-hidden">
+        {/* Abstract background decorative elements */}
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-[#1D496C]/5 to-[#429CE4]/5 rounded-full blur-3xl -translate-y-1/2 pointer-events-none"></div>
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-gradient-to-tr from-[#6A7626]/5 to-[#FFA600]/5 rounded-full blur-3xl translate-y-1/2 pointer-events-none"></div>
+
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+            <Badge className="rounded-full px-4 py-1.5 bg-[#1D496C]/10 text-[#1D496C] border-0 font-bold uppercase tracking-wider text-xs">
+              <Users className="mr-2 h-3.5 w-3.5" />
+              Role-Based Portals
             </Badge>
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4 text-[#0F172A]">
-              Tailored for Every Stakeholder
+            <h2 className="text-3.5xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#1D496C] leading-tight">
+              Tailored Portals for <span className="bg-gradient-to-r from-[#285E89] to-[#6A7626] bg-clip-text text-transparent">Every Stakeholder</span>
             </h2>
-            <p className="text-[#475569]">
-              Each user gets a personalized experience with exactly what they need
+            <p className="text-slate-500 font-medium text-base sm:text-lg">
+              Explore dynamic, dedicated panels built specifically to optimize administrative workflows, teaching activities, and parent-student engagement.
             </p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {roles.map((role, index) => (
-              <Card
-                key={index}
-                className="group border-0 bg-white shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer"
-              >
-                <CardHeader>
-                  <div className={`mb-4 flex h-16 w-16 items-center justify-center rounded-lg bg-gradient-to-br ${role.color} text-white shadow-sm group-hover:scale-110 transition-transform duration-300`}>
-                    {role.icon}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* Left Side Selector List */}
+            <div className="lg:col-span-4 flex flex-row lg:flex-col gap-3 overflow-x-auto lg:overflow-x-visible pb-4 lg:pb-0 scrollbar-none snap-x shrink-0 min-w-0">
+              {panelsData.map((panel, idx) => {
+                const Icon = panel.icon;
+                const isActive = activePanelIndex === idx;
+                return (
+                  <button
+                    key={panel.id}
+                    onClick={() => setActivePanelIndex(idx)}
+                    className={`flex items-center gap-4 p-4 rounded-2xl text-left border transition-all duration-300 snap-start shrink-0 min-w-[240px] lg:min-w-0 ${
+                      isActive
+                        ? `bg-white border-slate-200 shadow-lg ${panel.glowColor} translate-x-1 lg:translate-x-2`
+                        : "bg-white/60 hover:bg-white border-transparent hover:border-slate-100 hover:shadow-md"
+                    }`}
+                  >
+                    {/* Icon container */}
+                    <div
+                      className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 ${
+                        isActive ? `bg-gradient-to-br ${panel.color} text-white scale-110` : "bg-slate-100 text-slate-500"
+                      }`}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </div>
+
+                    <div className="flex-grow">
+                      <span
+                        className={`block font-bold text-sm lg:text-base transition-colors duration-300 ${
+                          isActive ? "text-[#1D496C]" : "text-slate-600 hover:text-[#1D496C]"
+                        }`}
+                      >
+                        {panel.name}
+                      </span>
+                      <span className="block text-xs font-semibold text-slate-400 mt-0.5">
+                        {isActive ? "Active Workspace" : "Click to explore"}
+                      </span>
+                    </div>
+
+                    {/* Active Right Indicator Line */}
+                    {isActive && (
+                      <div className={`hidden lg:block w-1.5 h-8 bg-gradient-to-b ${panel.color} rounded-full`}></div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Right Side Details & Live Mockup */}
+            <div className="lg:col-span-8">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activePanelIndex}
+                  initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -20, scale: 0.98 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="bg-white rounded-[32px] border border-slate-100 shadow-xl overflow-hidden flex flex-col p-6 sm:p-8 relative"
+                >
+                  {/* Background overlay accent matching the active panel's bgColor */}
+                  <div className={`absolute top-0 right-0 h-56 w-56 rounded-full blur-3xl pointer-events-none -translate-y-20 translate-x-20 ${panelsData[activePanelIndex].bgColor}`}></div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${panelsData[activePanelIndex].color} text-white flex items-center justify-center`}>
+                        {(() => {
+                          const Icon = panelsData[activePanelIndex].icon;
+                          return <Icon className="h-5 w-5" />;
+                        })()}
+                      </div>
+                      <h3 className="text-2xl sm:text-3xl font-black text-[#1D496C]">
+                        {panelsData[activePanelIndex].name}
+                      </h3>
+                    </div>
+                    <Badge variant="outline" className={`rounded-full px-3 py-1 font-bold text-xs uppercase bg-white border-${panelsData[activePanelIndex].accentColor}/30`}>
+                      ★ Dedicated Portal
+                    </Badge>
                   </div>
-                  <CardTitle className="text-xl text-[#0F172A]">{role.title}</CardTitle>
-                  <CardDescription className="text-sm font-medium text-[#475569]">
-                    {role.role}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-3">
-                    {role.features.slice(0, 4).map((feature, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm">
-                        <CheckCircle2 className="mt-0.5 h-3 w-3 text-[#34D399] shrink-0" />
-                        <span className="text-[#475569]">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            ))}
+
+                  <p className="text-slate-600 font-semibold text-sm sm:text-base leading-relaxed mb-8">
+                    {panelsData[activePanelIndex].description}
+                  </p>
+
+                  <div className="mb-8">
+                    <h4 className="text-[#1D496C] font-extrabold text-sm sm:text-base uppercase tracking-wider mb-4 flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-[#FFA600]" />
+                      Core Features & Capabilities
+                    </h4>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {panelsData[activePanelIndex].features.map((feature, idx) => (
+                        <div key={idx} className="flex items-start gap-2.5 p-1">
+                          <div className="h-5 w-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-slate-100">
+                            <CheckCircle2 className="h-3.5 w-3.5 text-[#6A7626]" strokeWidth={3} />
+                          </div>
+                          <span className="text-[#475569] font-bold text-sm leading-snug">
+                            {feature}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Mock Dashboard Workspace */}
+                  <div className="border border-slate-100 rounded-2xl bg-slate-950 p-5 sm:p-6 shadow-inner relative overflow-hidden">
+                    <div className="absolute inset-0 bg-grid-white/[0.02] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
+
+                    {/* Window Control Header */}
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4 text-xs">
+                      <div className="flex items-center gap-2">
+                        <span className="h-3 w-3 rounded-full bg-rose-500/80"></span>
+                        <span className="h-3 w-3 rounded-full bg-amber-500/80"></span>
+                        <span className="h-3 w-3 rounded-full bg-emerald-500/80"></span>
+                        <span className="text-slate-400 font-bold ml-2 hidden sm:inline text-[11px] uppercase tracking-wider">
+                          {panelsData[activePanelIndex].mockup.title}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span className="text-emerald-400 font-bold text-[10px] tracking-wider uppercase">Live Preview</span>
+                      </div>
+                    </div>
+
+                    {/* Metric Card Grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4 relative z-10">
+                      {panelsData[activePanelIndex].mockup.metrics.map((metric, mIdx) => (
+                        <div key={mIdx} className="bg-slate-900/80 border border-slate-900/60 p-3.5 rounded-xl flex flex-col justify-between">
+                          <span className="text-slate-500 font-semibold text-[10px] sm:text-xs uppercase tracking-wider block mb-1">
+                            {metric.label}
+                          </span>
+                          <span className="text-white font-extrabold text-sm sm:text-lg block tracking-tight">
+                            {metric.value}
+                          </span>
+                          <span className="text-slate-400 font-bold text-[9px] sm:text-[10px] block mt-1">
+                            {metric.change}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Preview Workspace zone */}
+                    <div className="bg-slate-900/50 border border-slate-900/40 p-3.5 rounded-xl relative z-10">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className={`h-2.5 w-2.5 rounded-full bg-gradient-to-r ${panelsData[activePanelIndex].color}`}></div>
+                        <span className="text-slate-300 font-extrabold text-xs uppercase tracking-wider">System Workspace Logs</span>
+                      </div>
+                      <p className="text-slate-400 text-[11px] sm:text-xs font-semibold leading-relaxed">
+                        {panelsData[activePanelIndex].mockup.previewText}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Special Modules Grid */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-8 lg:grid-cols-2">
-            {/* Fee Management */}
-            <Card className="group border-0 bg-gradient-to-br from-[#1D496C]/5 to-white shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer">
-              <div className="absolute top-0 right-0 h-40 w-40 bg-[#6A7626]/10 rounded-full blur-3xl -translate-y-20 translate-x-20 group-hover:scale-150 transition-transform duration-700"></div>
-              <CardHeader>
-                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-lg bg-gradient-to-br from-[#1D496C] to-[#15354F] text-white shadow-sm">
-                  <DollarSign className="h-8 w-8" />
-                </div>
-                <CardTitle className="text-2xl text-[#0F172A]">Fee Management</CardTitle>
-                <CardDescription className="text-[#475569]">
-                  Complete financial management with RTE compliance
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-3 mb-6">
-                  {feeCategories.map((category, i) => (
-                    <div key={i} className="rounded-lg bg-[#F8FAFC] p-3 text-sm font-medium text-[#1D496C] border border-[#6A7626]/20">
-                      {category}
-                    </div>
-                  ))}
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Badge className="rounded-lg bg-[#1D496C]/10 text-[#1D496C] border-0">RTE Reimbursement</Badge>
-                  <Badge className="rounded-lg bg-[#6A7626]/10 text-[#6A7626] border-0">Late Fee Penalties</Badge>
-                  <Badge className="rounded-lg bg-[#429CE4]/10 text-[#1D496C] border-0">Discount Management</Badge>
-                </div>
-              </CardContent>
-            </Card>
+      {/* Why Choose Us Section */}
+      <section id="why-choose-us" className="py-24 bg-white relative overflow-hidden">
+        {/* Soft background decor */}
+        <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-[#6A7626]/5 rounded-full blur-3xl -translate-y-1/2 pointer-events-none"></div>
+        <div className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-[#429CE4]/5 rounded-full blur-3xl pointer-events-none"></div>
 
-            {/* Inventory & Library */}
-            <Card className="group border-0 bg-gradient-to-br from-[#6A7626]/5 to-white shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer">
-              <div className="absolute top-0 right-0 h-40 w-40 bg-[#1D496C]/10 rounded-full blur-3xl -translate-y-20 translate-x-20 group-hover:scale-150 transition-transform duration-700"></div>
-              <CardHeader>
-                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-lg bg-gradient-to-br from-[#6A7626] to-[#4F581D] text-white shadow-sm">
-                  <BookMarked className="h-8 w-8" />
-                </div>
-                <CardTitle className="text-2xl text-[#0F172A]">Inventory & Library</CardTitle>
-                <CardDescription className="text-[#475569]">
-                  Complete asset and book tracking system
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-3">
-                  {inventoryFeatures.map((item, i) => (
-                    <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-white/80 hover:bg-white transition-colors border border-[#6A7626]/10">
-                      <CheckCircle2 className="h-4 w-4 text-[#6A7626] shrink-0" />
-                      <span className="text-sm text-[#475569]">{item}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
+          {/* Centered Heading */}
+          <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+            <Badge className="rounded-full px-4 py-1.5 bg-[#6A7626]/10 text-[#6A7626] border-0 font-bold uppercase tracking-wider text-xs">
+              Why Choose Us
+            </Badge>
+            <h2 className="text-3.5xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#1D496C] leading-tight">
+              Why Schools Choose <span className="bg-gradient-to-r from-[#285E89] to-[#6A7626] bg-clip-text text-transparent">VidhyaSanchalan</span>
+            </h2>
+            <p className="text-slate-500 font-medium text-base sm:text-lg">
+              Empower your educational institution with a platform designed to simplify administration, enhance student performance, and foster seamless communication.
+            </p>
+          </div>
+
+          {/* 2-Column Accordion Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+            
+            {/* Left Column (First 4 points) */}
+            <div className="space-y-4">
+              {whyChooseUsData.slice(0, 4).map((item, i) => {
+                const idx = i;
+                const isOpen = activeChooseIdx === idx;
+                return (
+                  <div
+                    key={idx}
+                    className={`border rounded-2xl transition-all duration-300 overflow-hidden ${
+                      isOpen
+                        ? "border-[#6A7626]/40 bg-gradient-to-br from-[#6A7626]/5 to-[#429CE4]/5 shadow-md shadow-[#6A7626]/5"
+                        : "border-slate-100 bg-white hover:border-slate-300 hover:shadow-sm"
+                    }`}
+                  >
+                    <button
+                      onClick={() => setActiveChooseIdx(isOpen ? null : idx)}
+                      className="w-full flex items-center justify-between p-5 text-left transition-colors focus:outline-none"
+                    >
+                      <div className="flex items-center gap-3.5">
+                        <CheckCircle2
+                          className={`h-6 w-6 shrink-0 transition-colors duration-300 ${
+                            isOpen ? "text-[#6A7626]" : "text-slate-400"
+                          }`}
+                        />
+                        <span
+                          className={`font-bold text-base sm:text-lg transition-colors duration-300 ${
+                            isOpen ? "text-[#1D496C]" : "text-[#475569]"
+                          }`}
+                        >
+                          {item.title}
+                        </span>
+                      </div>
+                      <ChevronDown
+                        className={`h-5 w-5 text-slate-400 shrink-0 transition-transform duration-300 ${
+                          isOpen ? "rotate-180 text-[#6A7626]" : ""
+                        }`}
+                      />
+                    </button>
+
+                    <AnimatePresence initial={false}>
+                      {isOpen && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.25, ease: "easeInOut" }}
+                        >
+                          <div className="px-5 pb-5 pt-0 pl-[48px] text-sm sm:text-base text-slate-600 font-medium leading-relaxed">
+                            {item.description}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Right Column (Last 4 points) */}
+            <div className="space-y-4">
+              {whyChooseUsData.slice(4, 8).map((item, i) => {
+                const idx = i + 4;
+                const isOpen = activeChooseIdx === idx;
+                return (
+                  <div
+                    key={idx}
+                    className={`border rounded-2xl transition-all duration-300 overflow-hidden ${
+                      isOpen
+                        ? "border-[#6A7626]/40 bg-gradient-to-br from-[#6A7626]/5 to-[#429CE4]/5 shadow-md shadow-[#6A7626]/5"
+                        : "border-slate-100 bg-white hover:border-slate-300 hover:shadow-sm"
+                    }`}
+                  >
+                    <button
+                      onClick={() => setActiveChooseIdx(isOpen ? null : idx)}
+                      className="w-full flex items-center justify-between p-5 text-left transition-colors focus:outline-none"
+                    >
+                      <div className="flex items-center gap-3.5">
+                        <CheckCircle2
+                          className={`h-6 w-6 shrink-0 transition-colors duration-300 ${
+                            isOpen ? "text-[#6A7626]" : "text-slate-400"
+                          }`}
+                        />
+                        <span
+                          className={`font-bold text-base sm:text-lg transition-colors duration-300 ${
+                            isOpen ? "text-[#1D496C]" : "text-[#475569]"
+                          }`}
+                        >
+                          {item.title}
+                        </span>
+                      </div>
+                      <ChevronDown
+                        className={`h-5 w-5 text-slate-400 shrink-0 transition-transform duration-300 ${
+                          isOpen ? "rotate-180 text-[#6A7626]" : ""
+                        }`}
+                      />
+                    </button>
+
+                    <AnimatePresence initial={false}>
+                      {isOpen && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.25, ease: "easeInOut" }}
+                        >
+                          <div className="px-5 pb-5 pt-0 pl-[48px] text-sm sm:text-base text-slate-600 font-medium leading-relaxed">
+                            {item.description}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
+            </div>
+
           </div>
         </div>
       </section>
@@ -621,7 +837,7 @@ export default function LandingPage() {
               Testimonials
             </Badge>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4 text-[#0F172A]">
-              Loved by Educators
+              Trusted by Schools & Educators
             </h2>
             <p className="text-[#475569]">
               See what schools are saying about VidyaSanchalan
@@ -631,23 +847,23 @@ export default function LandingPage() {
           <div className="grid gap-6 md:grid-cols-3">
             {[
               {
-                name: "Sarah Johnson",
-                role: "Principal, Greenfield School",
-                content: "EduManage has transformed how we handle admissions and attendance. The parent communication feature is a game-changer!",
+                name: "Rajesh Sharma",
+                role: "Principal, Apex International School",
+                content: "VidhyaSanchalan simplified our complete admission and fee management process.",
                 rating: 5,
                 color: "bg-white"
               },
               {
-                name: "Michael Chen",
-                role: "Head of Administration",
-                content: "The fee management system is incredibly intuitive. We've reduced our administrative workload by 60%.",
+                name: "Sunita Deshmukh",
+                role: "Parent of Class IX Student",
+                content: "Parents can now easily track student performance and attendance.",
                 rating: 5,
                 color: "bg-white"
               },
               {
-                name: "Priya Patel",
-                role: "Teacher, Oakridge School",
-                content: "Entering marks and generating progress reports has never been easier. My students love the parent portal!",
+                name: "Devendra Patel",
+                role: "Administration Trustee",
+                content: "The geo-attendance feature made staff management much easier.",
                 rating: 5,
                 color: "bg-white"
               }
@@ -655,8 +871,8 @@ export default function LandingPage() {
               <Card key={i} className={`border-0 ${testimonial.color} shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1`}>
                 <CardContent className="p-6">
                   <div className="flex gap-1 mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-[#FFA600] text-[#FFA600]" />
+                    {[...Array(testimonial.rating)].map((_, idx) => (
+                      <Star key={idx} className="h-4 w-4 fill-[#FFA600] text-[#FFA600]" />
                     ))}
                   </div>
                   <p className="text-[#475569] mb-4">"{testimonial.content}"</p>
@@ -920,49 +1136,233 @@ const mainFeatures = [
   }
 ];
 
-const roles = [
+const panelsData = [
   {
-    icon: <Shield className="h-8 w-8" />,
-    title: "Administrator",
-    role: "Full System Control",
+    id: "trustee",
+    name: "Trustee Panel",
+    icon: Shield,
     color: "from-[#1D496C] to-[#15354F]",
-    features: ["School configuration", "User management", "Financial oversight", "Report generation", "System audit logs"]
+    bgColor: "bg-[#1D496C]/5",
+    accentColor: "#1D496C",
+    glowColor: "shadow-[#1D496C]/20",
+    description: "Manage overall school operations, monitor administration, and analyze school performance with high-level summaries.",
+    features: [
+      "Create and manage staff",
+      "Add teachers, principals, peons, and office staff",
+      "Monitor school activities",
+      "Access reports and analytics",
+      "Control overall management"
+    ],
+    mockup: {
+      title: "Trustee Analytics Dashboard",
+      metrics: [
+        { label: "Total Schools", value: "1", change: "Active" },
+        { label: "Total Staff Created", value: "48", change: "+4 this month" },
+        { label: "Overall Revenue Analytics", value: "₹24.8 Lakhs", change: "92% collected" },
+        { label: "System Health & Audits", value: "Optimal", change: "No alerts" }
+      ],
+      previewText: "Staff control, active school logs, fee collections graphs, and branch management dashboard."
+    }
   },
   {
-    icon: <BookOpen className="h-8 w-8" />,
-    title: "Teacher",
-    role: "Academic Management",
+    id: "principal",
+    name: "Principal Panel",
+    icon: GraduationCap,
     color: "from-[#6A7626] to-[#4F581D]",
-    features: ["Attendance marking", "Mark entry", "Assignment management", "Parent communication", "Timetable view"]
+    bgColor: "bg-[#6A7626]/5",
+    accentColor: "#6A7626",
+    glowColor: "shadow-[#6A7626]/20",
+    description: "Maintain academic quality, oversee admissions, verify student fee structures, and streamline staff requests.",
+    features: [
+      "Create and publish admission forms",
+      "Verify fees",
+      "Approve or reject staff leave requests",
+      "Manage academic activities",
+      "View school reports"
+    ],
+    mockup: {
+      title: "Principal Portal",
+      metrics: [
+        { label: "Admissions Pending", value: "14", change: "Review required" },
+        { label: "Staff Leave Requests", value: "3", change: "2 pending approval" },
+        { label: "Active Classes", value: "18", change: "All teachers assigned" },
+        { label: "Today's Attendance", value: "96.4%", change: "High attendance" }
+      ],
+      previewText: "Admission portal pipelines, leave approval tables, time-table review grid, and class monitoring widget."
+    }
   },
   {
-    icon: <GraduationCap className="h-8 w-8" />,
-    title: "Student",
-    role: "Learning Portal",
-    color: "from-[#ED6708] to-[#FFA600]",
-    features: ["View attendance", "Check results", "Fee payment", "Download materials", "Event calendar"]
+    id: "clerk",
+    name: "Clerk Panel",
+    icon: BookMarked,
+    color: "from-[#429CE4] to-[#2E85CC]",
+    bgColor: "bg-[#429CE4]/5",
+    accentColor: "#429CE4",
+    glowColor: "shadow-[#429CE4]/20",
+    description: "Handle core student records, assign academic schedules, generate unique GR numbers, and manage location settings.",
+    features: [
+      "Assign class divisions",
+      "Allocate class teachers and subjects",
+      "Generate student GR numbers",
+      "Verify student fees",
+      "Manage records and documents",
+      "Geo attendance management"
+    ],
+    mockup: {
+      title: "Clerk Records Portal",
+      metrics: [
+        { label: "GR Numbers Issued", value: "1,248", change: "+12 today" },
+        { label: "Fee Records Staged", value: "85", change: "Pending verification" },
+        { label: "Geo Attendance Status", value: "Active", change: "9 locations synced" },
+        { label: "Class Assignments", value: "100%", change: "Completed" }
+      ],
+      previewText: "GR register generation tool, document uploader workspace, division allocator, and geo-tracking logs."
+    }
   },
   {
-    icon: <Heart className="h-8 w-8" />,
-    title: "Parent",
-    role: "Child Monitoring",
-    color: "from-[#429CE4] to-[#1D496C]",
-    features: ["Real-time alerts", "Fee payment", "Progress tracking", "Communication", "Leave applications"]
+    id: "fee-management",
+    name: "Fee Management Panel",
+    icon: DollarSign,
+    color: "from-[#FFA600] to-[#E09200]",
+    bgColor: "bg-[#FFA600]/5",
+    accentColor: "#FFA600",
+    glowColor: "shadow-[#FFA600]/20",
+    description: "Define custom, highly flexible fee categories, manage automated billing cycles, and track collection modes.",
+    features: [
+      "Create dynamic fee structures",
+      "Manage tuition, library, transport, and activity fees",
+      "Monthly, quarterly, yearly fee setup",
+      "Online and offline payment options",
+      "Track pending fees and receipts"
+    ],
+    mockup: {
+      title: "Fee Collections Desk",
+      metrics: [
+        { label: "Pending Fees", value: "₹4.2 Lakhs", change: "28 accounts overdue" },
+        { label: "Today's Receipts", value: "₹84,000", change: "15 receipts printed" },
+        { label: "Online Payments", value: "65%", change: "Via gateway" },
+        { label: "Offline Collections", value: "35%", change: "Cash/cheque synced" }
+      ],
+      previewText: "Dynamic fee structure creator, automatic reminders control panel, transaction registers, and outstanding fees summary."
+    }
+  },
+  {
+    id: "teacher",
+    name: "Teacher Panel",
+    icon: BookOpen,
+    color: "from-[#ED6708] to-[#CD5804]",
+    bgColor: "bg-[#ED6708]/5",
+    accentColor: "#ED6708",
+    glowColor: "shadow-[#ED6708]/20",
+    description: "Simplify classroom teaching workflows, publish homework and assignments, mark student attendance, and run online quizzes.",
+    features: [
+      "Upload homework and assignments",
+      "Manage attendance",
+      "Conduct online exams",
+      "Update marks and progress",
+      "Share announcements",
+      "Manage class timetable"
+    ],
+    mockup: {
+      title: "Teacher Classroom Center",
+      metrics: [
+        { label: "Assignments Checked", value: "24/28", change: "Grade pending" },
+        { label: "Today's Classes", value: "4 periods", change: "Next: Grade X Science" },
+        { label: "Active Exams", value: "1 Quiz", change: "MCQ Live" },
+        { label: "Announcements Sent", value: "2", change: "To Grade X Parents" }
+      ],
+      previewText: "Attendance calendar marker, mark entries sheet, assignment submission dashboard, and interactive quiz creator."
+    }
+  },
+  {
+    id: "student",
+    name: "Student Panel",
+    icon: Rocket,
+    color: "from-[#285E89] to-[#1D496C]",
+    bgColor: "bg-[#285E89]/5",
+    accentColor: "#285E89",
+    glowColor: "shadow-[#285E89]/20",
+    description: "Access a personalized study environment to track learning progress, submit assignments, take exams, and stay connected.",
+    features: [
+      "View homework and assignments",
+      "Attend online exams",
+      "Access timetable and syllabus",
+      "Login credentials via email",
+      "Track attendance and marks"
+    ],
+    mockup: {
+      title: "Student Portal Home",
+      metrics: [
+        { label: "Homework Pending", value: "2 items", change: "Due tomorrow" },
+        { label: "Your Attendance", value: "98.2%", change: "Excellent" },
+        { label: "Upcoming Exams", value: "1", change: "Friday 10:00 AM" },
+        { label: "Average GPA Score", value: "A+", change: "Top 5% in class" }
+      ],
+      previewText: "Timetable viewer widget, assignment upload form, exam console panel, and progress report dashboard."
+    }
+  },
+  {
+    id: "parent",
+    name: "Guardian / Parent Panel",
+    icon: Heart,
+    color: "from-[#E11D48] to-[#BE123C]",
+    bgColor: "bg-[#E11D48]/5",
+    accentColor: "#E11D48",
+    glowColor: "shadow-[#E11D48]/20",
+    description: "Stay involved in your child's education. Monitor daily school life, track progress, review marksheets, and see official school news.",
+    features: [
+      "Track student progress",
+      "View attendance and marksheets",
+      "Check exam results",
+      "Monitor homework completion",
+      "Receive school announcements"
+    ],
+    mockup: {
+      title: "Parent Dashboard",
+      metrics: [
+        { label: "Child Progress", value: "Improving", change: "+5% last term" },
+        { label: "Outstanding Fees", value: "₹0", change: "Fully paid" },
+        { label: "School Notifications", value: "3 new", change: "Holiday alert included" },
+        { label: "Homework Verified", value: "100%", change: "All checked" }
+      ],
+      previewText: "Performance progress graphs, report card download console, fee dues tracking, and school announcement logs."
+    }
   }
 ];
 
-const feeCategories = [
-  "Tuition Fee", "Transport Fee", "Library Fee", "Lab Fee",
-  "Sports Fee", "Exam Fee", "Hostel Fee", "Miscellaneous"
-];
-
-const inventoryFeatures = [
-  "Book catalog with ISBN tracking",
-  "Issue & return management",
-  "Overdue alerts & fine calculation",
-  "Asset lifecycle management",
-  "Vendor & purchase management",
-  "Stock level alerts"
+const whyChooseUsData = [
+  {
+    title: "Easy to use interface",
+    description: "Experience a dual-tone, intuitive design with a zero-learning-curve dashboard specifically optimized for administrators, teachers, and parents alike."
+  },
+  {
+    title: "Complete school automation",
+    description: "From student admissions and dynamic fee structures to classroom attendance, timetable allocation, and report cards—everything runs fully automated in one hub."
+  },
+  {
+    title: "Separate role-based panels",
+    description: "Seven completely isolated dashboards (Trustee, Principal, Clerk, Fee, Teacher, Student, Parent) ensure focused workflows, strict privacy, and distraction-free operation."
+  },
+  {
+    title: "Secure data management",
+    description: "Your school database is protected using modern end-to-end encryption protocols, regular automated backups, and strict role-based access permissions."
+  },
+  {
+    title: "Online & offline support",
+    description: "Enable seamless digital gateway payment options for online ease while maintaining fully synchronized cash, cheque, and manual fee desk logs."
+  },
+  {
+    title: "Real-time communication",
+    description: "Keep everyone in the loop with instant push notifications, integrated SMS notifications, prompt announcements, and automated attendance/grade alerts."
+  },
+  {
+    title: "Smart attendance tracking",
+    description: "Features precise, fraud-proof GPS geo-fenced mobile attendance check-ins for administrators and quick digital rolls for classroom teachers."
+  },
+  {
+    title: "Scalable for any school size",
+    description: "Designed on an ultra-modern modular architecture that scales effortlessly from single-campus institutes to sprawling multi-branch education trusts."
+  }
 ];
 
 const footerLinks = [
