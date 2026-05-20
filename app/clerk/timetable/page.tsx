@@ -117,7 +117,7 @@ const SLOT_COLORS = [
 ];
 
 // ─── SMALL HELPERS ────────────────────────────────────────────────────────────
-function fmtTime(t) {
+function fmtTime(t: string) {
   if (!t) return "";
   const parts = t.split(":");
   const h = parseInt(parts[0], 10);
@@ -128,14 +128,14 @@ function fmtTime(t) {
   return `${String(h12).padStart(2, "0")}:${String(m).padStart(2, "0")} ${ampm}`;
 }
 
-function toApiTime(t) {
+function toApiTime(t: string) {
   if (!t) return "00:00:00";
   const parts = t.split(":");
   if (parts.length === 2) return `${t}:00`;
   return t;
 }
 
-function minutesBetween(start, end) {
+function minutesBetween(start: string, end: string) {
   if (!start || !end) return 0;
   const [sh, sm] = start.split(":").map(Number);
   const [eh, em] = end.split(":").map(Number);
@@ -147,7 +147,7 @@ function genId() {
 }
 
 // ─── TOAST ────────────────────────────────────────────────────────────────────
-function Toast({ message, type, onClose }) {
+function Toast({ message, type, onClose }: { message: string; type: "success" | "error" | "info" | "warning"; onClose: () => void }) {
   useEffect(() => {
     const t = setTimeout(onClose, 4500);
     return () => clearTimeout(t);
@@ -184,6 +184,14 @@ function SelectField({
   disabled = false,
   accent = "violet",
   icon: Icon,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  children: React.ReactNode;
+  placeholder: string;
+  disabled?: boolean;
+  accent?: "violet" | "emerald" | "orange";
+  icon?: React.ComponentType<{ size: number; className: string }>;
 }) {
   const ring = {
     violet: "focus:ring-violet-300 focus:border-violet-400",
@@ -216,7 +224,7 @@ function SelectField({
 }
 
 // ─── FIELD LABEL ─────────────────────────────────────────────────────────────
-function Label({ children, required }) {
+function Label({ children, required }: { children: React.ReactNode; required?: boolean }) {
   return (
     <label className="block text-xs font-semibold text-gray-600 mb-1.5">
       {children}
@@ -226,7 +234,7 @@ function Label({ children, required }) {
 }
 
 // ─── STEP INDICATOR ──────────────────────────────────────────────────────────
-function StepIndicator({ current }) {
+function StepIndicator({ current }: { current: number }) {
   const steps = [
     { id: 1, label: "Basic Information" },
     { id: 2, label: "Add Time Slots" },
@@ -262,7 +270,22 @@ function StepIndicator({ current }) {
 }
 
 // ─── LIVE PREVIEW PANEL ───────────────────────────────────────────────────────
-function LivePreviewPanel({ slots, day }) {
+function LivePreviewPanel({
+  slots,
+  day,
+}: {
+  slots: Array<{
+    is_lecture: boolean;
+    is_break: boolean;
+    slot_start_time: string;
+    slot_end_time: string;
+    subject?: string | number;
+    subject_name?: string;
+    teacher?: string | number;
+    teacher_name?: string;
+  }>;
+  day: string;
+}) {
   const lectureCount = slots.filter((s) => s.is_lecture).length;
   const breakCount = slots.filter((s) => s.is_break).length;
   const totalMin = slots.reduce(

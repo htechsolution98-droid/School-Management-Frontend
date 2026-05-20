@@ -71,7 +71,7 @@ export default function SubjectsPage() {
   const [selectedClassId, setSelectedClassId] = useState<string>("");
 
   const filteredDivisions = divisions.filter(
-    (div) => div.SchoolClass.toString() === selectedClassId,
+    (div) => div.SchoolClass?.toString() === selectedClassId,
   );
 
   const fetchData = async () => {
