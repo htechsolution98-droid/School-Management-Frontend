@@ -1588,7 +1588,7 @@ async function deleteLocationSettings(id: number | string) {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function cn(...classes: string[]) {
+function cn(...classes: (string | undefined)[]) {
   return classes.filter(Boolean).join(" ");
 }
 
@@ -1881,7 +1881,7 @@ function InteractiveMap({
       mapInstanceRef.current = map;
 
       if (!readOnly) {
-        map.on("click", (e) => {
+        map.on("click", (e: any) => {
           const { lat: clickLat, lng: clickLng } = e.latlng;
           placeMarker(map, clickLat, clickLng, parseInt(radius || "100"));
           onLocationSelect(clickLat.toFixed(6), clickLng.toFixed(6));
