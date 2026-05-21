@@ -418,7 +418,7 @@ export default function LandingPage() {
       </section>
 
       {/* Main Features Section */}
-      <section id="features" className="py-20 bg-white overflow-hidden border-b border-[#1D496C]/10" ref={gsapContainerRef}>
+      <section id="features" className="pt-20 pb-6 bg-white overflow-hidden border-b border-[#1D496C]/10" ref={gsapContainerRef}>
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
             <Badge 
@@ -485,13 +485,13 @@ export default function LandingPage() {
       </section>
 
       {/* Interactive Panels Section */}
-      <section id="modules" className="py-24 bg-gradient-to-b from-[#F8FAFC] via-[#F1F5F9] to-white relative overflow-hidden">
+      <section id="modules" className="pt-10 pb-20 bg-gradient-to-b from-[#F8FAFC] via-[#F1F5F9] to-white relative overflow-hidden">
         {/* Abstract background decorative elements */}
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-[#1D496C]/5 to-[#429CE4]/5 rounded-full blur-3xl -translate-y-1/2 pointer-events-none"></div>
         <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-gradient-to-tr from-[#6A7626]/5 to-[#FFA600]/5 rounded-full blur-3xl translate-y-1/2 pointer-events-none"></div>
 
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+          <div className="text-center max-w-3xl mx-auto mb-8 space-y-3">
             <Badge className="rounded-full px-4 py-1.5 bg-[#1D496C]/10 text-[#1D496C] border-0 font-bold uppercase tracking-wider text-xs">
               <Users className="mr-2 h-3.5 w-3.5" />
               Role-Based Portals
@@ -661,14 +661,14 @@ export default function LandingPage() {
       </section>
 
       {/* Why Choose Us Section */}
-      <section id="why-choose-us" className="py-24 bg-white relative overflow-hidden">
+      <section id="why-choose-us" className="pt-10 pb-20 bg-white relative overflow-hidden">
         {/* Soft background decor */}
         <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-[#6A7626]/5 rounded-full blur-3xl -translate-y-1/2 pointer-events-none"></div>
         <div className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-[#429CE4]/5 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Centered Heading */}
-          <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
+          <div className="text-center max-w-3xl mx-auto mb-8 space-y-3">
             <Badge className="rounded-full px-4 py-1.5 bg-[#6A7626]/10 text-[#6A7626] border-0 font-bold uppercase tracking-wider text-xs">
               Why Choose Us
             </Badge>
@@ -829,7 +829,7 @@ export default function LandingPage() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 bg-[#F8FAFC]">
+      <section className="pt-20 pb-12 bg-[#F8FAFC]">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <Badge className="rounded-lg px-4 py-2 bg-white text-[#1D496C] border-0 mb-4">
@@ -895,7 +895,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-white">
+      <section className="pt-10 pb-20 bg-white">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <Card className="border-0 bg-gradient-to-br from-[#429CE4]/5 to-white shadow-xl overflow-hidden cursor-pointer">
             <div className="absolute inset-0 bg-grid-[#1D496C]/5 [mask-image:radial-gradient(ellipse_at_center,white,transparent)]"></div>
