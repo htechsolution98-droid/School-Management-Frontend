@@ -377,7 +377,7 @@ function LivePreviewPanel({ slots, day }: { slots: Slot[]; day: string }) {
         </h3>
         {day && (
           <span className="text-xs bg-violet-100 text-violet-700 font-bold px-3 py-1 rounded-full">
-            {DAY_SHORT[day] ?? day}
+            {DAY_SHORT[day as keyof typeof DAY_SHORT] ?? day}
           </span>
         )}
       </div>
@@ -1259,7 +1259,7 @@ function Step3PreviewSave({
 
       <div className="bg-gradient-to-r from-violet-50 to-purple-50 border border-violet-100 rounded-2xl p-4 mb-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {[
-          { label: "Day", value: DAY_FULL[form.day] ?? form.day },
+          { label: "Day", value: DAY_FULL[form.day as keyof typeof DAY_FULL] ?? form.day },
           {
             label: "Class",
             value: divName
@@ -1420,7 +1420,7 @@ function SuccessView({
           </p>
           <p className="text-sm text-emerald-600 mt-0.5">
             {divName ? `${divName.class_name} (${divName.division})` : ""} ·{" "}
-            {DAY_FULL[form.day]} · ID #{savedRecord?.id}
+            {DAY_FULL[form.day as keyof typeof DAY_FULL]} · ID #{savedRecord?.id}
           </p>
         </div>
         <div className="flex gap-2 flex-shrink-0">

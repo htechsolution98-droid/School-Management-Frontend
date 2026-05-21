@@ -144,7 +144,7 @@ function LoginFormInner() {
           <div className="relative">
             <User
               className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors duration-200 ${
-                focused === "username" ? "text-[#4F46E5]" : "text-[#94A3B8]"
+                focused === "username" ? "text-[#1D496C]" : "text-[#94A3B8]"
               }`}
             />
             <Input
@@ -156,7 +156,7 @@ function LoginFormInner() {
               onChange={(e) => setUsername(e.target.value)}
               onFocus={() => setFocused("username")}
               onBlur={() => setFocused(null)}
-              className="pl-10 h-12 rounded-xl border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#CBD5E1] shadow-sm focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-200"
+              className="pl-10 h-12 rounded-xl border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#CBD5E1] shadow-sm focus:border-[#1D496C] focus:ring-2 focus:ring-[#1D496C]/20 transition-all duration-200"
             />
           </div>
         </motion.div>
@@ -178,7 +178,7 @@ function LoginFormInner() {
             </Label>
             <a
               href="#"
-              className="text-xs font-medium text-[#4F46E5] hover:text-[#3730A3] transition-colors underline-offset-2 hover:underline"
+              className="text-xs font-medium text-[#1D496C] hover:text-[#285E89] transition-colors underline-offset-2 hover:underline"
             >
               Forgot password?
             </a>
@@ -186,7 +186,7 @@ function LoginFormInner() {
           <div className="relative">
             <Lock
               className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors duration-200 ${
-                focused === "password" ? "text-[#4F46E5]" : "text-[#94A3B8]"
+                focused === "password" ? "text-[#1D496C]" : "text-[#94A3B8]"
               }`}
             />
             <Input
@@ -198,7 +198,7 @@ function LoginFormInner() {
               onChange={(e) => setPassword(e.target.value)}
               onFocus={() => setFocused("password")}
               onBlur={() => setFocused(null)}
-              className="pl-10 pr-11 h-12 rounded-xl border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#CBD5E1] shadow-sm focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-200"
+              className="pl-10 pr-11 h-12 rounded-xl border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#CBD5E1] shadow-sm focus:border-[#1D496C] focus:ring-2 focus:ring-[#1D496C]/20 transition-all duration-200"
             />
             <button
               type="button"
@@ -247,7 +247,7 @@ function LoginFormInner() {
           <Button
             type="submit"
             disabled={isLoading}
-            className="group relative w-full h-12 rounded-xl bg-gradient-to-r from-[#4F46E5] to-[#6D28D9] text-white font-semibold text-sm shadow-lg shadow-indigo-200 hover:shadow-indigo-300 hover:from-[#4338CA] hover:to-[#5B21B6] active:scale-[0.98] transition-all duration-200 disabled:opacity-70"
+            className="group relative w-full h-12 rounded-xl bg-gradient-to-r from-[#1D496C] to-[#429CE4] text-white font-semibold text-sm shadow-lg shadow-blue-100 hover:shadow-blue-200 hover:from-[#15354F] hover:to-[#1D496C] active:scale-[0.98] transition-all duration-200 disabled:opacity-70"
           >
             <AnimatePresence mode="wait" initial={false}>
               {isLoading ? (
@@ -305,7 +305,7 @@ export function LoginForm() {
     <Suspense
       fallback={
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-[#4F46E5]" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#1D496C]" />
         </div>
       }
     >

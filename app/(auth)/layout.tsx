@@ -19,11 +19,11 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   // Memoize the left branding panel so it only animates on first mount
   // and stays stable during navigation between auth pages.
   const brandingPanel = useMemo(() => (
-    <div className="relative hidden lg:flex flex-col justify-center gap-12 overflow-hidden bg-gradient-to-br from-[#312E81] via-[#4F46E5] to-[#6D28D9] p-12">
+    <div className="relative hidden lg:flex flex-col justify-center gap-12 overflow-hidden bg-gradient-to-br from-[#1D496C] via-[#122F45] to-[#6A7626] p-12">
       {/* Animated blob background */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-white/5 blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-[#34D399]/10 blur-3xl animate-pulse [animation-delay:1s]" />
+        <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-[#6A7626]/10 blur-3xl animate-pulse [animation-delay:1s]" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-64 w-64 rounded-full bg-white/5 blur-2xl" />
         {/* Grid dots */}
         <svg className="absolute inset-0 h-full w-full opacity-10" xmlns="http://www.w3.org/2000/svg">
@@ -44,11 +44,11 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         className="relative z-10"
       >
         <Link href="/" className="flex items-center gap-3 group w-fit">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm shadow-lg group-hover:bg-white/25 transition-all">
-            <GraduationCap className="h-5 w-5 text-white" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white p-1 shadow-lg group-hover:scale-105 transition-all">
+            <img src="/logo.png" alt="VidyaSanchalan Logo" className="h-10 w-10 object-contain" />
           </div>
-          <span className="text-xl font-bold text-white">
-            Edu<span className="text-[#34D399]">Manage</span>
+          <span className="text-xl font-black text-white tracking-tight">
+            Vidya<span className="text-[#FFA600]">Sanchalan</span>
           </span>
         </Link>
       </motion.div>
@@ -62,7 +62,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       >
         <div>
           <h2 className="text-4xl font-bold text-white leading-tight mb-4">
-            Welcome to EduManage!
+            Welcome to VidyaSanchalan!
           </h2>
           <p className="text-white/70 text-lg leading-relaxed max-w-sm">
             Manage your school seamlessly with our cutting-edge unified platform.
@@ -80,7 +80,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               className="flex items-center gap-3"
             >
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10">
-                <f.icon className="h-4 w-4 text-[#34D399]" />
+                <f.icon className="h-4 w-4 text-[#FFA600]" />
               </div>
               <span className="text-sm text-white/80">{f.text}</span>
             </motion.li>
@@ -117,12 +117,12 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <div className="flex flex-col bg-[#F8FAFC]">
         {/* Mobile logo */}
         <div className="flex justify-center p-6 lg:hidden">
-          <Link href="/" className="flex items-center gap-2 font-medium">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-[#4F46E5] to-[#3730A3] text-white">
-              <GraduationCap className="size-4" />
+          <Link href="/" className="flex items-center gap-3 font-medium">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white p-1 shadow-md border border-[#1D496C]/10">
+              <img src="/logo.png" alt="VidyaSanchalan Logo" className="h-10 w-10 object-contain" />
             </div>
-            <span className="text-lg font-bold text-[#0F172A]">
-              Edu<span className="text-[#4F46E5]">Manage</span>
+            <span className="text-lg font-black tracking-tight">
+              <span className="text-[#285E89]">Vidya</span><span className="text-[#FFA600]">Sanchalan</span>
             </span>
           </Link>
         </div>
@@ -145,7 +145,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </div>
 
         <p className="pb-6 text-center text-xs text-[#94A3B8]">
-          © {new Date().getFullYear()} EduManage · School Management Platform
+          © {new Date().getFullYear()} VidyaSanchalan · School Management Platform
         </p>
       </div>
 
