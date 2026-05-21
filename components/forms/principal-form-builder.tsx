@@ -1244,38 +1244,7 @@ export default function PrincipalFormBuilder({
                               Individual Fees
                             </button>
                           </div>
-                          {/* Payment Mode */}
-                          <div className="space-y-1.5">
-                            <Label className="text-xs font-medium text-slate-600">
-                              Payment Mode
-                            </Label>
-                            <div className="flex bg-muted p-1 rounded-lg w-full max-w-[300px]">
-                              <button
-                                type="button"
-                                onClick={() => setPaymentMode("online")}
-                                className={cn(
-                                  "flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all",
-                                  paymentMode === "online"
-                                    ? "bg-white text-foreground shadow-sm"
-                                    : "text-muted-foreground hover:text-foreground",
-                                )}
-                              >
-                                Online (Razorpay)
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setPaymentMode("offline")}
-                                className={cn(
-                                  "flex-1 px-3 py-1.5 text-xs font-medium rounded-md transition-all",
-                                  paymentMode === "offline"
-                                    ? "bg-white text-foreground shadow-sm"
-                                    : "text-muted-foreground hover:text-foreground",
-                                )}
-                              >
-                                Offline (Cash)
-                              </button>
-                            </div>
-                          </div>
+                          
 
                           {feeType === "general" ? (
                             <div className="space-y-1.5">

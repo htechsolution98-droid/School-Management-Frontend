@@ -71,8 +71,8 @@ export default function SubjectsPage() {
   const [selectedClassId, setSelectedClassId] = useState<string>("");
 
   const filteredDivisions = divisions.filter(
-  (div) => div.SchoolClass != null && div.SchoolClass.toString() === selectedClassId,
-);
+    (div) => div.SchoolClass != null && div.SchoolClass.toString() === selectedClassId,
+  );
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -87,9 +87,52 @@ export default function SubjectsPage() {
       setSchoolClasses(classesData);
       setDivisions(divisionsData);
 
-      const sortedSubjects = subjectsData.sort((a, b) =>
-        a.name.localeCompare(b.name, undefined, { numeric: true }),
-      );
+      const sortedSubjects = [...subjectsData].sort((a, b) => {
+        const divA = divisionsData.find((d) => d.id === a.division);
+        const divB = divisionsData.find((d) => d.id === b.division);
+
+        const classA = classesData.find(
+          (c) => c.id === divA?.SchoolClass
+        );
+
+        const classB = classesData.find(
+          (c) => c.id === divB?.SchoolClass
+        );
+
+        // Sort by class order
+        const classIndexA = classA
+          ? SCHOOL_CLASS_OPTIONS.findIndex(
+            (opt) => opt.value === classA.school_class
+          )
+          : 999;
+
+        const classIndexB = classB
+          ? SCHOOL_CLASS_OPTIONS.findIndex(
+            (opt) => opt.value === classB.school_class
+          )
+          : 999;
+
+        if (classIndexA !== classIndexB) {
+          return classIndexA - classIndexB;
+        }
+
+        // Sort by division
+        const divisionCompare = (divA?.division || "").localeCompare(
+          divB?.division || "",
+          undefined,
+          { numeric: true }
+        );
+
+        if (divisionCompare !== 0) {
+          return divisionCompare;
+        }
+
+        // Sort by subject name
+        return a.name.localeCompare(b.name, undefined, {
+          numeric: true,
+        });
+      });
+
       setSubjects(sortedSubjects);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load data");
@@ -113,6 +156,20 @@ export default function SubjectsPage() {
 
     if (!selectedDivisionId) {
       toast.error("Please select a division");
+      return;
+    }
+
+    // Check duplicate subject in same division
+    const normalizedSubject = subjectName.trim().toLowerCase();
+
+    const alreadyExists = subjects.some(
+      (s) =>
+        s.division === parseInt(selectedDivisionId) &&
+        s.name.trim().toLowerCase() === normalizedSubject
+    );
+
+    if (alreadyExists) {
+      toast.error("This subject is already created for this class/division");
       return;
     }
 
@@ -166,7 +223,7 @@ export default function SubjectsPage() {
     const cls = schoolClasses.find((c) => c.id === div.SchoolClass);
     const classLabel = cls
       ? SCHOOL_CLASS_OPTIONS.find((o) => o.value === cls.school_class)?.label ||
-        cls.school_class
+      cls.school_class
       : "Unknown Class";
 
     return `${classLabel} - Div ${div.division}`;
@@ -185,13 +242,13 @@ export default function SubjectsPage() {
     const classB = schoolClasses.find((c) => c.id === b.SchoolClass);
     const indexA = classA
       ? SCHOOL_CLASS_OPTIONS.findIndex(
-          (opt) => opt.value === classA.school_class,
-        )
+        (opt) => opt.value === classA.school_class,
+      )
       : 999;
     const indexB = classB
       ? SCHOOL_CLASS_OPTIONS.findIndex(
-          (opt) => opt.value === classB.school_class,
-        )
+        (opt) => opt.value === classB.school_class,
+      )
       : 999;
     if (indexA !== indexB) return indexA - indexB;
     return a.division.localeCompare(b.division, undefined, { numeric: true });

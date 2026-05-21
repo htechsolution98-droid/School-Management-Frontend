@@ -124,11 +124,6 @@ export default function AssignTeacherPage() {
       return;
     }
 
-    if (!isClassTeacher) {
-      toast.error("You must mark this teacher as a Class Teacher to proceed");
-      return;
-    }
-
     setIsSaving(true);
     try {
       const payload: AssignClassPayload = {
@@ -403,8 +398,7 @@ export default function AssignTeacherPage() {
                     isSaving ||
                     !selectedDivisionId ||
                     !selectedSubjectId ||
-                    !selectedTeacherId ||
-                    !isClassTeacher
+                    !selectedTeacherId
                   }
                 >
                   {isSaving ? (
