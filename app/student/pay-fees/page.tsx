@@ -311,35 +311,175 @@ function ReceiptModal({
   fee: MyStudentFee;
   onClose: () => void;
 }) {
-  const handleDownload = () => {
-    const lines = [
-      `PAYMENT RECEIPT`,
-      `========================`,
-      `Student: ${(fee as any).student_name}`,
-      `Class: ${(fee as any).school_class_name}`,
-      `Fee Type: ${(fee as any).feetype_name}`,
-      `Period: ${billingPeriodToLabel(fee.billing_period)}`,
-      ``,
-      `Amount: ${formatINR(fee.amount)}`,
-      `Discount: -${formatINR(fee.discount_amount)}`,
-      `Fine: +${formatINR(fee.fine_amount)}`,
-      `Payable Amount: ${formatINR(fee.actual_payable_amount)}`,
-      `Paid Amount: ${formatINR(fee.paid_amount)}`,
-      `Balance: ${formatINR(fee.balance_amount)}`,
-      ``,
-      `Payment Mode: ${(fee as any).payment_mode ?? "online"}`,
-      `Transaction ID: ${(fee as any).transaction_id ?? "N/A"}`,
-      `Paid At: ${(fee as any).paid_at ? new Date((fee as any).paid_at).toLocaleString("en-IN") : "N/A"}`,
-      `Due Date: ${(fee as any).due_date ?? "N/A"}`,
-      `Status: PAID`,
-    ];
-    const blob = new Blob([lines.join("\n")], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `receipt-${(fee as any).feetype_name ?? fee.id}-${fee.billing_period}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const handleDownload = async () => {
+    const { default: jsPDF } = await import("jspdf");
+    const { default: autoTable } = await import("jspdf-autotable");
+
+    const doc = new jsPDF();
+    const pageW = doc.internal.pageSize.getWidth();
+    const left = 14;
+
+    const fmt = (d: string) =>
+      d
+        ? new Date(d).toLocaleString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "N/A";
+
+    // ── Header ──
+    doc.setFontSize(20);
+    doc.setFont("helvetica", "bold");
+    doc.text("SCHOOL FEE RECEIPT", pageW / 2, 18, { align: "center" });
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text("Official Payment Receipt", pageW / 2, 25, { align: "center" });
+
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.5);
+    doc.line(left, 29, pageW - left, 29);
+
+    // ── PAID stamp ──
+    doc.setDrawColor(0);
+    doc.rect(pageW - 50, 32, 36, 10);
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("PAID", pageW - 32, 39, { align: "center" });
+
+    // ── Student Info rows ──
+    doc.setFontSize(9);
+    let y = 34;
+    const col2 = 58;
+
+    const infoRow = (label: string, value: string) => {
+      doc.setFont("helvetica", "bold");
+      doc.text(label, left, y);
+      doc.setFont("helvetica", "normal");
+      doc.text(`: ${value}`, col2, y);
+      y += 6;
+    };
+
+    infoRow("Student Name", (fee as any).student_name ?? "N/A");
+    infoRow("Class", (fee as any).school_class_name ?? "N/A");
+    infoRow("Fee Type", (fee as any).feetype_name ?? "N/A");
+    infoRow("Billing Period", billingPeriodToLabel(fee.billing_period));
+    infoRow("Due Date", (fee as any).due_date ?? "N/A");
+    infoRow("Receipt ID", String((fee as any).id ?? "N/A"));
+    infoRow("Academic Year", String((fee as any).academic_year ?? "N/A"));
+
+    y += 4;
+    doc.setLineWidth(0.3);
+    doc.line(left, y, pageW - left, y);
+    y += 6;
+
+    // ── Fee Breakdown Table ──
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("FEE BREAKDOWN", pageW / 2, y, { align: "center" });
+    y += 4;
+
+    autoTable(doc, {
+      startY: y,
+      head: [["Description", "Amount"]],
+      body: [
+        ["Fee Amount", `Rs. ${Number(fee.amount).toFixed(2)}`],
+        ["Discount", `-Rs. ${Number(fee.discount_amount).toFixed(2)}`],
+        ["Fine Amount", `+Rs. ${Number(fee.fine_amount).toFixed(2)}`],
+        [
+          "Late Fee Amount",
+          `Rs. ${Number((fee as any).late_fee_amount ?? 0).toFixed(2)}`,
+        ],
+        [
+          "Max Late Fee",
+          `Rs. ${Number((fee as any).max_late_fee ?? 0).toFixed(2)}`,
+        ],
+        [
+          "Payable Amount",
+          `Rs. ${Number(fee.actual_payable_amount).toFixed(2)}`,
+        ],
+        ["Paid Amount", `Rs. ${Number(fee.paid_amount).toFixed(2)}`],
+        ["Balance", `Rs. ${Number(fee.balance_amount).toFixed(2)}`],
+      ],
+      styles: {
+        fontSize: 9,
+        textColor: [0, 0, 0] as any,
+        fillColor: [255, 255, 255] as any,
+      },
+      headStyles: {
+        fillColor: [255, 255, 255] as any,
+        textColor: [0, 0, 0] as any,
+        fontStyle: "bold",
+        lineWidth: 0.3,
+        lineColor: [0, 0, 0] as any,
+      },
+      bodyStyles: {
+        lineWidth: 0.2,
+        lineColor: [0, 0, 0] as any,
+      },
+      columnStyles: {
+        0: { cellWidth: 100 },
+        1: { halign: "right" },
+      },
+      theme: "grid",
+    });
+
+    y = (doc as any).lastAutoTable.finalY + 8;
+
+    // ── Payment Details Table ──
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "bold");
+    doc.text("PAYMENT DETAILS", pageW / 2, y, { align: "center" });
+    y += 4;
+
+    autoTable(doc, {
+      startY: y,
+      body: [
+        ["Payment Mode", (fee as any).payment_mode ?? "N/A"],
+        ["Transaction ID", (fee as any).transaction_id ?? "N/A"],
+        ["Paid At", fmt((fee as any).paid_at)],
+        ["Created At", fmt((fee as any).created_at)],
+        ["Late Fee Enabled", (fee as any).late_fee_enabled ? "Yes" : "No"],
+        ["Late Fee Type", (fee as any).late_fee_type ?? "N/A"],
+        ["Grace Days", String((fee as any).grace_days ?? "N/A")],
+        ["School ID", String((fee as any).school ?? "N/A")],
+        ["Student ID", String((fee as any).student ?? "N/A")],
+        ["Fee ID", String((fee as any).id ?? "N/A")],
+      ],
+      styles: {
+        fontSize: 9,
+        textColor: [0, 0, 0] as any,
+        fillColor: [255, 255, 255] as any,
+      },
+      bodyStyles: {
+        lineWidth: 0.2,
+        lineColor: [0, 0, 0] as any,
+      },
+      columnStyles: {
+        0: { fontStyle: "bold", cellWidth: 60 },
+      },
+      theme: "grid",
+    });
+
+    y = (doc as any).lastAutoTable.finalY + 16;
+
+    // ── Signatures ──
+    doc.setFontSize(9);
+    doc.setLineWidth(0.3);
+    doc.line(left, y, left + 60, y);
+    doc.line(pageW - left - 60, y, pageW - left, y);
+    y += 5;
+    doc.setFont("helvetica", "normal");
+    doc.text("Parent / Guardian Signature", left, y);
+    doc.text("Authorized Signature", pageW - left - 60, y);
+
+    doc.save(
+      `receipt-${(fee as any).feetype_name ?? fee.id}-${fee.billing_period}.pdf`,
+    );
+    onClose();
   };
 
   return (
@@ -1120,3 +1260,4 @@ export default function PayFeesPage() {
     </div>
   );
 }
+

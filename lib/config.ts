@@ -33,5 +33,6 @@ export const API_ENDPOINTS = {
     FEE_TYPE: "/feetype/",
     FEE_WISE_CLASS: "/fee-wise-class/",
     DASHBOARD_COUNT: "/dashboard-count/",
+    ACADEMIC_YEAR: "/main-academic-year/",
 }
 

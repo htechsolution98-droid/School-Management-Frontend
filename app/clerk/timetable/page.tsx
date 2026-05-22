@@ -46,6 +46,8 @@ interface Division {
 interface Subject {
   id: number;
   name: string;
+  division?: number;
+  school?: number;
 }
 
 interface Teacher {
@@ -59,6 +61,7 @@ interface AssignedTeacher {
   teacher_name?: string;
   subject_name?: string;
   is_class_teacher?: boolean;
+  division?: number | string;
 }
 
 interface Slot {
@@ -82,6 +85,8 @@ interface FormDataType {
   start_time: string;
   end_time: string;
   academicYear: string;
+  lecture_duration: number;
+  break_duration: number;
 }
 interface TimetableRecord {
   id: number;
@@ -322,31 +327,39 @@ function Label({
 // ─── STEP INDICATOR ──────────────────────────────────────────────────────────
 function StepIndicator({ current }: { current: number }) {
   const steps = [
-    { id: 1, label: "Basic Information" },
-    { id: 2, label: "Add Time Slots" },
-    { id: 3, label: "Preview & Save" },
+    { id: 1, label: "Basic Info", fullLabel: "Basic Information" },
+    { id: 2, label: "Time Slots", fullLabel: "Add Time Slots" },
+    { id: 3, label: "Preview", fullLabel: "Preview & Save" },
   ];
   const display = Math.min(Math.max(current, 1), 3);
 
   return (
-    <div className="flex overflow-x-auto pb-2 mb-8">
+    <div className="flex items-center justify-between w-full mb-6 px-1">
       {steps.map((s, i) => (
         <React.Fragment key={s.id}>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 flex-shrink-0">
             <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 transition-all ${display > s.id ? "bg-violet-600 text-white" : display === s.id ? "bg-violet-600 text-white ring-4 ring-violet-100" : "bg-gray-100 text-gray-400"}`}
+              className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold flex-shrink-0 transition-all ${display > s.id
+                ? "bg-violet-600 text-white"
+                : display === s.id
+                  ? "bg-violet-600 text-white ring-2 sm:ring-4 ring-violet-100"
+                  : "bg-gray-100 text-gray-400"
+                }`}
             >
-              {display > s.id ? <CheckCircle2 size={16} /> : s.id}
+              {display > s.id ? <CheckCircle2 size={14} /> : s.id}
             </div>
             <span
-              className={`text-xs sm:text-sm font-semibold whitespace-nowrap ${display >= s.id ? "text-gray-800" : "text-gray-400"}`}
+              className={`text-[9px] sm:text-sm font-semibold text-center sm:text-left leading-tight ${display >= s.id ? "text-gray-800" : "text-gray-400"
+                }`}
             >
-              {s.label}
+              <span className="sm:hidden">{s.label}</span>
+              <span className="hidden sm:inline">{s.fullLabel}</span>
             </span>
           </div>
           {i < steps.length - 1 && (
             <div
-              className={`h-0.5 w-12 mx-3 rounded-full flex-shrink-0 ${display > s.id ? "bg-violet-500" : "bg-gray-200"}`}
+              className={`h-0.5 flex-1 mx-1 sm:mx-2 rounded-full ${display > s.id ? "bg-violet-500" : "bg-gray-200"
+                }`}
             />
           )}
         </React.Fragment>
@@ -370,8 +383,8 @@ function LivePreviewPanel({ slots, day }: { slots: Slot[]; day: string }) {
   let lectureIndex = 0;
 
   return (
-    <div className="w-full flex-shrink-0 bg-white flex flex-col h-full">
-      <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-white z-10">
+    <div className="w-full xl:max-w-[380px] flex-shrink-0 bg-white flex flex-col h-full rounded-2xl">
+      <div className="px-4 sm:px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-white z-10">
         <h3 className="font-bold text-gray-800 text-sm flex items-center gap-2">
           <Eye size={15} className="text-violet-500" /> Live Timetable Preview
         </h3>
@@ -382,7 +395,9 @@ function LivePreviewPanel({ slots, day }: { slots: Slot[]; day: string }) {
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+      <div
+        className="overflow-y-auto px-4 py-3 space-y-2 max-h-[400px] xl:max-h-[calc(100vh-420px)]"
+      >
         {slots.length === 0 ? (
           <div className="text-center py-10">
             <Clock size={32} className="mx-auto mb-2 text-gray-200" />
@@ -395,7 +410,7 @@ function LivePreviewPanel({ slots, day }: { slots: Slot[]; day: string }) {
             if (slot.is_break) {
               return (
                 <div key={slot.id ?? i} className="flex items-center gap-3">
-                  <div className="text-right w-20 flex-shrink-0">
+                  <div className="text-right w-[72px] flex-shrink-0">
                     <p className="text-[10px] text-gray-500 font-semibold">
                       {fmtTime(slot.slot_start_time)}
                     </p>
@@ -403,16 +418,13 @@ function LivePreviewPanel({ slots, day }: { slots: Slot[]; day: string }) {
                       {fmtTime(slot.slot_end_time)}
                     </p>
                   </div>
-                  <div className="flex-1 bg-orange-50 border border-orange-100 rounded-xl p-3 flex items-center gap-2.5">
-                    <div className="w-9 h-9 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <div className="flex-1 bg-orange-50 border border-orange-100 rounded-xl px-2.5 py-2 flex items-center gap-2">
+                    <div className="w-7 h-7 bg-orange-100 rounded-md flex items-center justify-center flex-shrink-0">
                       <Coffee size={15} className="text-orange-500" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-bold text-orange-700">
                         Break Time
-                      </p>
-                      <p className="text-[10px] text-orange-400">
-                        Relax & Refresh
                       </p>
                     </div>
                     <span className="text-[10px] bg-orange-100 text-orange-600 font-bold px-2 py-0.5 rounded-full">
@@ -428,7 +440,7 @@ function LivePreviewPanel({ slots, day }: { slots: Slot[]; day: string }) {
             const hasTeacher = !!(slot.teacher_name || slot.teacher);
             return (
               <div key={slot.id ?? i} className="flex items-center gap-3">
-                <div className="text-right w-20 flex-shrink-0">
+                <div className="text-right w-[72px] flex-shrink-0">
                   <p className="text-[10px] text-gray-500 font-semibold">
                     {fmtTime(slot.slot_start_time)}
                   </p>
@@ -436,14 +448,14 @@ function LivePreviewPanel({ slots, day }: { slots: Slot[]; day: string }) {
                     {fmtTime(slot.slot_end_time)}
                   </p>
                 </div>
-                <div className="flex-1 bg-white border border-gray-100 rounded-xl p-3 flex items-center gap-2.5 hover:shadow-sm transition-shadow">
+                <div className="flex-1 bg-white border border-gray-100 rounded-xl px-2.5 py-2 flex items-center gap-2 hover:shadow-sm transition-shadow">
                   <div
-                    className={`w-9 h-9 ${color.icon} rounded-lg flex items-center justify-center flex-shrink-0`}
+                    className={`w-7 h-7 ${color.icon} rounded-md flex items-center justify-center flex-shrink-0`}
                   >
                     <BookOpen size={14} className="text-white" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-bold text-gray-800 truncate">
+                    <p className="text-xs font-bold text-gray-800 truncate max-w-[100px]">
                       {hasSubject ? (
                         slot.subject_name || `Subject ${slot.subject}`
                       ) : (
@@ -470,11 +482,11 @@ function LivePreviewPanel({ slots, day }: { slots: Slot[]; day: string }) {
         )}
       </div>
 
-      <div className="border-t border-gray-100 px-5 py-4 bg-white">
+      <div className="border-t border-gray-100 px-4 py-3 bg-white">
         <h4 className="text-sm font-bold text-gray-800 mb-4">
           Schedule Summary
         </h4>
-        <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="grid grid-cols-2 gap-2 mb-3">
           {[
             {
               icon: BookOpen,
@@ -508,7 +520,7 @@ function LivePreviewPanel({ slots, day }: { slots: Slot[]; day: string }) {
               bg: "bg-emerald-50",
             },
           ].map(({ icon: IconComp, label, value, color, bg }) => (
-            <div key={label} className={`${bg} rounded-xl p-3`}>
+            <div key={label} className={`${bg} rounded-xl p-2.5`}>
               <IconComp size={16} className={`${color} mb-1.5`} />
               <p className="text-sm font-black text-gray-800 whitespace-pre-line leading-tight">
                 {String(value)}
@@ -517,10 +529,10 @@ function LivePreviewPanel({ slots, day }: { slots: Slot[]; day: string }) {
             </div>
           ))}
         </div>
-        <div className="flex items-center gap-2 text-[11px] text-emerald-600 bg-emerald-50 rounded-lg px-3 py-2">
+        {/* <div className="flex items-center gap-2 text-[11px] text-emerald-600 bg-emerald-50 rounded-lg px-3 py-2">
           <CheckCircle2 size={13} className="flex-shrink-0" />
           Preview updates automatically as you make changes
-        </div>
+        </div> */}
       </div>
     </div>
   );
@@ -534,11 +546,17 @@ function Step1BasicInfo({
   form,
   setForm,
   onNext,
+  existingDays,
+  onViewDay,
+  onPreviewDay,
 }: {
   divisions: Division[];
   form: FormDataType;
   setForm: React.Dispatch<React.SetStateAction<FormDataType>>;
   onNext: () => void;
+  existingDays: { day: string; id: number }[];
+  onViewDay: (day: string) => void;
+  onPreviewDay: (day: string) => void;
 }) {
   const [toast, setToast] = useState<ToastData | null>(null);
 
@@ -559,6 +577,23 @@ function Step1BasicInfo({
       setToast({ msg: "End time must be after start time.", type: "error" });
       return;
     }
+
+    // ← ADD THIS BLOCK HERE, before onNext()
+    const totalMinutesAvailable = minutesBetween(
+      form.start_time,
+      form.end_time,
+    );
+    const minRequired = form.total_lecture * form.lecture_duration + form.total_breaks * form.break_duration;
+
+    if (totalMinutesAvailable < minRequired) {
+      const neededHr = Math.floor(minRequired / 60);
+      const neededMin = minRequired % 60;
+      setToast({
+        msg: `Not enough time! ${form.total_lecture} lectures + ${form.total_breaks} break(s) need at least ${neededHr}h ${neededMin}m. Please increase the time range or reduce lectures/breaks.`,
+        type: "error",
+      });
+      return;
+    }
     onNext();
   };
 
@@ -576,7 +611,7 @@ function Step1BasicInfo({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mb-4">
         <div>
           <Label required>Day</Label>
           <SelectField
@@ -614,38 +649,58 @@ function Step1BasicInfo({
           <Label required>Total Lectures</Label>
           <SelectField
             value={form.total_lecture}
-            onChange={(v) =>
-              setForm((f) => ({ ...f, total_lecture: Number(v) }))
-            }
+            onChange={(v) => setForm((f) => ({ ...f, total_lecture: Number(v) }))}
             accent="violet"
           >
             {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </SelectField>
-        </div>
-
-        <div>
-          <Label required>Total Breaks</Label>
-          <SelectField
-            value={form.total_breaks}
-            onChange={(v) =>
-              setForm((f) => ({ ...f, total_breaks: Number(v) }))
-            }
-            accent="orange"
-          >
-            {[0, 1, 2, 3].map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
+              <option key={n} value={n}>{n}</option>
             ))}
           </SelectField>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mb-4">
+        <div>
+          <Label required>Total Breaks</Label>
+          <SelectField
+            value={form.total_breaks}
+            onChange={(v) => setForm((f) => ({ ...f, total_breaks: Number(v) }))}
+            accent="orange"
+          >
+            {[0, 1, 2, 3].map((n) => (
+              <option key={n} value={n}>{n}</option>
+            ))}
+          </SelectField>
+        </div>
+
+        <div>
+          <Label required>Lecture Duration (mins)</Label>
+          <SelectField
+            value={form.lecture_duration}
+            onChange={(v) => setForm((f) => ({ ...f, lecture_duration: Number(v) }))}
+            accent="violet"
+          >
+            {[30, 35, 40, 45, 50, 55, 60].map((n) => (
+              <option key={n} value={n}>{n} min</option>
+            ))}
+          </SelectField>
+        </div>
+
+        <div>
+          <Label required>Break Duration (mins)</Label>
+          <SelectField
+            value={form.break_duration}
+            onChange={(v) => setForm((f) => ({ ...f, break_duration: Number(v) }))}
+            accent="orange"
+          >
+            {[5, 10, 15, 20, 25, 30].map((n) => (
+              <option key={n} value={n}>{n} min</option>
+            ))}
+          </SelectField>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
         <div>
           <Label required>Start Time</Label>
           <div className="relative">
@@ -656,9 +711,7 @@ function Step1BasicInfo({
             <input
               type="time"
               value={form.start_time}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, start_time: e.target.value }))
-              }
+              onChange={(e) => setForm((f) => ({ ...f, start_time: e.target.value }))}
               className="w-full border border-gray-200 rounded-xl pl-9 pr-3.5 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-violet-300 focus:border-violet-400 bg-white"
             />
           </div>
@@ -673,20 +726,82 @@ function Step1BasicInfo({
             <input
               type="time"
               value={form.end_time}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, end_time: e.target.value }))
-              }
+              onChange={(e) => setForm((f) => ({ ...f, end_time: e.target.value }))}
               className="w-full border border-gray-200 rounded-xl pl-9 pr-3.5 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-violet-300 focus:border-violet-400 bg-white"
             />
           </div>
         </div>
       </div>
 
+      {form.class_division && (
+        <div className="mb-6">
+          <p className="text-xs font-semibold text-gray-500 mb-3 flex items-center gap-2">
+            <Calendar size={13} className="text-violet-500" />
+            Weekly timetable status for this class:
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-row lg:flex-wrap gap-2">
+
+            {DAYS.map((day) => {
+              const existing = existingDays.find((e) => e.day === day);
+              if (existing) {
+                return (
+                  <div
+                    key={day}
+                    className={`w-full min-h-[80px] flex flex-col justify-between gap-2 px-3 py-2.5 rounded-2xl border-2 text-xs font-bold ${form.day === day
+                      ? "bg-violet-50 border-violet-300 text-violet-700"
+                      : "bg-emerald-50 border-emerald-200 text-emerald-700"
+                      }`}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <CheckCircle2
+                        size={11}
+                        className="text-emerald-500 flex-shrink-0"
+                      />
+                      <span className="text-sm leading-none">
+                        {DAY_FULL[day]}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 w-full">
+                      <button
+                        onClick={() => onPreviewDay(day)}
+                        className="flex-1 flex items-center justify-center gap-1 text-[10px] bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 px-2 py-1 rounded-lg font-bold transition-all min-w-0"
+                      >
+                        <Eye size={9} />
+                        <span>View</span>
+                      </button>
+
+                      <button
+                        onClick={() => onViewDay(day)}
+                        className="flex-1 flex items-center justify-center text-[10px] bg-white border border-emerald-200 text-emerald-600 hover:bg-emerald-50 px-2 py-1 rounded-lg font-bold transition-all min-w-0"
+                      >
+                        Edit
+                      </button>
+                    </div>
+                  </div>
+                );
+              }
+              return (
+                <div
+                  key={day}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 border-dashed border-gray-200 text-xs font-bold text-gray-300"
+                >
+                  <Clock size={11} className="flex-shrink-0" />
+                  {DAY_FULL[day]}
+                  <span className="text-[10px] bg-gray-100 text-gray-400 px-2 py-0.5 rounded-lg font-bold">
+                    Not created
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row gap-3 sm:justify-between sm:items-center pt-4 border-t border-gray-100">
         <div />
         <button
           onClick={handleNext}
-          className="flex items-center gap-2 px-6 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-violet-200"
+          className="w-full sm:w-auto justify-center flex items-center gap-2 px-6 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-violet-200"
         >
           Continue to Time Slots <ChevronRight size={15} />
         </button>
@@ -703,6 +818,7 @@ function Step1BasicInfo({
   );
 }
 
+
 // ═══════════════════════════════════════════════════════════════════
 // STEP 2 — Add Time Slots
 // ═══════════════════════════════════════════════════════════════════
@@ -711,6 +827,7 @@ function Step2TimeSlots({
   subjects,
   teachers,
   assignedTeachers,
+  divisions,
   slots,
   setSlots,
   onNext,
@@ -720,6 +837,7 @@ function Step2TimeSlots({
   subjects: Subject[];
   teachers: Teacher[];
   assignedTeachers: AssignedTeacher[];
+  divisions: Division[];
   slots: Slot[];
   setSlots: React.Dispatch<React.SetStateAction<Slot[]>>;
   onNext: () => void;
@@ -732,13 +850,32 @@ function Step2TimeSlots({
   const autoGenerate = useCallback(() => {
     const lectureCount = form.total_lecture || 4;
     const breakCount = form.total_breaks ?? 1;
+
+    const totalMinutesAvailable = minutesBetween(
+      form.start_time,
+      form.end_time,
+    );
+    const minRequired = lectureCount * form.lecture_duration + breakCount * form.break_duration;
+    if (totalMinutesAvailable < minRequired) {
+      const neededHr = Math.floor(minRequired / 60);
+      const neededMin = minRequired % 60;
+      setToast({
+        msg: `Not enough time! Need at least ${neededHr}h ${neededMin}m for ${lectureCount} lectures + ${breakCount} break(s). Increase the time range or reduce lectures/breaks.`,
+        type: "error",
+      });
+      return;
+    }
+
     const [sh, sm] = (form.start_time || "08:00").split(":").map(Number);
-    const perLecture = 45;
-    const perBreak = 15;
+    const perLecture = form.lecture_duration;
+    const perBreak = form.break_duration;
 
     const classTeacherEntry = (assignedTeachers || []).find(
-      (t) => t.is_class_teacher === true,
+      (t) =>
+        t.is_class_teacher === true &&
+        String(t.division) === String(form.class_division),
     );
+
 
     const breakPositions = new Set<number>();
     if (breakCount > 0) {
@@ -779,6 +916,8 @@ function Step2TimeSlots({
           isFirst && classTeacherEntry
             ? (classTeacherEntry.teacher_name ?? "")
             : "",
+
+
       });
       currentMin += perLecture;
 
@@ -863,8 +1002,37 @@ function Step2TimeSlots({
         if (s.id !== id) return s;
         const updated: Slot = { ...s, [field]: value };
         if (field === "subject") {
-          const subj = subjects.find((x: Subject) => x.id === Number(value));
-          updated.subject_name = subj?.name ?? "";
+          const atEntry = assignedTeachers.find(
+            (at) => String(at.subject) === String(value),
+          );
+
+          updated.subject_name =
+            atEntry?.subject_name ??
+            subjects.find((s) => String(s.id) === String(value))?.name ??
+            "";
+
+
+          // Auto-fill teacher if only one teacher is assigned to this subject
+          const matchingTeachers = assignedTeachers.filter(
+            (at) => String(at.subject) === String(value),
+          );
+          const classTeacher = matchingTeachers.find((at) => at.is_class_teacher === true);
+          const autoTeacher = classTeacher ?? (matchingTeachers.length === 1 ? matchingTeachers[0] : null);
+
+          if (autoTeacher) {
+            updated.teacher = String(autoTeacher.teacher);
+            const tchr = teachers.find(
+              (t) => String(t.id) === String(autoTeacher.teacher),
+            );
+            updated.teacher_name =
+              tchr?.name ??
+              (autoTeacher as AssignedTeacher & { teacher_name?: string }).teacher_name ??
+              "";
+          } else {
+            // Multiple teachers, none is class teacher — let user pick
+            updated.teacher = "";
+            updated.teacher_name = "";
+          }
         }
         if (field === "teacher") {
           const tchr = teachers.find((x: Teacher) => x.id === Number(value));
@@ -953,24 +1121,26 @@ function Step2TimeSlots({
             </p>
           </div>
         </div>
-        <button
-          onClick={autoGenerate}
-          className="w-full sm:w-auto justify-center flex items-center gap-2 px-4 py-2 bg-white border-2 border-violet-200 hover:border-violet-400 text-violet-700 rounded-xl text-xs font-bold transition-all hover:bg-violet-50"
-        >
-          <Wand2 size={13} /> Auto Generate Slots
-        </button>
+        {/* Info banner instead of Auto Generate button */}
+        <div className="flex items-center gap-2 px-4 py-2 bg-violet-50 border-2 border-violet-100 rounded-xl">
+          <div className="flex items-center gap-1.5">
+            <BookOpen size={13} className="text-violet-500 flex-shrink-0" />
+            <span className="text-xs font-bold text-violet-700">
+              {divisions.find((d) => String(d.id) === String(form.class_division))
+                ? `${divisions.find((d) => String(d.id) === String(form.class_division))!.class_name} - ${divisions.find((d) => String(d.id) === String(form.class_division))!.division}`
+                : "—"}
+            </span>
+          </div>
+          <span className="text-violet-300">·</span>
+          <div className="flex items-center gap-1.5">
+            <Calendar size={13} className="text-violet-500 flex-shrink-0" />
+            <span className="text-xs font-bold text-violet-700">
+              {DAY_FULL[form.day] ?? form.day}
+            </span>
+          </div>
+        </div>
       </div>
 
-      {slots.length > 0 && (
-        <div className="hidden md:grid grid-cols-12 gap-2 px-3 pb-2 text-[10px] text-gray-400 font-bold uppercase tracking-wide">
-          <div className="xl:col-span-1">#</div>
-          <div className="xl:col-span-2">Time</div>
-          <div className="xl:col-span-2">Type</div>
-          <div className="xl:col-span-3">Subject *</div>
-          <div className="xl:col-span-3">Teacher *</div>
-          <div className="xl:col-span-1">Action</div>
-        </div>
-      )}
 
       <div className="space-y-2.5 mb-5">
         {slots.map((slot, i) => {
@@ -988,58 +1158,70 @@ function Step2TimeSlots({
               onDragEnter={() => onDragEnter(i)}
               onDragEnd={onDragEnd}
               onDragOver={(e) => e.preventDefault()}
-              className={`grid grid-cols-1 xl:grid-cols-12 gap-3 items-center rounded-2xl px-3 py-3 border-2 transition-all group cursor-grab active:cursor-grabbing ${
-                isBreak
-                  ? "bg-orange-50 border-orange-100 hover:border-orange-200"
-                  : "bg-white border-gray-100 hover:border-violet-200 hover:shadow-sm"
-              } ${dragIndex === i ? "opacity-50 scale-95" : ""}`}
+              className={`rounded-2xl p-3 border-2 transition-all ${isBreak
+                ? "bg-orange-50 border-orange-100 hover:border-orange-200"
+                : "bg-white border-gray-100 hover:border-violet-200 hover:shadow-sm"
+                } ${dragIndex === i ? "opacity-50 scale-95" : ""}`}
             >
-              <div className="col-span-1 flex items-center gap-1">
-                <GripVertical
-                  size={14}
-                  className="text-gray-300 flex-shrink-0"
-                />
-                <div
-                  className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black text-white flex-shrink-0 ${isBreak ? "bg-orange-400" : color?.icon}`}
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <GripVertical size={14} className="text-gray-300 flex-shrink-0" />
+                  <div
+                    className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black text-white flex-shrink-0 ${isBreak ? "bg-orange-400" : color?.icon
+                      }`}
+                  >
+                    {slot.slot_number}
+                  </div>
+                  {isBreak ? (
+                    <span className="inline-flex items-center gap-1 bg-orange-100 text-orange-700 text-[10px] font-bold px-2.5 py-1 rounded-lg">
+                      <Coffee size={10} /> BREAK
+                    </span>
+                  ) : (
+                    <span
+                      className={`inline-flex items-center gap-1 ${color?.badge} text-[10px] font-bold px-2.5 py-1 rounded-lg`}
+                    >
+                      <BookOpen size={10} /> LECTURE
+                    </span>
+                  )}
+                </div>
+                <button
+                  onClick={() => removeSlot(slot.id)}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-red-500 bg-red-50 border border-red-200 hover:bg-red-100 hover:text-red-700 transition-all flex-shrink-0"
                 >
-                  {slot.slot_number}
+                  <Trash2 size={14} />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                <div>
+                  <p className="text-[9px] text-gray-400 font-semibold mb-1 uppercase tracking-wide">Start</p>
+                  <input
+                    type="time"
+                    value={slot.slot_start_time}
+                    readOnly
+                    onChange={(e) => updateSlot(slot.id, "slot_start_time", e.target.value)}
+                    className={`w-full border rounded-lg px-2 py-1.5 text-[11px] focus:outline-none focus:ring-1 bg-white ${isBreak
+                      ? "border-orange-200 focus:ring-orange-300"
+                      : "border-gray-200 focus:ring-violet-300"
+                      }`}
+                  />
+                </div>
+                <div>
+                  <p className="text-[9px] text-gray-400 font-semibold mb-1 uppercase tracking-wide">End</p>
+                  <input
+                    type="time"
+                    value={slot.slot_end_time}
+                    readOnly
+                    onChange={(e) => updateSlot(slot.id, "slot_end_time", e.target.value)}
+                    className={`w-full border rounded-lg px-2 py-1.5 text-[11px] focus:outline-none focus:ring-1 bg-white ${isBreak
+                      ? "border-orange-200 focus:ring-orange-300"
+                      : "border-gray-200 focus:ring-violet-300"
+                      }`}
+                  />
                 </div>
               </div>
 
-              <div className="xl:col-span-2">
-                <input
-                  type="time"
-                  value={slot.slot_start_time}
-                  onChange={(e) =>
-                    updateSlot(slot.id, "slot_start_time", e.target.value)
-                  }
-                  className={`w-full border rounded-lg px-2 py-1.5 text-[11px] focus:outline-none focus:ring-1 bg-white mb-1 ${isBreak ? "border-orange-200 focus:ring-orange-300" : "border-gray-200 focus:ring-violet-300"}`}
-                />
-                <input
-                  type="time"
-                  value={slot.slot_end_time}
-                  onChange={(e) =>
-                    updateSlot(slot.id, "slot_end_time", e.target.value)
-                  }
-                  className={`w-full border rounded-lg px-2 py-1.5 text-[11px] focus:outline-none focus:ring-1 bg-white ${isBreak ? "border-orange-200 focus:ring-orange-300" : "border-gray-200 focus:ring-violet-300"}`}
-                />
-              </div>
-
-              <div className="col-span-2">
-                {isBreak ? (
-                  <span className="inline-flex items-center gap-1 bg-orange-100 text-orange-700 text-[10px] font-bold px-2.5 py-1.5 rounded-lg">
-                    <Coffee size={10} /> BREAK
-                  </span>
-                ) : (
-                  <span
-                    className={`inline-flex items-center gap-1 ${color?.badge} text-[10px] font-bold px-2.5 py-1.5 rounded-lg`}
-                  >
-                    <BookOpen size={10} /> LECTURE
-                  </span>
-                )}
-              </div>
-
-              <div className="xl:col-span-3">
+              <div className="mb-2">
                 {isBreak ? (
                   <p className="text-[11px] text-orange-400 italic pl-1">
                     No subject or teacher required
@@ -1054,9 +1236,9 @@ function Step2TimeSlots({
                       className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-violet-300 bg-white appearance-none pr-7 cursor-pointer"
                     >
                       <option value="">Subject *</option>
-                      {subjects.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.name}
+                      {subjects.map((subj) => (
+                        <option key={subj.id} value={String(subj.id)}>
+                          {subj.name}
                         </option>
                       ))}
                     </select>
@@ -1068,7 +1250,7 @@ function Step2TimeSlots({
                 )}
               </div>
 
-              <div className="col-span-3">
+              <div className="w-full mt-2">
                 {!isBreak && (
                   <div className="relative">
                     <select
@@ -1079,11 +1261,27 @@ function Step2TimeSlots({
                       className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-violet-300 bg-white appearance-none pr-7 cursor-pointer"
                     >
                       <option value="">Teacher *</option>
-                      {teachers.map((t) => (
-                        <option key={t.id} value={t.id}>
-                          {t.name}
-                        </option>
-                      ))}
+                      {slot.subject
+                        ? assignedTeachers
+                          .filter(
+                            (at) =>
+                              String(at.subject) === String(slot.subject),
+                          )
+                          .map((at, index) => {
+                            const tchr = teachers.find(
+                              (t) => String(t.id) === String(at.teacher),
+                            );
+                            return tchr ? (
+                              <option key={`${tchr.id}-${index}`} value={tchr.id}>
+                                {tchr.name}
+                              </option>
+                            ) : null;
+                          })
+                        : teachers.map((t) => (
+                          <option key={t.id} value={t.id}>
+                            {t.name}
+                          </option>
+                        ))}
                     </select>
                     <ChevronDown
                       size={12}
@@ -1093,14 +1291,6 @@ function Step2TimeSlots({
                 )}
               </div>
 
-              <div className="col-span-1 flex justify-center">
-                <button
-                  onClick={() => removeSlot(slot.id)}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-200 hover:bg-red-50 hover:text-red-500 transition-all"
-                >
-                  <Trash2 size={14} />
-                </button>
-              </div>
             </div>
           );
         })}
@@ -1119,7 +1309,8 @@ function Step2TimeSlots({
         )}
       </div>
 
-      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 mb-5">
+      <div className="grid grid-cols-2 sm:flex sm:flex-row sm:flex-wrap gap-2 mb-5">
+
         <button
           onClick={addLecture}
           className="w-full sm:w-auto justify-center flex items-center gap-2 px-5 py-2.5 border-2 border-violet-200 hover:border-violet-400 text-violet-700 rounded-xl text-sm font-bold hover:bg-violet-50 transition-all"
@@ -1149,7 +1340,7 @@ function Step2TimeSlots({
         </p>
       </div>
 
-      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+      <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between pt-4 border-t border-gray-100">
         <button
           onClick={onBack}
           className="w-full sm:w-auto justify-center flex items-center gap-2 px-5 py-2.5 border-2 border-gray-200 hover:border-gray-300 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-all"
@@ -1344,32 +1535,24 @@ function Step3PreviewSave({
         })}
       </div>
 
-      <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+      <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between pt-4 border-t border-gray-100">
         <button
           onClick={onBack}
           className="w-full sm:w-auto justify-center flex items-center gap-2 px-5 py-2.5 border-2 border-gray-200 hover:border-gray-300 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-all"
         >
           <ArrowLeft size={14} /> Back
         </button>
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2.5 border-2 border-gray-200 hover:border-gray-300 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-all">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          {/* <button className="w-full sm:w-auto justify-center flex items-center gap-2 px-4 py-2.5 border-2 border-gray-200 hover:border-gray-300 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-all">
             <Download size={14} /> Export PDF
-          </button>
+          </button> */}
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center gap-2 px-6 py-2.5 bg-violet-600 hover:bg-violet-700 disabled:opacity-60 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-violet-200"
+            className="w-full sm:w-auto justify-center flex items-center gap-2 px-6 py-2.5 bg-violet-600 hover:bg-violet-700 disabled:opacity-60 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-violet-200"
           >
-            {saving ? (
-              <Loader2 size={15} className="animate-spin" />
-            ) : (
-              <Save size={15} />
-            )}
-            {saving
-              ? "Saving…"
-              : savedId
-                ? "Update Timetable"
-                : "Save Timetable"}
+            {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
+            {saving ? "Saving…" : savedId ? "Update Timetable" : "Save Timetable"}
           </button>
         </div>
       </div>
@@ -1410,12 +1593,12 @@ function SuccessView({
 
   return (
     <div>
-      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-2xl p-4 sm:p-5 flex flex-col lg:flex-row gap-4 border-2 border-emerald-200 rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
         <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center flex-shrink-0">
           <CheckCircle2 size={28} className="text-emerald-600" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-black text-emerald-800 text-lg">
+          <p className="font-black text-emerald-800 text-base sm:text-lg">
             Timetable Saved Successfully!
           </p>
           <p className="text-sm text-emerald-600 mt-0.5">
@@ -1460,7 +1643,7 @@ function SuccessView({
               <div className="flex-1 min-w-0">
                 {isBreak ? (
                   <>
-                    <p className="font-bold text-orange-700">Break Time</p>
+                    <p className="font-bold text-orange-700 text-sm">Break Time</p>
                     <p className="text-xs text-orange-400">
                       {fmtTime(slot.slot_start_time)} –{" "}
                       {fmtTime(slot.slot_end_time)}
@@ -1468,7 +1651,7 @@ function SuccessView({
                   </>
                 ) : (
                   <>
-                    <p className={`font-bold ${color?.text}`}>
+                    <p className={`font-bold ${color?.text} text-sm truncate`}>
                       {slot.subject_name ||
                         subjects.find((s) => s.id === Number(slot.subject))
                           ?.name ||
@@ -1493,6 +1676,164 @@ function SuccessView({
             </div>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+function DayPreviewModal({
+  isOpen,
+  onClose,
+  day,
+  classDivision,
+  subjects,
+  teachers,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  day: string | null;
+  classDivision: string | number;
+  subjects: Subject[];
+  teachers: Teacher[];
+}) {
+  const [slots, setSlots] = useState<TimetableRecord["slots"]>([]);
+  const [loading, setLoading] = useState(false);
+  const [allSubjects, setAllSubjects] = useState<Subject[]>([]);
+
+  useEffect(() => {
+    if (!isOpen || !day || !classDivision) return;
+    setLoading(true);
+
+    Promise.all([
+      getTimetable(Number(classDivision)),
+      getSubjects(),
+    ])
+      .then(([res, subRes]) => {
+        const filtered = Array.isArray(res)
+          ? res.filter((r) => r.class_division === Number(classDivision))
+          : [];
+        const match = filtered.find((r) => r.day === day);
+        setSlots(match?.slots ?? []);
+        setAllSubjects(Array.isArray(subRes) ? (subRes as Subject[]) : []);
+      })
+      .catch(() => {
+        setSlots([]);
+        setAllSubjects([]);
+      })
+      .finally(() => setLoading(false));
+  }, [isOpen, day, classDivision]);
+
+  if (!isOpen || !day) return null;
+
+  let lectureIdx = 0;
+
+  // Helper: find subject name from all sources
+  const getSubjectName = (subjectId: number | null): string => {
+    if (!subjectId) return "—";
+    // Try allSubjects first (full list)
+    const fromAll = allSubjects.find((s) => s.id === subjectId);
+    if (fromAll) return fromAll.name;
+    // Fallback to passed subjects prop
+    const fromProp = subjects.find((s) => s.id === subjectId);
+    if (fromProp) return fromProp.name;
+    return "—";
+  };
+
+  const getTeacherName = (teacherId: number | null): string => {
+    if (!teacherId) return "—";
+    const tchr = teachers.find((t) => t.id === teacherId);
+    return tchr?.name ?? "—";
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-5 border-b border-gray-100 sticky top-0 bg-white z-10">
+          <div>
+            <h2 className="text-base font-bold text-gray-900">
+              {DAY_FULL[day]} Timetable
+            </h2>
+            <p className="text-xs text-gray-400 mt-0.5">Slot-by-slot view</p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
+            <X size={18} className="text-gray-500" />
+          </button>
+        </div>
+        <div className="p-5">
+          {loading ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 size={28} className="animate-spin text-violet-500" />
+            </div>
+          ) : slots.length === 0 ? (
+            <div className="text-center py-16 text-gray-400">
+              <Clock size={36} className="mx-auto mb-3 opacity-30" />
+              <p className="font-medium text-sm">No slots found</p>
+            </div>
+          ) : (
+            <div className="space-y-2.5">
+              {slots
+                .sort((a, b) => a.slot_number - b.slot_number)
+                .map((slot) => {
+                  const isBreak = slot.is_break;
+                  const color = isBreak
+                    ? null
+                    : SLOT_COLORS[lectureIdx % SLOT_COLORS.length];
+                  if (!isBreak) lectureIdx++;
+                  return (
+                    <div
+                      key={slot.slot_number}
+                      className={`flex items-center gap-3 rounded-2xl p-3 border-2 ${isBreak
+                        ? "bg-orange-50 border-orange-100"
+                        : "bg-white border-gray-100"
+                        }`}
+                    >
+                      <div className="text-right w-[68px] flex-shrink-0">
+                        <p className="text-[10px] text-gray-500 font-semibold">
+                          {fmtTime(slot.slot_start_time?.slice(0, 5))}
+                        </p>
+                        <p className="text-[10px] text-gray-300">
+                          {fmtTime(slot.slot_end_time?.slice(0, 5))}
+                        </p>
+                      </div>
+                      <div
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${isBreak ? "bg-orange-100" : color?.icon
+                          }`}
+                      >
+                        {isBreak ? (
+                          <Coffee size={14} className="text-orange-500" />
+                        ) : (
+                          <BookOpen size={13} className="text-white" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        {isBreak ? (
+                          <p className="text-xs font-bold text-orange-700">
+                            Break Time
+                          </p>
+                        ) : (
+                          <>
+                            <p className={`text-xs font-bold truncate ${color?.text}`}>
+                              {getSubjectName(slot.subject)}
+                            </p>
+                            <p className="text-[10px] text-gray-400 truncate">
+                              {getTeacherName(slot.teacher)}
+                            </p>
+                          </>
+                        )}
+                      </div>
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${isBreak ? "bg-orange-100 text-orange-600" : color?.badge
+                          }`}
+                      >
+                        {isBreak ? "Break" : `P${slot.slot_number}`}
+                      </span>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -1523,7 +1864,12 @@ function TimetablePreviewModal({
     if (!isOpen || !classDivision) return;
     setLoading(true);
     getTimetable(Number(classDivision))
-      .then((res) => setData(Array.isArray(res) ? res : []))
+      .then((res) => {
+        const filtered = Array.isArray(res)
+          ? res.filter((r) => r.class_division === Number(classDivision))
+          : [];
+        setData(filtered);
+      })
       .catch(() => setData([]))
       .finally(() => setLoading(false));
   }, [isOpen, classDivision]);
@@ -1535,10 +1881,10 @@ function TimetablePreviewModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[92vh] overflow-y-auto">
         <div className="flex items-center justify-between p-5 border-b border-gray-100 sticky top-0 bg-white z-10">
           <div>
-            <h2 className="text-lg font-bold text-gray-900">
+            <h2 className="text-base sm:text-lg font-bold text-gray-900">
               Timetable Preview
             </h2>
             {divName && (
@@ -1555,7 +1901,7 @@ function TimetablePreviewModal({
           </button>
         </div>
 
-        <div className="p-5">
+        <div className="p-3 sm:p-5">
           {loading ? (
             <div className="flex items-center justify-center py-20">
               <Loader2 size={32} className="animate-spin text-violet-500" />
@@ -1569,126 +1915,385 @@ function TimetablePreviewModal({
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="bg-violet-50">
-                    <th className="px-4 py-3 text-left text-xs font-bold text-violet-700 uppercase tracking-wide border border-violet-100 w-28">
-                      Slot
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-bold text-violet-700 uppercase tracking-wide border border-violet-100 w-28">
-                      Time
-                    </th>
-                    {data.map((d) => (
-                      <th
-                        key={d.id}
-                        className="px-4 py-3 text-center text-xs font-bold text-violet-700 uppercase tracking-wide border border-violet-100"
-                      >
-                        {DAY_FULL[d.day] ?? d.day}
+            <div className="overflow-x-auto -mx-3 sm:mx-0">
+              <div className="min-w-[520px] px-3 sm:px-0">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-violet-50">
+                      <th className="px-4 py-3 text-left text-xs font-bold text-violet-700 uppercase tracking-wide border border-violet-100 w-28">
+                        Slot
                       </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {(() => {
-                    const firstDay = data[0];
-                    return firstDay.slots
-                      .sort((a, b) => a.slot_number - b.slot_number)
-                      .map((templateSlot) => {
-                        const isBreak = templateSlot.is_break;
-                        return (
-                          <tr
-                            key={templateSlot.slot_number}
-                            className={
-                              isBreak ? "bg-orange-50" : "hover:bg-gray-50"
-                            }
-                          >
-                            <td className="px-4 py-3 border border-gray-100 text-center">
-                              <div
-                                className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black text-white mx-auto ${isBreak ? "bg-orange-400" : "bg-violet-600"}`}
-                              >
-                                {templateSlot.slot_number}
-                              </div>
-                            </td>
-                            <td className="px-4 py-3 border border-gray-100">
-                              <p className="text-xs font-semibold text-gray-700">
-                                {fmtTime(
-                                  templateSlot.slot_start_time?.slice(0, 5),
-                                )}
-                              </p>
-                              <p className="text-[10px] text-gray-400">
-                                {fmtTime(
-                                  templateSlot.slot_end_time?.slice(0, 5),
-                                )}
-                              </p>
-                            </td>
-                            {data.map((dayRecord) => {
-                              const slot = dayRecord.slots.find(
-                                (s) =>
-                                  s.slot_number === templateSlot.slot_number,
-                              );
-                              if (!slot)
-                                return (
-                                  <td
-                                    key={dayRecord.id}
-                                    className="px-4 py-3 border border-gray-100 text-center text-gray-300 text-xs"
-                                  >
-                                    —
-                                  </td>
-                                );
-                              if (slot.is_break)
-                                return (
-                                  <td
-                                    key={dayRecord.id}
-                                    className="px-4 py-3 border border-orange-100 text-center"
-                                  >
-                                    <div className="flex items-center justify-center gap-1 text-orange-500">
-                                      <Coffee size={13} />
-                                      <span className="text-xs font-bold">
-                                        Break
-                                      </span>
-                                    </div>
-                                  </td>
-                                );
-                              const subj = subjects.find(
-                                (s) => s.id === slot.subject,
-                              );
-                              const tchr = teachers.find(
-                                (t) => t.id === slot.teacher,
-                              );
-                              return (
-                                <td
-                                  key={dayRecord.id}
-                                  className="px-4 py-3 border border-gray-100"
+                      <th className="px-4 py-3 text-left text-xs font-bold text-violet-700 uppercase tracking-wide border border-violet-100 w-28">
+                        Time
+                      </th>
+                      {data.map((d) => (
+                        <th
+                          key={d.id}
+                          className="px-4 py-3 text-center text-xs font-bold text-violet-700 uppercase tracking-wide border border-violet-100"
+                        >
+                          {DAY_FULL[d.day] ?? d.day}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(() => {
+                      // Use the day with the most slots as the row template
+                      const templateDay = data.reduce((max, d) =>
+                        d.slots.length > max.slots.length ? d : max, data[0]
+                      );
+                      return templateDay.slots
+                        .sort((a, b) => a.slot_number - b.slot_number)
+                        .map((templateSlot) => {
+                          const isBreak = templateSlot.is_break;
+                          return (
+                            <tr
+                              key={templateSlot.slot_number}
+                              className={
+                                isBreak ? "bg-orange-50" : "hover:bg-gray-50"
+                              }
+                            >
+                              <td className="px-4 py-3 border border-gray-100 text-center">
+                                <div
+                                  className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black text-white mx-auto ${isBreak ? "bg-orange-400" : "bg-violet-600"}`}
                                 >
-                                  <p className="text-xs font-bold text-gray-800 truncate max-w-[120px]">
-                                    {subj?.name ??
-                                      (slot.subject
-                                        ? `Subject ${slot.subject}`
-                                        : "—")}
-                                  </p>
-                                  <p className="text-[10px] text-gray-400 truncate max-w-[120px] mt-0.5">
-                                    {tchr?.name ??
-                                      (slot.teacher
-                                        ? `Teacher ${slot.teacher}`
-                                        : "—")}
-                                  </p>
-                                </td>
-                              );
-                            })}
-                          </tr>
-                        );
-                      });
-                  })()}
-                </tbody>
-              </table>
+                                  {templateSlot.slot_number}
+                                </div>
+                              </td>
+                              <td className="px-4 py-3 border border-gray-100">
+                                <p className="text-xs font-semibold text-gray-700">
+                                  {fmtTime(
+                                    templateSlot.slot_start_time?.slice(0, 5),
+                                  )}
+                                </p>
+                                <p className="text-[10px] text-gray-400">
+                                  {fmtTime(
+                                    templateSlot.slot_end_time?.slice(0, 5),
+                                  )}
+                                </p>
+                              </td>
+                              {data.map((dayRecord) => {
+                                const slot = dayRecord.slots.find(
+                                  (s) =>
+                                    s.slot_number === templateSlot.slot_number,
+                                );
+                                if (!slot)
+                                  return (
+                                    <td
+                                      key={dayRecord.id}
+                                      className="px-4 py-3 border border-gray-100 text-center text-gray-300 text-xs"
+                                    >
+                                      —
+                                    </td>
+                                  );
+                                if (slot.is_break)
+                                  return (
+                                    <td
+                                      key={dayRecord.id}
+                                      className="px-4 py-3 border border-orange-100 text-center"
+                                    >
+                                      <div className="flex items-center justify-center gap-1 text-orange-500">
+                                        <Coffee size={13} />
+                                        <span className="text-xs font-bold">
+                                          Break
+                                        </span>
+                                      </div>
+                                    </td>
+                                  );
+                                const subj = subjects.find(
+                                  (s) => s.id === slot.subject,
+                                );
+                                const tchr = teachers.find(
+                                  (t) => t.id === slot.teacher,
+                                );
+                                return (
+                                  <td
+                                    key={dayRecord.id}
+                                    className="px-4 py-3 border border-gray-100"
+                                  >
+                                    <p className="text-xs font-bold text-gray-800 truncate max-w-[120px]">
+                                      {subj?.name ??
+                                        (slot.subject
+                                          ? `Subject ${slot.subject}`
+                                          : "—")}
+                                    </p>
+                                    <p className="text-[10px] text-gray-400 truncate max-w-[120px] mt-0.5">
+                                      {tchr?.name ??
+                                        (slot.teacher
+                                          ? `Teacher ${slot.teacher}`
+                                          : "—")}
+                                    </p>
+                                  </td>
+                                );
+                              })}
+                            </tr>
+                          );
+                        });
+                    })()}
+                  </tbody>
+                </table>
+              </div>
             </div>
+
           )}
         </div>
       </div>
     </div>
   );
 }
+
+// ═══════════════════════════════════════════════════════════════════
+// TIMETABLE LIST PAGE — shown before the create form
+// ═══════════════════════════════════════════════════════════════════
+function TimetableListPage({
+  divisions,
+  teachers,
+  subjects,
+  onCreateNew,
+}: {
+  divisions: Division[];
+  teachers: Teacher[];
+  subjects: Subject[];
+  onCreateNew: (classDivision: string, day: string) => void;
+}) {
+  const [selectedDivision, setSelectedDivision] = useState<string>("");
+  const [timetableData, setTimetableData] = useState<TimetableRecord[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedDayPreview, setSelectedDayPreview] = useState<string | null>(null);
+  const [allTimetables, setAllTimetables] = useState<Record<number, TimetableRecord[]>>({});
+  const [loadingAll, setLoadingAll] = useState(false);
+  const [previewDivision, setPreviewDivision] = useState<string>("");
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+
+
+  // Load all timetables for all divisions on mount
+  useEffect(() => {
+    if (!divisions.length) return;
+    setLoadingAll(true);
+    Promise.all(
+      divisions.map((d) =>
+        getTimetable(d.id)
+          .then((res) => ({
+            id: d.id,
+            data: Array.isArray(res)
+              ? (res as TimetableRecord[]).filter((r) => r.class_division === d.id)
+              : [],
+          }))
+          .catch(() => ({ id: d.id, data: [] }))
+      )
+    )
+      .then((results) => {
+        const map: Record<number, TimetableRecord[]> = {};
+        results.forEach((r) => { map[r.id] = r.data; });
+        setAllTimetables(map);
+      })
+      .finally(() => setLoadingAll(false));
+  }, [divisions]);
+
+  // Also update when selectedDivision changes (for single division fetch)
+  useEffect(() => {
+    if (!selectedDivision) { setTimetableData([]); return; }
+    const cached = allTimetables[Number(selectedDivision)];
+    if (cached) {
+      setTimetableData(cached);
+    }
+  }, [selectedDivision, allTimetables]);
+
+  return (
+    <div className="min-h-screen bg-[#f8f7ff]" style={{ fontFamily: "'DM Sans', 'Nunito', sans-serif" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;0,9..40,900&display=swap');
+        @keyframes slideUp { from { transform:translateY(16px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+        .animate-slide-up { animation: slideUp 0.25s ease; }
+      `}</style>
+
+      {/* Header */}
+      <div className="px-3 sm:px-6 pt-4 sm:pt-6 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-black text-gray-900">Timetable</h1>
+            <p className="text-sm text-gray-400 mt-1">View and manage all class timetables.</p>
+          </div>
+          <button
+            onClick={() => onCreateNew("", "monday")}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-violet-200 flex-shrink-0"
+          >
+            <Plus size={15} /> Create Timetable
+          </button>
+        </div>
+      </div>
+
+      <div className="px-3 sm:px-6 pb-8">
+        {loadingAll ? (
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+            <Loader2 size={36} className="animate-spin text-violet-500 mx-auto mb-3" />
+            <p className="text-sm text-gray-500 font-medium">Loading all timetables...</p>
+          </div>
+        ) : divisions.length === 0 ? (
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+            <Calendar size={48} className="mx-auto mb-4 text-gray-200" />
+            <p className="text-base font-bold text-gray-400">No classes found</p>
+            <p className="text-sm text-gray-300 mt-1">Add divisions first to manage timetables</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {divisions.map((division) => {
+              const records = allTimetables[division.id] ?? [];
+              const createdCount = records.length;
+              const totalDays = DAYS.length;
+
+              return (
+                <div key={division.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                  {/* Class Header */}
+                  <div className="px-4 sm:px-5 py-4 border-b border-gray-100 flex flex-col gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <BookOpen size={18} className="text-violet-600" />
+                      </div>
+                      <div>
+                        <h2 className="font-bold text-gray-900 text-base">
+                          {division.class_name}
+                          <span className="ml-2 text-xs font-semibold bg-violet-100 text-violet-700 px-2 py-0.5 rounded-lg">
+                            Division {division.division}
+                          </span>
+                        </h2>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
+                            <CheckCircle2 size={10} /> {createdCount}/{totalDays} days
+                          </span>
+                          {createdCount < totalDays && (
+                            <span className="flex items-center gap-1 text-[11px] font-semibold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md">
+                              <Clock size={10} /> {totalDays - createdCount} pending
+                            </span>
+                          )}
+                          {createdCount === totalDays && (
+                            <span className="flex items-center gap-1 text-[11px] font-semibold text-violet-600 bg-violet-50 px-2 py-0.5 rounded-md">
+                              ✓ Complete
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
+                      <button
+                        onClick={() => {
+                          setPreviewDivision(String(division.id));
+                          setShowPreviewModal(true);
+                        }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 text-blue-600 rounded-xl text-xs font-bold hover:bg-blue-100 transition-all">
+                        <Eye size={12} /> Full Preview
+                      </button>
+                      <button
+                        onClick={() => onCreateNew(String(division.id), "monday")}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-50 border border-violet-200 text-violet-700 rounded-xl text-xs font-bold hover:bg-violet-100 transition-all">
+                        <Plus size={12} /> Add Day
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Days Row */}
+                  <div className="p-3 overflow-x-auto">
+                    <div className="grid grid-cols-7 gap-1.5 min-w-[420px]">
+                      {DAYS.map((day) => {
+                        const record = records.find((r) => r.day === day);
+                        const isCreated = !!record;
+                        const lectureCount = record?.slots.filter((s) => s.is_lecture).length ?? 0;
+                        const breakCount = record?.slots.filter((s) => s.is_break).length ?? 0;
+
+                        return (
+                          <div
+                            key={day}
+                            className={`rounded-xl border-2 p-2 flex flex-col gap-1.5 transition-all min-w-0 ${isCreated
+
+                              ? "border-emerald-200 bg-emerald-50/50 hover:border-emerald-300"
+                              : "border-dashed border-gray-200 bg-gray-50/50 hover:border-violet-200"
+                              }`}
+                          >
+                            {/* Day label */}
+                            <div className="flex items-center justify-between">
+                              <div className={`text-[11px] font-black ${isCreated ? "text-emerald-700" : "text-gray-400"}`}>
+                                {DAY_SHORT[day]}
+                              </div>
+                              {isCreated && <CheckCircle2 size={11} className="text-emerald-500" />}
+                            </div>
+
+                            {isCreated ? (
+                              <>
+                                {/* Stats */}
+                                <div className="flex gap-1">
+                                  <div className="flex-1 bg-white rounded-md py-1 text-center">
+                                    <p className="text-xs font-black text-violet-700 leading-none">{lectureCount}</p>
+                                    <p className="text-[9px] text-violet-400 font-semibold leading-tight">Lec</p>
+                                  </div>
+                                  <div className="flex-1 bg-white rounded-md py-1 text-center">
+                                    <p className="text-xs font-black text-orange-500 leading-none">{breakCount}</p>
+                                    <p className="text-[9px] text-orange-400 font-semibold leading-tight">Brk</p>
+                                  </div>
+                                </div>
+                                {/* Action buttons */}
+                                <div className="flex flex-col gap-1">
+                                  <button
+                                    onClick={() => { setSelectedDivision(String(division.id)); setSelectedDayPreview(day); }}
+                                    className="w-full flex items-center justify-center gap-0.5 py-1 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-md text-[10px] font-bold hover:bg-emerald-100 transition-all"
+                                  >
+                                    <Eye size={9} />
+                                    <span>View</span>
+                                  </button>
+                                  <button
+                                    onClick={() => onCreateNew(String(division.id), day)}
+                                    className="w-full flex items-center justify-center gap-0.5 py-1 bg-violet-50 border border-violet-200 text-violet-600 rounded-md text-[10px] font-bold hover:bg-violet-100 transition-all"
+                                  >
+                                    <RefreshCw size={9} />
+                                    <span>Edit</span>
+                                  </button>
+                                </div>
+                              </>
+                            ) : (
+                              <>
+                                <div className="flex-1 flex items-center justify-center py-1">
+                                  <Clock size={16} className="text-gray-200" />
+                                </div>
+                                <button
+                                  onClick={() => onCreateNew(String(division.id), day)}
+                                  className="w-full flex items-center justify-center py-1 bg-violet-50 border border-dashed border-violet-200 text-violet-500 rounded-md text-[10px] font-bold hover:bg-violet-100 transition-all"
+                                >
+                                  <Plus size={10} />
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      <DayPreviewModal
+        isOpen={selectedDayPreview !== null}
+        onClose={() => setSelectedDayPreview(null)}
+        day={selectedDayPreview}
+        classDivision={selectedDivision}
+        subjects={subjects}
+        teachers={teachers}
+      />
+
+      <TimetablePreviewModal
+        isOpen={showPreviewModal}
+        onClose={() => setShowPreviewModal(false)}
+        classDivision={previewDivision}
+        divisions={divisions}
+        subjects={subjects}
+        teachers={teachers}
+      />
+    </div>
+  );
+}
+
 
 export default function CreateTimetablePage() {
   const [divisions, setDivisions] = useState<Division[]>([]);
@@ -1699,7 +2304,8 @@ export default function CreateTimetablePage() {
   );
   const [loading, setLoading] = useState(true);
   const [loadErr, setLoadErr] = useState<string | null>(null);
-
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [previewDivision, setPreviewDivision] = useState<string>("");
   const [step, setStep] = useState(1);
 
   const [form, setForm] = useState<FormDataType>({
@@ -1710,24 +2316,50 @@ export default function CreateTimetablePage() {
     start_time: "08:00",
     end_time: "12:00",
     academicYear: "2026-2027",
+    lecture_duration: 45,
+    break_duration: 15,
   });
+  // Load form from localStorage on mount
+  // Load form from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("timetable_form");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setForm((f) => ({ ...f, ...parsed }));
+      } catch {
+        // ignore
+      }
+    }
+  }, []);
+
+  // Save form to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("timetable_form", JSON.stringify(form));
+  }, [form]);
+
 
   const [slots, setSlots] = useState<Slot[]>([]);
   const [existingId, setExistingId] = useState<number | null>(null);
   const [savedRecord, setSavedRecord] = useState<{ id?: number } | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [existingDays, setExistingDays] = useState<
+    { day: string; id: number }[]
+  >([]);
+  const [selectedDayPreview, setSelectedDayPreview] = useState<string | null>(
+    null,
+  );
+  const [showList, setShowList] = useState(true);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [divRes, subRes, tchRes] = await Promise.all([
+        const [divRes, tchRes] = await Promise.all([
           getDivisions(),
-          getSubjects(),
           getTeachers(),
         ]);
         setDivisions(Array.isArray(divRes) ? (divRes as Division[]) : []);
-        setSubjects(Array.isArray(subRes) ? (subRes as Subject[]) : []);
         setTeachers(Array.isArray(tchRes) ? (tchRes as Teacher[]) : []);
       } catch (e: unknown) {
         setLoadErr(e instanceof Error ? e.message : "Failed to load data");
@@ -1739,17 +2371,42 @@ export default function CreateTimetablePage() {
   }, []);
 
   useEffect(() => {
-    if (!form.class_division) return;
-    setSlots([]); // ← ADD THIS — clear slots when class changes
-    setExistingId(null); // ← ADD THIS — reset existing ID
+    if (!form.class_division) {
+      setExistingDays([]);
+      setSlots([]);
+      setExistingId(null);
+      return;
+    }
+    setSlots([]);
+    setExistingId(null);
     (async () => {
       try {
         const assigned = await getAssignedTeachers(form.class_division);
-        setAssignedTeachers(
-          Array.isArray(assigned) ? (assigned as AssignedTeacher[]) : [],
+        const assignedList = Array.isArray(assigned) ? (assigned as AssignedTeacher[]) : [];
+
+        // Filter only entries matching the selected division
+        const divisionList = assignedList.filter(
+          (at) => String(at.division) === String(form.class_division),
         );
+
+        setAssignedTeachers(divisionList);
+
+        // Build unique subjects list directly from assignedTeachers data
+        const uniqueSubjectsMap = new Map<string, Subject>();
+        divisionList.forEach((at) => {
+          if (!uniqueSubjectsMap.has(String(at.subject))) {
+            uniqueSubjectsMap.set(String(at.subject), {
+              id: Number(at.subject),
+              name: at.subject_name ?? `Subject ${at.subject}`,
+              division: Number(at.division),
+            });
+          }
+        });
+        setSubjects(Array.from(uniqueSubjectsMap.values()));
+
       } catch {
         setAssignedTeachers([]);
+        setSubjects([]);
       }
     })();
   }, [form.class_division]);
@@ -1759,9 +2416,23 @@ export default function CreateTimetablePage() {
     (async () => {
       try {
         const records = await getTimetable(Number(form.class_division));
+        const list: unknown[] = Array.isArray(records)
+          ? records.filter(
+            (r) =>
+              r !== null &&
+              typeof r === "object" &&
+              (r as { class_division?: number }).class_division ===
+              Number(form.class_division),
+          )
+          : [];
 
-        // ✅ Fix: use unknown[] instead of Record<string, unknown>[]
-        const list: unknown[] = Array.isArray(records) ? records : [];
+        // ← Always update existingDays regardless of day match
+        setExistingDays(
+          list.map((r) => ({
+            day: (r as { day: string }).day,
+            id: (r as { id: number }).id,
+          })),
+        );
 
         const match = list.find(
           (r) =>
@@ -1770,13 +2441,13 @@ export default function CreateTimetablePage() {
             (r as { day?: string }).day === form.day,
         ) as
           | {
-              id: number;
-              day: string;
-              total_lecture?: number;
-              start_time?: string;
-              end_time?: string;
-              slots?: unknown[];
-            }
+            id: number;
+            day: string;
+            total_lecture?: number;
+            start_time?: string;
+            end_time?: string;
+            slots?: unknown[];
+          }
           | undefined;
 
         if (match) {
@@ -1806,9 +2477,12 @@ export default function CreateTimetablePage() {
               subject: slot.subject ?? "",
               teacher: slot.teacher ?? "",
               subject_name:
+                assignedTeachers.find((at) => String(at.subject) === String(slot.subject))?.subject_name ??
                 subjects.find((x) => x.id === slot.subject)?.name ?? "",
               teacher_name:
+                assignedTeachers.find((at) => String(at.teacher) === String(slot.teacher))?.teacher_name ??
                 teachers.find((x) => x.id === slot.teacher)?.name ?? "",
+
             };
           });
 
@@ -1830,13 +2504,12 @@ export default function CreateTimetablePage() {
           }));
         } else {
           setExistingId(null);
-          setSlots([]); // ← ADD THIS
         }
       } catch {
         // Silently ignore — timetable may not exist yet
       }
     })();
-  }, [form.class_division, form.day, subjects, teachers]);
+  }, [form.class_division, form.day, subjects, teachers, assignedTeachers]);
 
   const handleAutoGenerate = useCallback(
     (
@@ -1848,12 +2521,15 @@ export default function CreateTimetablePage() {
       const [sh, sm] = (currentForm.start_time || "08:00")
         .split(":")
         .map(Number);
-      const perLecture = 45;
-      const perBreak = 15;
+      const perLecture = currentForm.lecture_duration;
+      const perBreak = currentForm.break_duration;
 
       const classTeacherEntry = (currentAssignedTeachers || []).find(
-        (t) => t.is_class_teacher === true,
+        (t) =>
+          t.is_class_teacher === true &&
+          String(t.division) === String(currentForm.class_division),
       );
+
 
       const breakPositions = new Set<number>();
       if (breakCount > 0) {
@@ -1919,11 +2595,14 @@ export default function CreateTimetablePage() {
   );
 
   const handleReset = () => {
+    setShowList(true);
     setStep(1);
     setSlots([]);
     setExistingId(null);
     setSavedRecord(null);
     setShowSuccess(false);
+    setExistingDays([]);
+    setSelectedDayPreview(null);
     setForm({
       day: "monday",
       class_division: "",
@@ -1932,8 +2611,28 @@ export default function CreateTimetablePage() {
       start_time: "08:00",
       end_time: "12:00",
       academicYear: "2026-2027",
+      lecture_duration: 45,
+      break_duration: 15,
     });
   };
+
+  if (showList) {
+    return (
+      <TimetableListPage
+        divisions={divisions}
+        teachers={teachers}
+        subjects={subjects}
+        onCreateNew={(classDivision, day) => {
+          if (classDivision) {
+            setForm((f) => ({ ...f, class_division: classDivision, day }));
+          }
+          setShowList(false);
+          setStep(1);
+          setShowSuccess(false);
+        }}
+      />
+    );
+  }
 
   if (loading) {
     return (
@@ -1986,24 +2685,23 @@ export default function CreateTimetablePage() {
       `}</style>
 
       <div className="px-3 sm:px-6 pt-4 sm:pt-6 pb-4">
-        <div className="flex items-center gap-2 text-xs text-gray-400 mb-3">
-          <span className="hover:text-violet-600 cursor-pointer transition-colors">
-            Timetable
-          </span>
-          <ChevronRight size={12} />
-          <span className="text-gray-700 font-semibold">Create Timetable</span>
-        </div>
-
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-black text-gray-900">
+            <button
+              onClick={() => setShowList(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-200 hover:border-violet-400 text-gray-600 hover:text-violet-700 rounded-xl text-sm font-bold mb-3 transition-all shadow-sm hover:shadow-md"
+            >
+              <ArrowLeft size={15} /> Back to Timetables
+            </button>
+
+            {/* <h1 className="text-2xl font-black text-gray-900">
               Create Timetable
             </h1>
             <p className="text-sm text-gray-400 mt-1">
               Create and manage class schedules easily.
-            </p>
+            </p> */}
           </div>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full md:w-auto">
+          <div className="flex flex-col xs:flex-row sm:flex-row sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
             {existingId && (
               <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold px-3 py-2 rounded-xl">
                 <RefreshCw size={12} /> Editing existing timetable
@@ -2011,20 +2709,18 @@ export default function CreateTimetablePage() {
             )}
             <button
               onClick={() => setShowPreview(true)}
-              className="w-full sm:w-auto justify-center flex items-center gap-2 px-4 py-2.5 border-2 border-violet-200 text-violet-700 bg-white rounded-xl text-sm font-bold hover:bg-violet-50 transition-all"
+              className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-4 py-2.5 border-2 border-violet-200 text-violet-700 bg-white rounded-xl text-sm font-bold hover:bg-violet-50 transition-all"
             >
               <Eye size={15} /> Preview
             </button>
-
             <button
-              onClick={() => {
-                if (!showSuccess && step < 3) setStep(3);
-              }}
-              className="w-full sm:w-auto justify-center flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-violet-200"
+              onClick={() => { if (!showSuccess && step < 3) setStep(3); }}
+              className="flex-1 sm:flex-none justify-center flex items-center gap-2 px-5 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-violet-200"
             >
               <Save size={15} /> Save Timetable
             </button>
           </div>
+
         </div>
       </div>
 
@@ -2051,16 +2747,18 @@ export default function CreateTimetablePage() {
                   divisions={divisions}
                   form={form}
                   setForm={setForm}
-                  onNext={() => {
+                  existingDays={existingDays}
+                  onPreviewDay={(day) => setSelectedDayPreview(day)}
+                  onViewDay={(day) => {
+                    setForm((f) => ({ ...f, day }));
                     setStep(2);
-                    if (slots.length === 0) {
-                      const generated = handleAutoGenerate(
-                        form,
-                        assignedTeachers,
-                      );
-                      setSlots(generated);
-                    }
                   }}
+                  onNext={() => {
+                    const generated = handleAutoGenerate(form, assignedTeachers);
+                    setSlots(generated);
+                    setStep(2);
+                  }}
+
                 />
               ) : step === 2 ? (
                 <Step2TimeSlots
@@ -2068,6 +2766,7 @@ export default function CreateTimetablePage() {
                   subjects={subjects}
                   teachers={teachers}
                   assignedTeachers={assignedTeachers}
+                  divisions={divisions}
                   slots={slots}
                   setSlots={setSlots}
                   onNext={() => setStep(3)}
@@ -2092,7 +2791,8 @@ export default function CreateTimetablePage() {
           </div>
         </div>
 
-        <div className="hidden 2xl:block w-[300px] flex-shrink-0">
+        <div className="hidden xl:block w-[320px] flex-shrink-0">
+
           <div
             className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col"
             style={{
@@ -2105,14 +2805,24 @@ export default function CreateTimetablePage() {
           </div>
         </div>
       </div>
-      <TimetablePreviewModal
-        isOpen={showPreview}
-        onClose={() => setShowPreview(false)}
+      <DayPreviewModal
+        isOpen={selectedDayPreview !== null}
+        onClose={() => setSelectedDayPreview(null)}
+        day={selectedDayPreview}
         classDivision={form.class_division}
+        subjects={subjects}
+        teachers={teachers}
+      />
+
+      <TimetablePreviewModal
+        isOpen={showPreviewModal}
+        onClose={() => setShowPreviewModal(false)}
+        classDivision={previewDivision}
         divisions={divisions}
         subjects={subjects}
         teachers={teachers}
       />
+
     </div>
   );
 }

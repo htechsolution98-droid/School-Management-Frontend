@@ -1470,7 +1470,7 @@ export async function getTimetable(
   params.set("class_division", String(classDivision));
   if (day) params.set("day", day);
 
-  const url = `${API_BASE_URL}/timetable/${params.toString() ? `?${params.toString()}` : ""}`;
+  const url = `${API_BASE_URL}/timetable/?${params.toString()}`;
   const response = await fetchWithAuth(url);
 
   if (!response.ok) {
@@ -1952,6 +1952,7 @@ export async function getAcademicYears(): Promise<AcademicYear[]> {
   return Array.isArray(data) ? data : (data.results ?? data.data ?? []);
 }
 
+
 // POST /api/academic-year/
 export async function createAcademicYear(payload: {
   name: string;
@@ -1974,6 +1975,82 @@ export async function createAcademicYear(payload: {
   }
 
   return data;
+}
+
+export async function createAcademicYearForPrincipal(payload: {
+  name: string;
+  start_month: number;
+  end_month: number;
+}): Promise<AcademicYear> {
+  const url = `${API_BASE_URL}${API_ENDPOINTS.ACADEMIC_YEAR}`;
+  const response = await fetchWithAuth(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data?.detail || data?.message || "Failed to create academic year."
+    );
+  }
+
+  return data;
+}
+
+export async function getAcademicYearsForPrincipal(): Promise<AcademicYear[]> {
+  const url = `${API_BASE_URL}${API_ENDPOINTS.ACADEMIC_YEAR}`;
+  const response = await fetchWithAuth(url);
+
+  if (!response.ok) {
+    let message = "Failed to fetch academic years.";
+    try {
+      const err = await response.json();
+      message = err?.detail || err?.message || message;
+    } catch { }
+    throw new Error(message);
+  }
+
+  const data = await response.json();
+  return Array.isArray(data) ? data : (data.results ?? data.data ?? []);
+}
+
+export async function updateAcademicYearForPrincipal(
+  id: number,
+  payload: { name: string; start_month: number; end_month: number }
+): Promise<AcademicYear> {
+  const url = `${API_BASE_URL}${API_ENDPOINTS.ACADEMIC_YEAR}${id}/`;
+  const response = await fetchWithAuth(url, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data?.detail || data?.message || "Failed to update academic year."
+    );
+  }
+
+  return data;
+}
+
+export async function deleteAcademicYearForPrincipal(id: number): Promise<void> {
+  const url = `${API_BASE_URL}${API_ENDPOINTS.ACADEMIC_YEAR}${id}/`;
+  const response = await fetchWithAuth(url, { method: "DELETE" });
+
+  if (!response.ok) {
+    let message = "Failed to delete academic year.";
+    try {
+      const err = await response.json();
+      message = err?.detail || err?.message || message;
+    } catch { }
+    throw new Error(message);
+  }
 }
 
 // ─── Fee Type Types & APIs ────────────────────────────────────────────────────
