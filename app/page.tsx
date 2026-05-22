@@ -166,19 +166,19 @@ export default function LandingPage() {
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-[#F8FAFC] via-white to-[#429CE4]/5">
 
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-[#1D496C]/10 bg-white/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60">
+      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-gradient-to-r from-[#1D496C]/95 via-[#285E89]/95 to-[#1D496C]/95 shadow-lg backdrop-blur-md supports-[backdrop-filter]:bg-gradient-to-r">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="relative flex items-center">
-                <div className="flex h-14 w-auto items-center justify-center rounded-xl bg-white p-1.5 shadow-md border border-[#1D496C]/10">
+                <div className="flex h-14 w-auto items-center justify-center rounded-xl bg-white p-1.5 shadow-md border border-white/10">
                   <img src="/logo.png" alt="VidyaSanchalan Logo" className="h-10 w-auto max-w-[160px] object-contain" />
                 </div>
                 <div className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-[#FFA600] ring-2 ring-white"></div>
               </div>
               <div>
-                <span className="text-xl font-black tracking-tight"><span className="text-[#285E89]">Vidya</span><span className="text-[#FFA600]">Sanchalan</span></span>
-                <p className="text-[10px] text-[#475569]/80 font-bold uppercase tracking-wider mt-0.5">School Management</p>
+                <span className="text-xl font-black tracking-tight"><span className="text-white">Vidya</span><span className="text-[#FFA600]">Sanchalan</span></span>
+                <p className="text-[10px] text-white/70 font-bold uppercase tracking-wider mt-0.5">School Management</p>
               </div>
             </div>
 
@@ -187,10 +187,10 @@ export default function LandingPage() {
                 <Link
                   key={item}
                   href={`#${item.toLowerCase()}`}
-                  className="group relative text-sm font-medium text-[#475569] transition-colors hover:text-[#285E89]"
+                  className="group relative text-sm font-medium text-white/90 transition-colors hover:text-[#FFA600]"
                 >
                   {item}
-                  <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-gradient-to-r from-[#1D496C] to-[#6A7626] transition-all group-hover:w-full"></span>
+                  <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-gradient-to-r from-[#FFA600] to-[#ED6708] transition-all group-hover:w-full"></span>
                 </Link>
               ))}
             </nav>
@@ -199,20 +199,20 @@ export default function LandingPage() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="hidden md:inline-flex rounded-lg text-[#475569] hover:bg-[#429CE4]/10 hover:text-[#285E89]"
+                className="hidden md:inline-flex rounded-lg text-white/90 hover:bg-white/10 hover:text-white"
                 asChild
               >
                 <Link href="/login">Sign in</Link>
               </Button>
               <Button
                 size="sm"
-                className="rounded-lg bg-[#429CE4] text-white shadow-md hover:bg-[#1D496C] transition-all duration-300"
+                className="rounded-lg bg-[#FFA600] text-white shadow-md hover:bg-[#ED6708] hover:scale-105 transition-all duration-300"
                 onClick={handleGetStarted}
               >
                 Get Started
                 <ArrowRight className="ml-2 h-3 w-3" />
               </Button>
-              <Button variant="outline" size="icon" className="md:hidden rounded-lg border-[#6A7626]/30 text-[#1D496C]">
+              <Button variant="outline" size="icon" className="md:hidden rounded-lg border-white/20 text-white hover:bg-white/10">
                 <Menu className="h-4 w-4" />
               </Button>
             </div>
@@ -223,15 +223,7 @@ export default function LandingPage() {
       {/* Admission Marquee */}
       {formLink && (
         <div className="sticky top-16 z-40 overflow-hidden bg-[#ED6708] py-2 border-b border-[#ED6708]/20 shadow-sm">
-          <motion.div
-            animate={{ x: ["0%", "-50%"] }}
-            transition={{
-              duration: 30,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-            className="flex whitespace-nowrap items-center gap-12 px-4"
-          >
+          <div className="flex whitespace-nowrap items-center gap-12 px-4 w-max animate-marquee-left-fast pause-on-hover">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="flex items-center gap-3 text-sm font-medium text-white">
                 <Sparkles className="h-4 w-4 text-white/80" />
@@ -246,7 +238,7 @@ export default function LandingPage() {
                 </a>
               </div>
             ))}
-          </motion.div>
+          </div>
         </div>
       )}
 
@@ -437,15 +429,7 @@ export default function LandingPage() {
 
             {/* Slider 1: Modules (Right to Left) */}
             <div className="relative w-full overflow-hidden py-1.5" style={{ maskImage: "linear-gradient(to right, transparent, white 15%, white 85%, transparent)", WebkitMaskImage: "linear-gradient(to right, transparent, white 15%, white 85%, transparent)" }}>
-              <motion.div
-                animate={{ x: ["0%", "-50%"] }}
-                transition={{
-                  duration: 25,
-                  repeat: Infinity,
-                  ease: "linear"
-                }}
-                className="flex whitespace-nowrap gap-4 w-max"
-              >
+              <div className="flex whitespace-nowrap gap-4 w-max animate-marquee-left pause-on-hover">
                 {/* First set */}
                 {sliderModules.map((item, idx) => (
                   <div
@@ -470,20 +454,12 @@ export default function LandingPage() {
                     <span className="text-sm font-bold text-[#1D496C]">{item.label}</span>
                   </div>
                 ))}
-              </motion.div>
+              </div>
             </div>
 
             {/* Slider 2: Badges (Left to Right) */}
             <div className="relative w-full overflow-hidden py-1.5" style={{ maskImage: "linear-gradient(to right, transparent, white 15%, white 85%, transparent)", WebkitMaskImage: "linear-gradient(to right, transparent, white 15%, white 85%, transparent)" }}>
-              <motion.div
-                animate={{ x: ["-50%", "0%"] }}
-                transition={{
-                  duration: 30,
-                  repeat: Infinity,
-                  ease: "linear"
-                }}
-                className="flex whitespace-nowrap gap-4 w-max"
-              >
+              <div className="flex whitespace-nowrap gap-4 w-max animate-marquee-right pause-on-hover">
                 {/* First set */}
                 {sliderBadges.map((item, idx) => (
                   <div
@@ -508,7 +484,7 @@ export default function LandingPage() {
                     <span className="text-sm font-bold text-[#475569]">{item.label}</span>
                   </div>
                 ))}
-              </motion.div>
+              </div>
             </div>
           </div>
         </div>
