@@ -497,6 +497,7 @@ export interface TempUser {
   status: string
 }
 
+
 export async function getTempUsers(): Promise<TempUser[]> {
   const url = `${API_BASE_URL}${API_ENDPOINTS.GET_TEMP_USER_DATA}`
 
@@ -1925,11 +1926,13 @@ export interface BillingPeriod {
 
 export interface AcademicYear {
   id: number;
-  name: string;
+  name?: string;
+  start_year: number;
+  end_year: number;
   start_month: number;
   end_month: number;
   billing_periods: string[];
-  is_active?: boolean;          // ← add this
+  is_active?: boolean;
   status?: "Active" | "Completed" | "Upcoming";
 }
 
@@ -1978,7 +1981,8 @@ export async function createAcademicYear(payload: {
 }
 
 export async function createAcademicYearForPrincipal(payload: {
-  name: string;
+  start_year: number;
+  end_year: number;
   start_month: number;
   end_month: number;
 }): Promise<AcademicYear> {
@@ -1993,7 +1997,9 @@ export async function createAcademicYearForPrincipal(payload: {
 
   if (!response.ok) {
     throw new Error(
-      data?.detail || data?.message || "Failed to create academic year."
+      data?.detail || data?.message
+        ? (data?.detail || data?.message)
+        : JSON.stringify(data)
     );
   }
 
@@ -2019,7 +2025,7 @@ export async function getAcademicYearsForPrincipal(): Promise<AcademicYear[]> {
 
 export async function updateAcademicYearForPrincipal(
   id: number,
-  payload: { name: string; start_month: number; end_month: number }
+  payload: { start_year: number; end_year: number; start_month: number; end_month: number }
 ): Promise<AcademicYear> {
   const url = `${API_BASE_URL}${API_ENDPOINTS.ACADEMIC_YEAR}${id}/`;
   const response = await fetchWithAuth(url, {
@@ -2931,8 +2937,8 @@ async function apiFetch<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const url = path.startsWith("http")
-  ? path
-  : `${API_BASE_URL}${path.replace(/^\/api/, "")}`;
+    ? path
+    : `${API_BASE_URL}${path.replace(/^\/api/, "")}`;
 
   const response = await fetchWithAuth(url, {
     headers: {
@@ -3199,3 +3205,79 @@ export function periodToMonthName(period: string): string {
     month: "long",
   });
 }
+
+
+// ─── Temp Users ───────────────────────────────────────────────────────────────
+
+export interface TempUser {
+  id: number
+  username: string
+  email: string | null
+  mobile: string | null
+  is_active: boolean
+}
+
+export async function getTempUsersForPrincipal(): Promise<TempUser[]> {
+  const url = `${API_BASE_URL}/tempusers/`
+  const response = await fetchWithAuth(url)
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch temp users")
+  }
+
+  const data = await response.json()
+  return Array.isArray(data) ? data : (data.data ?? data.results ?? [])
+}
+
+export async function activateTempUser(id: number): Promise<void> {
+  const url = `${API_BASE_URL}/tempusers/${id}/activate/`
+  const response = await fetchWithAuth(url, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ is_active: true }),
+  })
+
+  if (!response.ok) {
+    let message = "Failed to activate user."
+    try {
+      const err = await response.json()
+      message = err?.detail || err?.message || message
+    } catch { }
+    throw new Error(message)
+  }
+}
+
+export async function deactivateTempUser(id: number): Promise<void> {
+  const url = `${API_BASE_URL}/tempusers/${id}/activate/`
+  const response = await fetchWithAuth(url, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ is_active: false }),
+  })
+
+  if (!response.ok) {
+    let message = "Failed to deactivate user."
+    try {
+      const err = await response.json()
+      message = err?.detail || err?.message || message
+    } catch {}
+    throw new Error(message)
+  }
+}
+
+// ADD this to forms.ts — after deactivateTempUser
+export async function deactivateAllTempUsers(): Promise<void> {
+  const url = `${API_BASE_URL}/tempusers/deactivate-all/`
+  const response = await fetchWithAuth(url, { method: "POST" })
+
+  if (!response.ok) {
+    let message = "Failed to deactivate all users."
+    try {
+      const err = await response.json()
+      message = err?.detail || err?.message || message
+    } catch {}
+    throw new Error(message)
+  }
+}
+
+
