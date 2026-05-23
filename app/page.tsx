@@ -183,10 +183,10 @@ export default function LandingPage() {
             </div>
 
             <nav className="hidden md:flex items-center gap-8">
-              {["Features", "Modules", "Pricing", "Contact"].map((item) => (
+              {["Features", "Modules", "Contact"].map((item) => (
                 <Link
                   key={item}
-                  href={`#${item.toLowerCase()}`}
+                  href={item === "Features" ? "/features" : item === "Modules" ? "/modules" : item === "Contact" ? "/contact" : `#${item.toLowerCase()}`}
                   className="group relative text-sm font-medium text-white/90 transition-colors hover:text-[#FFA600]"
                 >
                   {item}
@@ -729,67 +729,67 @@ export default function LandingPage() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
-              className="lg:col-span-7 relative bg-white border border-slate-100 shadow-2xl rounded-[3rem] p-8 sm:p-12 lg:p-16"
+              className="lg:col-span-7 relative bg-white border border-slate-100 shadow-xl rounded-[2.5rem] p-6 sm:p-8 lg:p-10"
             >
               {/* Soft visual background glow */}
               <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-[#5D3FD3]/5 rounded-full blur-3xl pointer-events-none"></div>
 
-              <div className="space-y-8">
+              <div className="space-y-6">
                 {/* Purple pill badge */}
                 <div>
-                  <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-[#5D3FD3]/10 text-[#5D3FD3] text-xs font-black tracking-wide uppercase">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-[#5D3FD3]/10 text-[#5D3FD3] text-[11px] font-black tracking-wide uppercase">
                     Why Choose Us?
                   </span>
                 </div>
 
                 {/* Main Styled Heading */}
-                <h2 className="text-3.5xl sm:text-4.5xl lg:text-[2.75rem] font-extrabold tracking-tight text-slate-900 leading-[1.12]">
+                <h2 className="text-2xl sm:text-3xl lg:text-[2.1rem] font-extrabold tracking-tight text-slate-900 leading-[1.2]">
                   <span className="font-extrabold text-slate-900">VidyaSanchalan</span>{" "}
                   <span className="font-medium text-slate-400">is a</span>{" "}
                   <span className="font-black text-[#5D3FD3] relative inline-block">
                     revolution
-                    <span className="absolute -bottom-1 left-0 w-full h-[3.5px] bg-[#5D3FD3]/20 rounded-full"></span>
+                    <span className="absolute -bottom-1 left-0 w-full h-[3px] bg-[#5D3FD3]/20 rounded-full"></span>
                   </span>{" "}
                   <span className="font-medium text-slate-400">in education</span>{" "}
                   <span className="font-black text-slate-900">management</span>
                 </h2>
 
                 {/* Structured Points list */}
-                <div className="space-y-8 pt-4">
+                <div className="space-y-6 pt-2">
                   {/* Point 1 */}
-                  <div className="flex gap-5 group">
-                    <div className="w-14 h-14 rounded-full border-[2.5px] border-[#5D3FD3]/20 bg-white flex items-center justify-center text-[#5D3FD3] shadow-md shadow-[#5D3FD3]/5 shrink-0 group-hover:scale-110 group-hover:border-[#5D3FD3] group-hover:bg-[#5D3FD3] group-hover:text-white transition-all duration-300">
-                      <Lightbulb className="h-6.5 w-6.5 stroke-[2.2]" />
+                  <div className="flex gap-4 group">
+                    <div className="w-11 h-11 rounded-full border-[2px] border-[#5D3FD3]/20 bg-white flex items-center justify-center text-[#5D3FD3] shadow-sm shrink-0 group-hover:scale-110 group-hover:border-[#5D3FD3] group-hover:bg-[#5D3FD3] group-hover:text-white transition-all duration-300">
+                      <Lightbulb className="h-5.5 w-5.5 stroke-[2.2]" />
                     </div>
                     <div className="space-y-1">
-                      <h3 className="text-lg sm:text-xl font-black text-slate-900 group-hover:text-[#5D3FD3] transition-colors duration-300">Innovation at our core</h3>
-                      <p className="text-sm font-semibold text-slate-500 leading-relaxed max-w-xl">
+                      <h3 className="text-base sm:text-lg font-extrabold text-slate-900 group-hover:text-[#5D3FD3] transition-colors duration-300">Innovation at our core</h3>
+                      <p className="text-xs sm:text-sm font-medium text-slate-500 leading-relaxed max-w-xl">
                         VidyaSanchalan stands as the vanguard of school-management solutions, consistently pioneering the integration of next-generation technologies that redefine educational administration worldwide.
                       </p>
                     </div>
                   </div>
 
                   {/* Point 2 */}
-                  <div className="flex gap-5 group">
-                    <div className="w-14 h-14 rounded-full border-[2.5px] border-[#285E89]/20 bg-white flex items-center justify-center text-[#285E89] shadow-md shadow-[#285E89]/5 shrink-0 group-hover:scale-110 group-hover:border-[#285E89] group-hover:bg-[#285E89] group-hover:text-white transition-all duration-300">
-                      <Target className="h-6.5 w-6.5 stroke-[2.2]" />
+                  <div className="flex gap-4 group">
+                    <div className="w-11 h-11 rounded-full border-[2px] border-[#285E89]/20 bg-white flex items-center justify-center text-[#285E89] shadow-sm shrink-0 group-hover:scale-110 group-hover:border-[#285E89] group-hover:bg-[#285E89] group-hover:text-white transition-all duration-300">
+                      <Target className="h-5.5 w-5.5 stroke-[2.2]" />
                     </div>
                     <div className="space-y-1">
-                      <h3 className="text-lg sm:text-xl font-black text-slate-900 group-hover:text-[#285E89] transition-colors duration-300">Simplifying complexity</h3>
-                      <p className="text-sm font-semibold text-slate-500 leading-relaxed max-w-xl">
+                      <h3 className="text-base sm:text-lg font-extrabold text-slate-900 group-hover:text-[#285E89] transition-colors duration-300">Simplifying complexity</h3>
+                      <p className="text-xs sm:text-sm font-medium text-slate-500 leading-relaxed max-w-xl">
                         Infographics & animations distill complex academic data into intuitive visuals—transforming every report and result into an easily grasped, optimized experience for students, parents, and educators.
                       </p>
                     </div>
                   </div>
 
                   {/* Point 3 */}
-                  <div className="flex gap-5 group">
-                    <div className="w-14 h-14 rounded-full border-[2.5px] border-[#FFA600]/20 bg-white flex items-center justify-center text-[#FFA600] shadow-md shadow-[#FFA600]/5 shrink-0 group-hover:scale-110 group-hover:border-[#FFA600] group-hover:bg-[#FFA600] group-hover:text-white transition-all duration-300">
-                      <TrendingUp className="h-6.5 w-6.5 stroke-[2.2]" />
+                  <div className="flex gap-4 group">
+                    <div className="w-11 h-11 rounded-full border-[2px] border-[#FFA600]/20 bg-white flex items-center justify-center text-[#FFA600] shadow-sm shrink-0 group-hover:scale-110 group-hover:border-[#FFA600] group-hover:bg-[#FFA600] group-hover:text-white transition-all duration-300">
+                      <TrendingUp className="h-5.5 w-5.5 stroke-[2.2]" />
                     </div>
                     <div className="space-y-1">
-                      <h3 className="text-lg sm:text-xl font-black text-slate-900 group-hover:text-[#FFA600] transition-colors duration-300">Empowering institutional growth</h3>
-                      <p className="text-sm font-semibold text-slate-500 leading-relaxed max-w-xl">
+                      <h3 className="text-base sm:text-lg font-extrabold text-slate-900 group-hover:text-[#FFA600] transition-colors duration-300">Empowering institutional growth</h3>
+                      <p className="text-xs sm:text-sm font-medium text-slate-500 leading-relaxed max-w-xl">
                         Our platform equips schools with automated workflows, real-time communication, and scalable features designed for any school size to thrive in the modern age.
                       </p>
                     </div>
@@ -995,9 +995,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="border-t border-[#6A7626]/20 bg-white">
-        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 pb-6">
           <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-5">
             <div className="lg:col-span-2">
               <div className="flex items-center gap-3 mb-4">
@@ -1036,7 +1035,7 @@ export default function LandingPage() {
                 <ul className="space-y-3">
                   {section.links.map((link, j) => (
                     <li key={j}>
-                      <Link href="#" className="text-sm text-[#475569] hover:text-[#285E89] transition-colors">
+                      <Link href={link === "Modules" ? "/modules" : link === "Contact" ? "/contact" : "#"} className="text-sm text-[#475569] hover:text-[#285E89] transition-colors">
                         {link}
                       </Link>
                     </li>

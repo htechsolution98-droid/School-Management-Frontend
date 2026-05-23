@@ -79,10 +79,10 @@ function VerifyOtpInner() {
     >
       {/* Header */}
       <motion.div custom={0} variants={fadeUp} initial="hidden" animate="visible" className="mb-8">
-        <h1 className="text-3xl font-bold text-[#0F172A] mb-2">Verify OTP</h1>
+        <h1 className="text-3xl font-extrabold text-[#1D496C] mb-2">Verify OTP</h1>
         <p className="text-[#64748B] text-sm flex items-center gap-2">
           {type === "email" ? <Mail className="h-4 w-4" /> : <Phone className="h-4 w-4" />}
-          OTP sent to <span className="font-semibold text-[#0F172A]">{identifier}</span>
+          OTP sent to <span className="font-bold text-[#1D496C]">{identifier}</span>
         </p>
       </motion.div>
 
@@ -90,13 +90,13 @@ function VerifyOtpInner() {
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* OTP */}
         <motion.div custom={1} variants={fadeUp} initial="hidden" animate="visible" className="space-y-1.5">
-          <Label htmlFor="otp" className="text-sm font-semibold text-[#374151]">
+          <Label htmlFor="otp" className="text-sm font-bold text-[#1D496C]">
             One-Time Password
           </Label>
           <div className="relative">
             <KeyRound
               className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors duration-200 ${
-                focused === "otp" ? "text-[#4F46E5]" : "text-[#94A3B8]"
+                focused === "otp" ? "text-[#FFA600]" : "text-[#94A3B8]"
               }`}
             />
             <Input
@@ -109,20 +109,20 @@ function VerifyOtpInner() {
               onChange={(e) => setOtp(e.target.value)}
               onFocus={() => setFocused("otp")}
               onBlur={() => setFocused(null)}
-              className="pl-10 h-12 rounded-xl border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#CBD5E1] shadow-sm focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-200"
+              className="pl-10 h-12 rounded-xl border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#CBD5E1] shadow-sm focus:border-[#FFA600] focus:ring-2 focus:ring-[#FFA600]/20 transition-all duration-200"
             />
           </div>
         </motion.div>
 
         {/* Password */}
         <motion.div custom={2} variants={fadeUp} initial="hidden" animate="visible" className="space-y-1.5">
-          <Label htmlFor="password" className="text-sm font-semibold text-[#374151]">
+          <Label htmlFor="password" className="text-sm font-bold text-[#1D496C]">
             Set Password
           </Label>
           <div className="relative">
             <Lock
               className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors duration-200 ${
-                focused === "password" ? "text-[#4F46E5]" : "text-[#94A3B8]"
+                focused === "password" ? "text-[#FFA600]" : "text-[#94A3B8]"
               }`}
             />
             <Input
@@ -134,7 +134,7 @@ function VerifyOtpInner() {
               onChange={(e) => setPassword(e.target.value)}
               onFocus={() => setFocused("password")}
               onBlur={() => setFocused(null)}
-              className="pl-10 pr-11 h-12 rounded-xl border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#CBD5E1] shadow-sm focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-200"
+              className="pl-10 pr-11 h-12 rounded-xl border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#CBD5E1] shadow-sm focus:border-[#FFA600] focus:ring-2 focus:ring-[#FFA600]/20 transition-all duration-200"
             />
             <button
               type="button"
@@ -159,13 +159,13 @@ function VerifyOtpInner() {
 
         {/* Confirm Password */}
         <motion.div custom={3} variants={fadeUp} initial="hidden" animate="visible" className="space-y-1.5">
-          <Label htmlFor="confirm-password" className="text-sm font-semibold text-[#374151]">
+          <Label htmlFor="confirm-password" className="text-sm font-bold text-[#1D496C]">
             Confirm Password
           </Label>
           <div className="relative">
             <Lock
               className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors duration-200 ${
-                focused === "confirm-password" ? "text-[#4F46E5]" : "text-[#94A3B8]"
+                focused === "confirm-password" ? "text-[#FFA600]" : "text-[#94A3B8]"
               }`}
             />
             <Input
@@ -177,7 +177,7 @@ function VerifyOtpInner() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               onFocus={() => setFocused("confirm-password")}
               onBlur={() => setFocused(null)}
-              className="pl-10 pr-11 h-12 rounded-xl border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#CBD5E1] shadow-sm focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-200"
+              className="pl-10 pr-11 h-12 rounded-xl border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#CBD5E1] shadow-sm focus:border-[#FFA600] focus:ring-2 focus:ring-[#FFA600]/20 transition-all duration-200"
             />
             <button
               type="button"
@@ -203,7 +203,7 @@ function VerifyOtpInner() {
         {/* Error Message */}
         {error && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
-            <p className="text-sm font-medium text-red-500">{error}</p>
+            <p className="text-sm font-semibold text-red-500">{error}</p>
           </motion.div>
         )}
 
@@ -212,7 +212,7 @@ function VerifyOtpInner() {
           <Button
             type="submit"
             disabled={isLoading}
-            className="group relative w-full h-12 rounded-xl bg-gradient-to-r from-[#4F46E5] to-[#6D28D9] text-white font-semibold text-sm shadow-lg shadow-indigo-200 hover:shadow-indigo-300 hover:from-[#4338CA] hover:to-[#5B21B6] active:scale-[0.98] transition-all duration-200 disabled:opacity-70"
+            className="group relative w-full h-12 rounded-xl bg-gradient-to-r from-[#1D496C] via-[#285E89] to-[#429CE4] text-white font-bold text-sm shadow-lg shadow-[#1D496C]/10 hover:shadow-xl hover:from-[#153957] hover:to-[#2e7ca8] active:scale-[0.98] transition-all duration-200 disabled:opacity-70"
           >
             <AnimatePresence mode="wait" initial={false}>
               {isLoading ? (
@@ -252,8 +252,8 @@ function VerifyOtpInner() {
         className="mt-8 pt-6 border-t border-[#F1F5F9] flex items-center justify-center gap-6"
       >
         {["256-bit Encryption", "Secure Session", "Double Verified"].map((badge) => (
-          <span key={badge} className="flex items-center gap-1.5 text-[10px] font-medium text-[#94A3B8] uppercase tracking-wider">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#34D399] inline-block" />
+          <span key={badge} className="flex items-center gap-1.5 text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#6A7626] inline-block" />
             {badge}
           </span>
         ))}
@@ -264,7 +264,7 @@ function VerifyOtpInner() {
 
 export function VerifyOtpForm() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-[#4F46E5]" /></div>}>
+    <Suspense fallback={<div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-[#FFA600]" /></div>}>
       <VerifyOtpInner />
     </Suspense>
   );
