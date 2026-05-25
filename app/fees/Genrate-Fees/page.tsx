@@ -335,11 +335,10 @@ const CreateFeeModal = ({
               setFeeType(type);
               setErrors({});
             }}
-            className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${
-              feeType === type
-                ? "bg-white text-blue-600 shadow-sm"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
+            className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all ${feeType === type
+              ? "bg-white text-blue-600 shadow-sm"
+              : "text-gray-500 hover:text-gray-700"
+              }`}
           >
             {type === "monthly" ? "Monthly Fee" : "Single Fee"}
           </button>
@@ -348,11 +347,10 @@ const CreateFeeModal = ({
 
       {toast && (
         <div
-          className={`mb-4 p-3 rounded-lg flex items-center gap-2 text-sm ${
-            toast.type === "success"
-              ? "bg-green-50 text-green-700 border border-green-200"
-              : "bg-red-50 text-red-700 border border-red-200"
-          }`}
+          className={`mb-4 p-3 rounded-lg flex items-center gap-2 text-sm ${toast.type === "success"
+            ? "bg-green-50 text-green-700 border border-green-200"
+            : "bg-red-50 text-red-700 border border-red-200"
+            }`}
         >
           {toast.type === "success" ? (
             <CheckCircle2 size={16} />
@@ -366,84 +364,57 @@ const CreateFeeModal = ({
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* UI-only class filter */}
         <FormField label="Class" required>
-          <select
-            className={selectClass}
+          <CustomDropdown
             value={form.selected_class}
-            onChange={(e) => {
-              update("selected_class", e.target.value);
-              update("student", ""); // reset student on class change
-            }}
-          >
-            <option value="">Select class...</option>
-            {[...new Set(students.map((s) => s.class_name).filter(Boolean))]
+            onChange={(v) => { update("selected_class", v); update("student", ""); }}
+            options={[...new Set(students.map((s) => s.class_name).filter(Boolean))]
               .sort()
-              .map((cls) => (
-                <option key={cls} value={cls!}>
-                  {cls}
-                </option>
-              ))}
-          </select>
+              .map((cls) => ({ value: cls!, label: cls! }))}
+            placeholder="Select class..."
+          />
         </FormField>
 
         <FormField label="Student" error={errors.student} required>
-          <select
-            className={selectClass}
+          <CustomDropdown
             value={form.student}
-            onChange={(e) => update("student", e.target.value)}
+            onChange={(v) => update("student", v)}
             disabled={!form.selected_class}
-          >
-            <option value="">
-              {form.selected_class ? "Select student..." : "Select class first"}
-            </option>
-            {students
+            placeholder={form.selected_class ? "Select student..." : "Select class first"}
+            options={students
               .filter((s) => s.class_name === form.selected_class)
-              .map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name} {s.surname || ""}
-                </option>
-              ))}
-          </select>
+              .map((s) => ({ value: String(s.id), label: `${s.name} ${s.surname || ""}`.trim() }))}
+            error={!!errors.student}
+          />
         </FormField>
 
         <FormField label="Academic Year" error={errors.academic_year} required>
-          <select
-            className={selectClass}
+          <CustomDropdown
             value={form.academic_year}
-            onChange={(e) => update("academic_year", e.target.value)}
-          >
-            <option value="">Select academic year...</option>
-            {academicYears.map((ay) => (
-              <option key={ay.id} value={ay.id}>
-                {ay.name} {ay.is_active ? "(Active)" : ""}
-              </option>
-            ))}
-          </select>
+            onChange={(v) => update("academic_year", v)}
+            placeholder="Select academic year..."
+            options={academicYears.map((ay) => ({
+              value: String(ay.id),
+              label: `${ay.name}${ay.is_active ? " (Active)" : ""}`,
+            }))}
+            error={!!errors.academic_year}
+          />
         </FormField>
 
         <FormField label="Fee Structure" error={errors.fee_wise_class} required>
-          <select
-            className={selectClass}
+          <CustomDropdown
             value={form.fee_wise_class}
-            onChange={(e) => {
-              const selectedId = e.target.value;
-              const selectedFeeClass = feeWiseClasses.find(
-                (fc) => fc.id === Number(selectedId),
-              );
-              update("fee_wise_class", selectedId);
-              update(
-                "feetype",
-                selectedFeeClass ? String(selectedFeeClass.feetype) : "",
-              );
+            onChange={(v) => {
+              const selectedFeeClass = feeWiseClasses.find((fc) => fc.id === Number(v));
+              update("fee_wise_class", v);
+              update("feetype", selectedFeeClass ? String(selectedFeeClass.feetype) : "");
             }}
-          >
-            <option value="">Select fee structure...</option>
-            {filteredFeeClasses.map((fc) => (
-              <option key={fc.id} value={fc.id}>
-                {fc.feetype_name} — ₹
-                {parseFloat(fc.amount).toLocaleString("en-IN")}
-              </option>
-            ))}
-          </select>
+            placeholder="Select fee structure..."
+            options={filteredFeeClasses.map((fc) => ({
+              value: String(fc.id),
+              label: `${fc.feetype_name} — ₹${parseFloat(fc.amount).toLocaleString("en-IN")}`,
+            }))}
+            error={!!errors.fee_wise_class}
+          />
         </FormField>
 
         {feeType === "monthly" && (
@@ -496,6 +467,74 @@ const CreateFeeModal = ({
     </Modal>
   );
 };
+
+// ─── Custom Dropdown (replaces native <select> on mobile) ─────────────────────
+function CustomDropdown({
+  value,
+  onChange,
+  options,
+  placeholder = "Select...",
+  disabled = false,
+  error = false,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+  placeholder?: string;
+  disabled?: boolean;
+  error?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
+  const selected = options.find((o) => o.value === value);
+
+  useEffect(() => {
+    const close = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => !disabled && setOpen((p) => !p)}
+        className={`w-full px-3 py-2.5 border rounded-lg text-sm text-left flex items-center justify-between transition-all bg-white
+          ${error ? "border-red-400 focus:ring-red-400" : "border-gray-200 focus:ring-blue-500"}
+          ${disabled ? "opacity-50 cursor-not-allowed bg-gray-50" : "cursor-pointer hover:border-gray-300"}
+          focus:outline-none focus:ring-2 focus:border-transparent`}
+      >
+        <span className={selected ? "text-gray-900" : "text-gray-400"}>
+          {selected ? selected.label : placeholder}
+        </span>
+        <ChevronRight
+          size={14}
+          className={`text-gray-400 transition-transform flex-shrink-0 ${open ? "rotate-90" : ""}`}
+        />
+      </button>
+      {open && (
+        <div className="absolute z-[500] top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-2xl max-h-52 overflow-y-auto">
+          {options.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => { onChange(opt.value); setOpen(false); }}
+              className={`w-full text-left px-4 py-2.5 text-sm transition-colors
+                ${value === opt.value
+                  ? "bg-blue-50 text-blue-700 font-semibold"
+                  : "text-gray-700 hover:bg-gray-50"}`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 // Discount Modal
 const DiscountModal = ({
@@ -590,11 +629,10 @@ const DiscountModal = ({
 
       {toast && (
         <div
-          className={`mb-4 p-3 rounded-lg flex items-center gap-2 text-sm ${
-            toast.type === "success"
-              ? "bg-green-50 text-green-700 border border-green-200"
-              : "bg-red-50 text-red-700 border border-red-200"
-          }`}
+          className={`mb-4 p-3 rounded-lg flex items-center gap-2 text-sm ${toast.type === "success"
+            ? "bg-green-50 text-green-700 border border-green-200"
+            : "bg-red-50 text-red-700 border border-red-200"
+            }`}
         >
           {toast.type === "success" ? (
             <CheckCircle2 size={16} />
@@ -867,12 +905,12 @@ export default function GenerateFeesPage() {
 
   // Client-side filtering for mock data
   const filteredFees = fees.filter((fee) => {
-  const matchTab =
-    activeTab === "monthly"
-      ? fee.billing_period !== "" && fee.billing_period != null
-      : fee.billing_period === "" || fee.billing_period == null;
-  return matchTab;
-});
+    const matchTab =
+      activeTab === "monthly"
+        ? fee.billing_period !== "" && fee.billing_period != null
+        : fee.billing_period === "" || fee.billing_period == null;
+    return matchTab;
+  });
 
 
   const paginatedFees = filteredFees.slice(
@@ -992,11 +1030,10 @@ export default function GenerateFeesPage() {
                   setActiveTab(tab);
                   setCurrentPage(1);
                 }}
-                className={`pb-3 px-4 text-sm font-medium border-b-2 transition-all -mb-px ${
-                  activeTab === tab
-                    ? "border-blue-600 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700"
-                }`}
+                className={`pb-3 px-4 text-sm font-medium border-b-2 transition-all -mb-px ${activeTab === tab
+                  ? "border-blue-600 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
+                  }`}
               >
                 {tab === "monthly" ? "Monthly Fees" : "Single Fees"}
               </button>
@@ -1348,11 +1385,10 @@ export default function GenerateFeesPage() {
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`w-8 h-8 text-sm rounded-lg font-medium transition-colors ${
-                        currentPage === page
-                          ? "bg-blue-600 text-white"
-                          : "border border-gray-200 text-gray-600 hover:bg-gray-50"
-                      }`}
+                      className={`w-8 h-8 text-sm rounded-lg font-medium transition-colors ${currentPage === page
+                        ? "bg-blue-600 text-white"
+                        : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                        }`}
                     >
                       {page}
                     </button>

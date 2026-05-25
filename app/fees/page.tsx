@@ -222,7 +222,7 @@ function VerifyModal({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.16 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-[999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <motion.div
@@ -242,8 +242,9 @@ function VerifyModal({
             style={{ backgroundImage: "radial-gradient(ellipse at 85% 15%, rgba(255,255,255,0.18), transparent 55%)" }}
           />
           <button
+            type="button"
             onClick={onClose}
-            className="absolute right-4 top-4 rounded-lg bg-white/20 hover:bg-white/35 p-1.5 transition-colors"
+            className="absolute right-4 top-4 z-50 rounded-lg bg-white/20 hover:bg-white/35 p-1.5 transition-colors touch-manipulation"
           >
             <X className="h-3.5 w-3.5" />
           </button>
@@ -338,7 +339,7 @@ function VerifyModal({
         </div>
 
         {/* footer */}
-        <div className="shrink-0 border-t border-slate-100 bg-slate-50/80 px-6 py-4 flex gap-2.5">
+        <div className="shrink-0 border-t border-slate-100 bg-slate-50/80 px-4 py-3 flex flex-col sm:flex-row gap-2">
           <button
             onClick={onClose}
             className="flex-1 rounded-xl border-2 border-slate-200 bg-white py-3 font-bold text-slate-700 hover:bg-slate-50 transition-colors text-xs"
@@ -350,7 +351,7 @@ function VerifyModal({
             whileTap={{ scale: 0.97 }}
             disabled={verifyingId === record.id}
             onClick={onConfirm}
-            className="flex-1 rounded-xl bg-emerald-500 hover:bg-emerald-600 disabled:opacity-60 py-3 font-bold text-white shadow-lg shadow-emerald-200/60 transition-colors text-xs flex items-center justify-center gap-2"
+            className="w-full sm:flex-1 rounded-xl bg-emerald-500 hover:bg-emerald-600 disabled:opacity-60 py-2.5 px-3 font-bold text-white shadow-lg shadow-emerald-200/60 transition-colors text-[11px] sm:text-xs flex items-center justify-center gap-1.5 text-center leading-tight"
           >
             {verifyingId === record.id ? (
               <><Loader2 className="h-4 w-4 animate-spin" />Verifying…</>

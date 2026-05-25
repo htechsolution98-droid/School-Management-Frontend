@@ -639,14 +639,15 @@ export default function RazorpayCredentialsPage() {
                             setIsAdding(false);
                             window.scrollTo({ top: 0, behavior: "smooth" });
                           }}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-[#4F46E5] hover:text-white hover:border-[#4F46E5] active:bg-[#4F46E5] active:text-white active:border-[#4F46E5] transition-all"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all border-[#4F46E5] text-[#4F46E5] sm:border-gray-200 sm:text-gray-600 hover:bg-[#4F46E5] hover:text-white hover:border-[#4F46E5] active:bg-[#4F46E5] active:text-white active:border-[#4F46E5]"
                         >
                           <Edit3 className="h-3.5 w-3.5" />
                           Edit
                         </button>
                         <button
                           onClick={() => setDeletingRecord(record)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-red-500 hover:text-white hover:border-red-500 active:bg-red-500 active:text-white active:border-red-500 transition-all"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all border-red-400 text-red-500 sm:border-gray-200 sm:text-gray-600 hover:bg-red-500 hover:text-white hover:border-red-500 active:bg-red-500 active:text-white active:border-red-500"
+
                         >
                           <X className="h-3.5 w-3.5" />
                           Delete
