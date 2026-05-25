@@ -57,10 +57,134 @@ function StatCounter({ target, suffix }: { target: number; suffix: string }) {
   return <span ref={ref}>{count}{suffix}</span>;
 }
 
+// Helper to render lucide icons dynamically based on name
+const getIcon = (name: string, className?: string) => {
+  switch (name) {
+    case "GraduationCap": return <GraduationCap className={className} />;
+    case "Users": return <Users className={className} />;
+    case "BookOpen": return <BookOpen className={className} />;
+    case "Calendar": return <Calendar className={className} />;
+    case "Shield": return <Shield className={className} />;
+    case "Bell": return <Bell className={className} />;
+    case "CreditCard": return <CreditCard className={className} />;
+    case "ArrowRight": return <ArrowRight className={className} />;
+    case "CheckCircle2": return <CheckCircle2 className={className} />;
+    case "ChevronDown": return <ChevronDown className={className} />;
+    case "Sparkles": return <Sparkles className={className} />;
+    case "Star": return <Star className={className} />;
+    case "TrendingUp": return <TrendingUp className={className} />;
+    case "Award": return <Award className={className} />;
+    case "Heart": return <Heart className={className} />;
+    case "Rocket": return <Rocket className={className} />;
+    case "DollarSign": return <DollarSign className={className} />;
+    case "BookMarked": return <BookMarked className={className} />;
+    case "Lightbulb": return <Lightbulb className={className} />;
+    case "Target": return <Target className={className} />;
+    default: return <Sparkles className={className} />;
+  }
+};
+
 export default function LandingPage() {
   const [formLink, setFormLink] = useState("");
   const [activeFeatureIdx, setActiveFeatureIdx] = useState<number | null>(null);
   const [expandedCardIdxs, setExpandedCardIdxs] = useState<number[]>([]);
+
+  // Dynamic MongoDB Landing Page States
+  const [heroBadge, setHeroBadge] = useState("★ Smart School ERP Platform");
+  const [heroTitle, setHeroTitle] = useState("VidhyaSanchalan");
+  const [heroSubtitle, setHeroSubtitle] = useState("Complete Smart School Management System");
+  const [heroDescription, setHeroDescription] = useState("Manage the complete school journey — from student admission to leaving certificate — with powerful digital panels for Trustees, Principals, Clerks, Teachers, Students, and Guardians.");
+  const [satisfactionRate, setSatisfactionRate] = useState(99.8);
+  const [stats, setStats] = useState([
+    { label: "Schools", target: 500, suffix: "+", iconName: "GraduationCap" },
+    { label: "Students", target: 50, suffix: "K+", iconName: "Users" },
+    { label: "Teachers", target: 5, suffix: "K+", iconName: "BookOpen" },
+    { label: "Parents", target: 100, suffix: "K+", iconName: "Heart" },
+  ]);
+  const [whyChooseUs, setWhyChooseUs] = useState([
+    {
+      title: "Innovation at our core",
+      description: "VidyaSanchalan stands as the vanguard of school-management solutions, consistently pioneering the integration of next-generation technologies that redefine educational administration worldwide.",
+      iconName: "Lightbulb",
+      color: "text-[#5D3FD3]"
+    },
+    {
+      title: "Simplifying complexity",
+      description: "Infographics & animations distill complex academic data into intuitive visuals—transforming every report and result into an easily grasped, optimized experience for students, parents, and educators.",
+      iconName: "Target",
+      color: "text-[#285E89]"
+    },
+    {
+      title: "Empowering institutional growth",
+      description: "Our platform equips schools with automated workflows, real-time communication, and scalable features designed for any school size to thrive in the modern age.",
+      iconName: "TrendingUp",
+      color: "text-[#FFA600]"
+    }
+  ]);
+
+  const [features, setFeatures] = useState<any[]>([]);
+  const [modules, setModules] = useState<any[]>([]);
+  const [badges, setBadges] = useState<any[]>([]);
+  const [testimonialsList, setTestimonialsList] = useState<any[]>([]);
+
+  // Set initial fallbacks on mount, then fetch live data from MongoDB
+  useEffect(() => {
+    setFeatures(fallbackFeatures);
+    setModules(fallbackModules);
+    setBadges(fallbackBadges);
+    setTestimonialsList(fallbackTestimonials);
+
+    // 1. Fetch Landing Settings
+    fetch("/api/landing/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.isSeeded && data.settings) {
+          setHeroBadge(data.settings.heroBadge || "★ Smart School ERP Platform");
+          setHeroTitle(data.settings.heroTitle || "VidhyaSanchalan");
+          setHeroSubtitle(data.settings.heroSubtitle || "Complete Smart School Management System");
+          setHeroDescription(data.settings.heroDescription || "");
+          setSatisfactionRate(data.settings.satisfactionRate || 99.8);
+          if (data.settings.stats && data.settings.stats.length > 0) {
+            setStats(data.settings.stats);
+          }
+          if (data.settings.whyChooseUs && data.settings.whyChooseUs.length > 0) {
+            setWhyChooseUs(data.settings.whyChooseUs);
+          }
+        }
+      })
+      .catch((err) => console.log("Failed to fetch settings from DB, using fallback", err));
+
+    // 2. Fetch Features
+    fetch("/api/landing/features")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.features && data.features.length > 0) {
+          setFeatures(data.features);
+        }
+      })
+      .catch((err) => console.log("Failed to fetch features from DB, using fallback", err));
+
+    // 3. Fetch Slider Modules
+    fetch("/api/landing/modules")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          if (data.modules && data.modules.length > 0) setModules(data.modules);
+          if (data.badges && data.badges.length > 0) setBadges(data.badges);
+        }
+      })
+      .catch((err) => console.log("Failed to fetch slider modules from DB, using fallback", err));
+
+    // 4. Fetch Testimonials
+    fetch("/api/landing/testimonials")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.testimonials && data.testimonials.length > 0) {
+          setTestimonialsList(data.testimonials);
+        }
+      })
+      .catch((err) => console.log("Failed to fetch testimonials from DB, using fallback", err));
+  }, []);
 
   const toggleCardPoints = (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -117,13 +241,13 @@ export default function LandingPage() {
   ];
 
   useEffect(() => {
-    if (isTestimonialPaused) return;
+    if (isTestimonialPaused || testimonialsList.length === 0) return;
     const timer = setInterval(() => {
       setSlideDirection(1);
-      setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
+      setCurrentTestimonial((prev) => (prev + 1) % testimonialsList.length);
     }, 4500);
     return () => clearInterval(timer);
-  }, [isTestimonialPaused]);
+  }, [isTestimonialPaused, testimonialsList]);
 
   useEffect(() => {
     getPublishedFormLink()
@@ -132,13 +256,15 @@ export default function LandingPage() {
   }, []);
 
   const handleNextTestimonial = () => {
+    if (testimonialsList.length === 0) return;
     setSlideDirection(1);
-    setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
+    setCurrentTestimonial((prev) => (prev + 1) % testimonialsList.length);
   };
 
   const handlePrevTestimonial = () => {
+    if (testimonialsList.length === 0) return;
     setSlideDirection(-1);
-    setCurrentTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+    setCurrentTestimonial((prev) => (prev - 1 + testimonialsList.length) % testimonialsList.length);
   };
 
   const handleDotClick = (index: number) => {
@@ -311,21 +437,21 @@ export default function LandingPage() {
                   variant="outline"
                   className="rounded-full px-4 py-1.5 border-[#6A7626]/30 bg-[#6A7626]/10 text-[#6A7626] shadow-sm font-bold tracking-wider uppercase text-xs"
                 >
-                  ★ Smart School ERP Platform
+                  {heroBadge}
                 </Badge>
 
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.15]">
                   <span className="bg-gradient-to-r from-[#285E89] to-[#FFA600] bg-clip-text text-transparent block font-black mb-2 text-5xl sm:text-6xl lg:text-7.5xl tracking-tighter">
-                    VidhyaSanchalan
+                    {heroTitle}
                   </span>
                   <span className="text-[#1D496C] text-2xl sm:text-3xl lg:text-4xl font-extrabold block">
-                    Complete Smart School Management System
+                    {heroSubtitle}
                   </span>
                 </h1>
               </div>
 
               <p className="text-base sm:text-lg text-[#475569] leading-relaxed font-medium">
-                Manage the complete school journey — from student admission to leaving certificate — with powerful digital panels for Trustees, Principals, Clerks, Teachers, Students, and Guardians.
+                {heroDescription}
               </p>
 
               {/* Small Highlights Checklist */}
@@ -450,25 +576,25 @@ export default function LandingPage() {
             <div className="relative w-full overflow-hidden py-1.5" style={{ maskImage: "linear-gradient(to right, transparent, white 15%, white 85%, transparent)", WebkitMaskImage: "linear-gradient(to right, transparent, white 15%, white 85%, transparent)" }}>
               <div className="flex whitespace-nowrap gap-4 w-max animate-marquee-left pause-on-hover">
                 {/* First set */}
-                {sliderModules.map((item, idx) => (
+                {modules.map((item, idx) => (
                   <div
                     key={`m1-${idx}`}
                     className="flex items-center gap-3 backdrop-blur-md bg-white/60 border border-slate-200/60 rounded-full px-5 py-2.5 shadow-sm hover:shadow-md hover:border-[#429CE4]/40 transition-all cursor-pointer group"
                   >
                     <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#429CE4]/10 text-[#429CE4] group-hover:scale-110 transition-transform">
-                      {item.icon}
+                      {getIcon(item.iconName, "h-4 w-4")}
                     </div>
                     <span className="text-sm font-bold text-[#1D496C]">{item.label}</span>
                   </div>
                 ))}
                 {/* Duplicated set for infinite loop */}
-                {sliderModules.map((item, idx) => (
+                {modules.map((item, idx) => (
                   <div
                     key={`m1-dup-${idx}`}
                     className="flex items-center gap-3 backdrop-blur-md bg-white/60 border border-slate-200/60 rounded-full px-5 py-2.5 shadow-sm hover:shadow-md hover:border-[#429CE4]/40 transition-all cursor-pointer group"
                   >
                     <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#429CE4]/10 text-[#429CE4] group-hover:scale-110 transition-transform">
-                      {item.icon}
+                      {getIcon(item.iconName, "h-4 w-4")}
                     </div>
                     <span className="text-sm font-bold text-[#1D496C]">{item.label}</span>
                   </div>
@@ -480,25 +606,25 @@ export default function LandingPage() {
             <div className="relative w-full overflow-hidden py-1.5" style={{ maskImage: "linear-gradient(to right, transparent, white 15%, white 85%, transparent)", WebkitMaskImage: "linear-gradient(to right, transparent, white 15%, white 85%, transparent)" }}>
               <div className="flex whitespace-nowrap gap-4 w-max animate-marquee-right pause-on-hover">
                 {/* First set */}
-                {sliderBadges.map((item, idx) => (
+                {badges.map((item, idx) => (
                   <div
                     key={`b1-${idx}`}
                     className="flex items-center gap-3 backdrop-blur-md bg-white/60 border border-slate-200/60 rounded-full px-5 py-2.5 shadow-sm hover:shadow-md hover:border-[#6A7626]/40 transition-all cursor-pointer group"
                   >
                     <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#6A7626]/10 text-[#6A7626] group-hover:scale-110 transition-transform">
-                      {item.icon}
+                      {getIcon(item.iconName, item.iconName === "Star" ? "h-4 w-4 text-amber-500 fill-amber-500" : "h-4 w-4")}
                     </div>
                     <span className="text-sm font-bold text-[#475569]">{item.label}</span>
                   </div>
                 ))}
                 {/* Duplicated set for infinite loop */}
-                {sliderBadges.map((item, idx) => (
+                {badges.map((item, idx) => (
                   <div
                     key={`b1-dup-${idx}`}
                     className="flex items-center gap-3 backdrop-blur-md bg-white/60 border border-slate-200/60 rounded-full px-5 py-2.5 shadow-sm hover:shadow-md hover:border-[#6A7626]/40 transition-all cursor-pointer group"
                   >
                     <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#6A7626]/10 text-[#6A7626] group-hover:scale-110 transition-transform">
-                      {item.icon}
+                      {getIcon(item.iconName, item.iconName === "Star" ? "h-4 w-4 text-amber-500 fill-amber-500" : "h-4 w-4")}
                     </div>
                     <span className="text-sm font-bold text-[#475569]">{item.label}</span>
                   </div>
@@ -530,7 +656,7 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pb-8 pt-4">
-            {mainFeatures.map((feature, index) => (
+            {features.map((feature, index) => (
               <div
                 key={index}
                 onClick={() => setActiveFeatureIdx(activeFeatureIdx === index ? null : index)}
@@ -554,7 +680,7 @@ export default function LandingPage() {
                     {((expandedCardIdxs.includes(index) || feature.points.length <= 4)
                       ? feature.points
                       : feature.points.slice(0, 4)
-                    ).map((point, i) => (
+                    ).map((point: string, i: number) => (
                       <li key={i} className="flex items-start gap-2.5 text-sm">
                         <CheckCircle2 className={`mt-0.5 h-4.5 w-4.5 stroke-[2.5] shrink-0 transition-colors ${activeFeatureIdx === index
                           ? (activeBgStyles[index].check === "text-white"
@@ -653,7 +779,6 @@ export default function LandingPage() {
                     </div>
                   </div>
                 </motion.div>
-
                 {/* Main Card (Image only, clean rounded card) */}
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -680,7 +805,7 @@ export default function LandingPage() {
                       😊
                     </div>
                     <div>
-                      <div className="text-base sm:text-lg font-black text-slate-950 leading-none mb-0.5">99.8%</div>
+                      <div className="text-base sm:text-lg font-black text-slate-950 leading-none mb-0.5">{satisfactionRate}%</div>
                       <div className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">User Satisfaction</div>
                     </div>
                   </motion.div>
@@ -775,44 +900,27 @@ export default function LandingPage() {
 
                 {/* Structured Points list */}
                 <div className="space-y-6 pt-2">
-                  {/* Point 1 */}
-                  <div className="flex gap-4 group">
-                    <div className="w-11 h-11 rounded-full border-[2px] border-[#5D3FD3]/20 bg-white flex items-center justify-center text-[#5D3FD3] shadow-sm shrink-0 group-hover:scale-110 group-hover:border-[#5D3FD3] group-hover:bg-[#5D3FD3] group-hover:text-white transition-all duration-300">
-                      <Lightbulb className="h-5.5 w-5.5 stroke-[2.2]" />
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-base sm:text-lg font-extrabold text-slate-900 group-hover:text-[#5D3FD3] transition-colors duration-300">Innovation at our core</h3>
-                      <p className="text-xs sm:text-sm font-medium text-slate-500 leading-relaxed max-w-xl">
-                        VidyaSanchalan stands as the vanguard of school-management solutions, consistently pioneering the integration of next-generation technologies that redefine educational administration worldwide.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Point 2 */}
-                  <div className="flex gap-4 group">
-                    <div className="w-11 h-11 rounded-full border-[2px] border-[#285E89]/20 bg-white flex items-center justify-center text-[#285E89] shadow-sm shrink-0 group-hover:scale-110 group-hover:border-[#285E89] group-hover:bg-[#285E89] group-hover:text-white transition-all duration-300">
-                      <Target className="h-5.5 w-5.5 stroke-[2.2]" />
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-base sm:text-lg font-extrabold text-slate-900 group-hover:text-[#285E89] transition-colors duration-300">Simplifying complexity</h3>
-                      <p className="text-xs sm:text-sm font-medium text-slate-500 leading-relaxed max-w-xl">
-                        Infographics & animations distill complex academic data into intuitive visuals—transforming every report and result into an easily grasped, optimized experience for students, parents, and educators.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Point 3 */}
-                  <div className="flex gap-4 group">
-                    <div className="w-11 h-11 rounded-full border-[2px] border-[#FFA600]/20 bg-white flex items-center justify-center text-[#FFA600] shadow-sm shrink-0 group-hover:scale-110 group-hover:border-[#FFA600] group-hover:bg-[#FFA600] group-hover:text-white transition-all duration-300">
-                      <TrendingUp className="h-5.5 w-5.5 stroke-[2.2]" />
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-base sm:text-lg font-extrabold text-slate-900 group-hover:text-[#FFA600] transition-colors duration-300">Empowering institutional growth</h3>
-                      <p className="text-xs sm:text-sm font-medium text-slate-500 leading-relaxed max-w-xl">
-                        Our platform equips schools with automated workflows, real-time communication, and scalable features designed for any school size to thrive in the modern age.
-                      </p>
-                    </div>
-                  </div>
+                  {whyChooseUs.map((point, index) => {
+                    const colorMap: any = {
+                      "text-[#5D3FD3]": { border: "border-[#5D3FD3]/20", bg: "group-hover:bg-[#5D3FD3]", text: "text-[#5D3FD3]", hoverText: "group-hover:text-[#5D3FD3]", hoverBorder: "group-hover:border-[#5D3FD3]" },
+                      "text-[#285E89]": { border: "border-[#285E89]/20", bg: "group-hover:bg-[#285E89]", text: "text-[#285E89]", hoverText: "group-hover:text-[#285E89]", hoverBorder: "group-hover:border-[#285E89]" },
+                      "text-[#FFA600]": { border: "border-[#FFA600]/20", bg: "group-hover:bg-[#FFA600]", text: "text-[#FFA600]", hoverText: "group-hover:text-[#FFA600]", hoverBorder: "group-hover:border-[#FFA600]" },
+                    };
+                    const colors = colorMap[point.color] || colorMap["text-[#5D3FD3]"];
+                    return (
+                      <div key={index} className="flex gap-4 group">
+                        <div className={`w-11 h-11 rounded-full border-[2px] ${colors.border} bg-white flex items-center justify-center ${colors.text} shadow-sm shrink-0 group-hover:scale-110 ${colors.hoverBorder} ${colors.bg} group-hover:text-white transition-all duration-300`}>
+                          {getIcon(point.iconName, "h-5.5 w-5.5 stroke-[2.2]")}
+                        </div>
+                        <div className="space-y-1">
+                          <h3 className={`text-base sm:text-lg font-extrabold text-slate-900 ${colors.hoverText} transition-colors duration-300`}>{point.title}</h3>
+                          <p className="text-xs sm:text-sm font-medium text-slate-500 leading-relaxed max-w-xl">
+                            {point.description}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </motion.div>
@@ -841,12 +949,7 @@ export default function LandingPage() {
                   }
                 }}
               >
-                {[
-                  { label: "Schools", target: 500, suffix: "+", icon: <GraduationCap className="h-6 w-6 mx-auto mb-2 opacity-80" /> },
-                  { label: "Students", target: 50, suffix: "K+", icon: <Users className="h-6 w-6 mx-auto mb-2 opacity-80" /> },
-                  { label: "Teachers", target: 5, suffix: "K+", icon: <BookOpen className="h-6 w-6 mx-auto mb-2 opacity-80" /> },
-                  { label: "Parents", target: 100, suffix: "K+", icon: <Heart className="h-6 w-6 mx-auto mb-2 opacity-80" /> },
-                ].map((stat, i) => (
+                {stats.map((stat, i) => (
                   <motion.div 
                     key={i} 
                     className="group hover:scale-110 transition-transform duration-300 cursor-pointer"
@@ -857,7 +960,7 @@ export default function LandingPage() {
                     transition={{ type: "spring", stiffness: 100, damping: 15 }}
                   >
                     <div className="group-hover:scale-110 group-hover:text-[#FFA600] transition-all duration-300">
-                      {stat.icon}
+                      {getIcon(stat.iconName, "h-6 w-6 mx-auto mb-2 opacity-80")}
                     </div>
                     <div className="text-3xl font-extrabold mb-2 tracking-tight group-hover:text-[#FFA600] transition-colors duration-300">
                       <StatCounter target={stat.target} suffix={stat.suffix} />
@@ -887,111 +990,113 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div 
-            className="relative max-w-4xl mx-auto px-4 py-4"
-            onMouseEnter={() => setIsTestimonialPaused(true)}
-            onMouseLeave={() => setIsTestimonialPaused(false)}
-          >
-            {/* Testimonial slider viewport */}
-            <div className="relative w-full overflow-hidden min-h-[360px] sm:min-h-[280px] flex items-center justify-center">
-              <AnimatePresence initial={false} custom={slideDirection} mode="wait">
-                <motion.div
-                  key={currentTestimonial}
-                  custom={slideDirection}
-                  variants={slideVariants}
-                  initial="enter"
-                  animate="center"
-                  exit="exit"
-                  transition={{
-                    x: { type: "spring", stiffness: 350, damping: 35 },
-                    opacity: { duration: 0.25 }
-                  }}
-                  className="w-full"
-                >
-                  <Card className="border border-slate-100 bg-white shadow-xl rounded-[2.5rem] p-8 sm:p-12 relative overflow-hidden">
-                    {/* Subtle quote icon background */}
-                    <div className="absolute top-6 right-8 text-slate-100 pointer-events-none">
-                      <Quote className="h-24 w-24 stroke-[1.5] opacity-20" />
-                    </div>
-
-                    <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center">
-                      {/* Left side: Avatar */}
-                      <div className="relative shrink-0">
-                        <div className="absolute -inset-1.5 rounded-full bg-gradient-to-r from-[#1D496C] to-[#6A7626] opacity-35 blur-[3px]"></div>
-                        <Avatar className="h-24 w-24 sm:h-28 sm:w-28 border-4 border-white relative shadow-xl">
-                          <AvatarImage 
-                            src={testimonials[currentTestimonial].image} 
-                            alt={testimonials[currentTestimonial].name}
-                            className="object-cover"
-                          />
-                          <AvatarFallback className="bg-gradient-to-br from-[#1D496C] to-[#6A7626] text-white text-2xl font-black">
-                            {testimonials[currentTestimonial].name.split(' ').map(n => n[0]).join('')}
-                          </AvatarFallback>
-                        </Avatar>
+          {testimonialsList.length > 0 && (
+            <div 
+              className="relative max-w-4xl mx-auto px-4 py-4"
+              onMouseEnter={() => setIsTestimonialPaused(true)}
+              onMouseLeave={() => setIsTestimonialPaused(false)}
+            >
+              {/* Testimonial slider viewport */}
+              <div className="relative w-full overflow-hidden min-h-[360px] sm:min-h-[280px] flex items-center justify-center">
+                <AnimatePresence initial={false} custom={slideDirection} mode="wait">
+                  <motion.div
+                    key={currentTestimonial}
+                    custom={slideDirection}
+                    variants={slideVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{
+                      x: { type: "spring", stiffness: 350, damping: 35 },
+                      opacity: { duration: 0.25 }
+                    }}
+                    className="w-full"
+                  >
+                    <Card className="border border-slate-100 bg-white shadow-xl rounded-[2.5rem] p-8 sm:p-12 relative overflow-hidden">
+                      {/* Subtle quote icon background */}
+                      <div className="absolute top-6 right-8 text-slate-100 pointer-events-none">
+                        <Quote className="h-24 w-24 stroke-[1.5] opacity-20" />
                       </div>
 
-                      {/* Right side: Review */}
-                      <div className="flex-1 space-y-4 text-center md:text-left">
-                        {/* Rating */}
-                        <div className="flex gap-1 justify-center md:justify-start">
-                          {[...Array(testimonials[currentTestimonial].rating)].map((_, idx) => (
-                            <Star key={idx} className="h-5 w-5 fill-[#FFA600] text-[#FFA600]" />
-                          ))}
+                      <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center">
+                        {/* Left side: Avatar */}
+                        <div className="relative shrink-0">
+                          <div className="absolute -inset-1.5 rounded-full bg-gradient-to-r from-[#1D496C] to-[#6A7626] opacity-35 blur-[3px]"></div>
+                          <Avatar className="h-24 w-24 sm:h-28 sm:w-28 border-4 border-white relative shadow-xl">
+                            <AvatarImage 
+                              src={testimonialsList[currentTestimonial].image} 
+                              alt={testimonialsList[currentTestimonial].name}
+                              className="object-cover"
+                            />
+                            <AvatarFallback className="bg-gradient-to-br from-[#1D496C] to-[#6A7626] text-white text-2xl font-black">
+                              {testimonialsList[currentTestimonial].name.split(' ').map((n: string) => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
                         </div>
 
-                        {/* Content */}
-                        <blockquote className="text-lg sm:text-xl font-extrabold text-slate-800 leading-relaxed italic">
-                          &ldquo;{testimonials[currentTestimonial].content}&rdquo;
-                        </blockquote>
+                        {/* Right side: Review */}
+                        <div className="flex-1 space-y-4 text-center md:text-left">
+                          {/* Rating */}
+                          <div className="flex gap-1 justify-center md:justify-start">
+                            {[...Array(testimonialsList[currentTestimonial].rating)].map((_, idx) => (
+                              <Star key={idx} className="h-5 w-5 fill-[#FFA600] text-[#FFA600]" />
+                            ))}
+                          </div>
 
-                        {/* Author info */}
-                        <div>
-                          <cite className="not-italic font-black text-[#0F172A] text-lg block">
-                            {testimonials[currentTestimonial].name}
-                          </cite>
-                          <span className="text-sm font-semibold text-slate-500 block mt-0.5">
-                            {testimonials[currentTestimonial].role}
-                          </span>
+                          {/* Content */}
+                          <blockquote className="text-lg sm:text-xl font-extrabold text-slate-800 leading-relaxed italic">
+                            &ldquo;{testimonialsList[currentTestimonial].content}&rdquo;
+                          </blockquote>
+
+                          {/* Author info */}
+                          <div>
+                            <cite className="not-italic font-black text-[#0F172A] text-lg block">
+                              {testimonialsList[currentTestimonial].name}
+                            </cite>
+                            <span className="text-sm font-semibold text-slate-500 block mt-0.5">
+                              {testimonialsList[currentTestimonial].role}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </Card>
-                </motion.div>
-              </AnimatePresence>
-            </div>
+                    </Card>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
 
-            {/* Navigation Arrows */}
-            <button
-              onClick={handlePrevTestimonial}
-              className="absolute left-[-1.5rem] sm:left-[-3rem] top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white border border-slate-100 shadow-lg flex items-center justify-center text-slate-600 hover:text-[#1D496C] hover:bg-slate-50 hover:scale-110 active:scale-95 transition-all duration-300 z-20"
-              aria-label="Previous testimonial"
-            >
-              <ChevronLeft className="h-6 w-6 stroke-[2.5]" />
-            </button>
-            <button
-              onClick={handleNextTestimonial}
-              className="absolute right-[-1.5rem] sm:right-[-3rem] top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white border border-slate-100 shadow-lg flex items-center justify-center text-slate-600 hover:text-[#1D496C] hover:bg-slate-50 hover:scale-110 active:scale-95 transition-all duration-300 z-20"
-              aria-label="Next testimonial"
-            >
-              <ChevronRight className="h-6 w-6 stroke-[2.5]" />
-            </button>
+              {/* Navigation Arrows */}
+              <button
+                onClick={handlePrevTestimonial}
+                className="absolute left-[-1.5rem] sm:left-[-3rem] top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white border border-slate-100 shadow-lg flex items-center justify-center text-slate-600 hover:text-[#1D496C] hover:bg-slate-50 hover:scale-110 active:scale-95 transition-all duration-300 z-20"
+                aria-label="Previous testimonial"
+              >
+                <ChevronLeft className="h-6 w-6 stroke-[2.5]" />
+              </button>
+              <button
+                onClick={handleNextTestimonial}
+                className="absolute right-[-1.5rem] sm:right-[-3rem] top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white border border-slate-100 shadow-lg flex items-center justify-center text-slate-600 hover:text-[#1D496C] hover:bg-slate-50 hover:scale-110 active:scale-95 transition-all duration-300 z-20"
+                aria-label="Next testimonial"
+              >
+                <ChevronRight className="h-6 w-6 stroke-[2.5]" />
+              </button>
 
-            {/* Navigation Dots */}
-            <div className="flex justify-center gap-2.5 mt-8 relative z-20">
-              {testimonials.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleDotClick(index)}
-                  className={`h-2.5 rounded-full transition-all duration-500 ${
-                    index === currentTestimonial 
-                      ? "w-8 bg-[#1D496C]" 
-                      : "w-2.5 bg-slate-300 hover:bg-slate-400"
-                  }`}
-                  aria-label={`Go to testimonial ${index + 1}`}
-                />
-              ))}
+              {/* Navigation Dots */}
+              <div className="flex justify-center gap-2.5 mt-8 relative z-20">
+                {testimonialsList.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleDotClick(index)}
+                    className={`h-2.5 rounded-full transition-all duration-500 ${
+                      index === currentTestimonial 
+                        ? "w-8 bg-[#1D496C]" 
+                        : "w-2.5 bg-slate-300 hover:bg-slate-400"
+                    }`}
+                    aria-label={`Go to testimonial ${index + 1}`}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
@@ -1145,11 +1250,11 @@ function Linkedin() {
 
 
 
-const mainFeatures = [
+const fallbackFeatures = [
   {
     title: "Admission Management",
     image: "/admission (1).jpg",
-    icon: <GraduationCap className="h-6 w-6" />,
+    iconName: "GraduationCap",
     color: "from-[#1D496C] to-[#1A3F5C]",
     points: [
       "Online admission forms",
@@ -1162,7 +1267,7 @@ const mainFeatures = [
   {
     title: "Fee Management",
     image: "/fees (1).jpg",
-    icon: <CreditCard className="h-6 w-6" />,
+    iconName: "CreditCard",
     color: "from-[#6A7626] to-[#596420]",
     points: [
       "Online & offline fee collection",
@@ -1176,7 +1281,7 @@ const mainFeatures = [
   {
     title: "Timetable Management",
     image: "/timetable (1).jpg",
-    icon: <Calendar className="h-6 w-6" />,
+    iconName: "Calendar",
     color: "from-[#429CE4] to-[#2E85CC]",
     points: [
       "Class-wise timetable creation",
@@ -1188,7 +1293,7 @@ const mainFeatures = [
   {
     title: "Homework & Assignment",
     image: "/homework (1).jpg",
-    icon: <BookOpen className="h-6 w-6" />,
+    iconName: "BookOpen",
     color: "from-[#ED6708] to-[#CD5804]",
     points: [
       "Online and offline homework",
@@ -1200,7 +1305,7 @@ const mainFeatures = [
   {
     title: "Progress Reports",
     image: "/progress report.jpeg",
-    icon: <TrendingUp className="h-6 w-6" />,
+    iconName: "TrendingUp",
     color: "from-[#FFA600] to-[#E09200]",
     points: [
       "Report cards",
@@ -1213,7 +1318,7 @@ const mainFeatures = [
   {
     title: "Announcement System",
     image: "/announcement.jpeg",
-    icon: <Bell className="h-6 w-6" />,
+    iconName: "Bell",
     color: "from-[#1D496C] to-[#6A7626]",
     points: [
       "School announcements",
@@ -1225,7 +1330,7 @@ const mainFeatures = [
   {
     title: "Geo Attendance Feature",
     image: "/geo mapping.jpeg",
-    icon: <Shield className="h-6 w-6" />,
+    iconName: "Shield",
     color: "from-[#6A7626] to-[#1D496C]",
     points: [
       "Staff attendance with geo-location tracking",
@@ -1236,7 +1341,7 @@ const mainFeatures = [
   {
     title: "Online Examination",
     image: "/examination.jpeg",
-    icon: <Award className="h-6 w-6" />,
+    iconName: "Award",
     color: "from-[#429CE4] to-[#ED6708]",
     points: [
       "Conduct online exams",
@@ -1282,26 +1387,26 @@ const footerLinks = [
   }
 ];
 
-const sliderModules = [
-  { label: "Online & Offline Admissions", icon: <GraduationCap className="h-4 w-4" /> },
-  { label: "Smart Fee Collection", icon: <DollarSign className="h-4 w-4" /> },
-  { label: "Dynamic Timetable Planner", icon: <Calendar className="h-4 w-4" /> },
-  { label: "Classroom Homework", icon: <BookOpen className="h-4 w-4" /> },
-  { label: "Online Examination Desk", icon: <Award className="h-4 w-4" /> },
-  { label: "Real-time Progress Reports", icon: <TrendingUp className="h-4 w-4" /> },
-  { label: "GPS Attendance Tracking", icon: <Shield className="h-4 w-4" /> },
-  { label: "Instant Announcement System", icon: <Bell className="h-4 w-4" /> }
+const fallbackModules = [
+  { label: "Online & Offline Admissions", iconName: "GraduationCap" },
+  { label: "Smart Fee Collection", iconName: "DollarSign" },
+  { label: "Dynamic Timetable Planner", iconName: "Calendar" },
+  { label: "Classroom Homework", iconName: "BookOpen" },
+  { label: "Online Examination Desk", iconName: "Award" },
+  { label: "Real-time Progress Reports", iconName: "TrendingUp" },
+  { label: "GPS Attendance Tracking", iconName: "Shield" },
+  { label: "Instant Announcement System", iconName: "Bell" }
 ];
 
-const sliderBadges = [
-  { label: "Trusted by 500+ Schools", icon: <Star className="h-4 w-4 text-amber-500 fill-amber-500" /> },
-  { label: "ISO 27001 Secure Data", icon: <CheckCircle2 className="h-4 w-4" /> },
-  { label: "99.9% Cloud Uptime", icon: <Rocket className="h-4 w-4" /> },
-  { label: "Dedicated Guardian App", icon: <Users className="h-4 w-4" /> },
-  { label: "Encrypted Database Logs", icon: <Shield className="h-4 w-4" /> },
-  { label: "24/7 Priority Support Desk", icon: <Heart className="h-4 w-4" /> },
-  { label: "AI Powered Report Cards", icon: <Sparkles className="h-4 w-4" /> },
-  { label: "SRS Compliance Approved", icon: <BookMarked className="h-4 w-4" /> }
+const fallbackBadges = [
+  { label: "Trusted by 500+ Schools", iconName: "Star" },
+  { label: "ISO 27001 Secure Data", iconName: "CheckCircle2" },
+  { label: "99.9% Cloud Uptime", iconName: "Rocket" },
+  { label: "Dedicated Guardian App", iconName: "Users" },
+  { label: "Encrypted Database Logs", iconName: "Shield" },
+  { label: "24/7 Priority Support Desk", iconName: "Heart" },
+  { label: "AI Powered Report Cards", iconName: "Sparkles" },
+  { label: "SRS Compliance Approved", iconName: "BookMarked" }
 ];
 
 const slideVariants = {
@@ -1321,7 +1426,7 @@ const slideVariants = {
   })
 };
 
-const testimonials = [
+const fallbackTestimonials = [
   {
     name: "Rajesh Sharma",
     role: "Principal, Apex International School",
