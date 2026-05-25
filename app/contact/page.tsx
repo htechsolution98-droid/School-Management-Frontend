@@ -533,7 +533,7 @@ export default function ContactPage() {
       {/* Footer (WHITE/LIGHT BACKGROUND) */}
       <footer className="border-t border-slate-200 bg-white text-slate-600">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 pb-6">
-          <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-5 text-left">
+          <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4 text-left">
             <div className="lg:col-span-2">
               <div className="flex items-center gap-3 mb-4">
                 <div className="relative h-16 w-auto flex items-center justify-center rounded-xl bg-white p-2 shadow-sm border border-[#285E89]/10">
@@ -571,7 +571,7 @@ export default function ContactPage() {
                 <ul className="space-y-3">
                   {section.links.map((link, j) => (
                     <li key={j}>
-                      <Link href={link === "Modules" ? "/modules" : link === "Contact" ? "/contact" : "#"} className="text-sm text-slate-500 hover:text-[#285E89] transition-colors">
+                      <Link href={getLinkHref(link)} className="text-sm text-slate-500 hover:text-[#285E89] transition-colors">
                         {link}
                       </Link>
                     </li>
@@ -634,6 +634,17 @@ function Linkedin() {
   );
 }
 
+const getLinkHref = (link: string) => {
+  switch (link) {
+    case "Modules": return "/modules";
+    case "Contact": return "/contact";
+    case "About Us": return "https://h-techsolutions.in/aboutus";
+    case "Service": return "https://h-techsolutions.in/service";
+    case "Gallery": return "https://h-techsolutions.in/gallery";
+    default: return "#";
+  }
+};
+
 const footerLinks = [
   {
     title: "Product",
@@ -641,10 +652,6 @@ const footerLinks = [
   },
   {
     title: "Company",
-    links: ["About Us", "Blog", "Careers", "Press", "Contact"]
-  },
-  {
-    title: "Support",
-    links: ["Documentation", "Help Center", "Community", "Status", "Privacy"]
+    links: ["About Us", "Service", "Gallery", "Blog", "Contact"]
   }
 ];

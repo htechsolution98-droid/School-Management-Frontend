@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { AnimatePresence, motion, useMotionValue, useSpring } from "framer-motion";
+import { AnimatePresence, motion, useMotionValue, useSpring, useInView, animate } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,25 @@ import {
   Quote,
 } from "lucide-react";
 import { getPublishedFormLink } from "@/lib/forms";
+
+function StatCounter({ target, suffix }: { target: number; suffix: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (isInView) {
+      const controls = animate(0, target, {
+        duration: 2,
+        ease: "easeOut",
+        onUpdate: (latest) => setCount(Math.floor(latest)),
+      });
+      return () => controls.stop();
+    }
+  }, [isInView, target]);
+
+  return <span ref={ref}>{count}{suffix}</span>;
+}
 
 export default function LandingPage() {
   const [formLink, setFormLink] = useState("");
@@ -807,21 +826,46 @@ export default function LandingPage() {
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <Card className="border-0 bg-gradient-to-r from-[#1D496C] to-[#15354F] text-white shadow-xl overflow-hidden">
             <div className="absolute inset-0 bg-grid-white/[0.08] [mask-image:radial-gradient(ellipse_at_center,white,transparent)]"></div>
-            <CardContent className="p-12 relative">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <CardContent className="py-6 px-8 md:px-12 relative">
+              <motion.div 
+                className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                variants={{
+                  hidden: {},
+                  visible: {
+                    transition: {
+                      staggerChildren: 0.1
+                    }
+                  }
+                }}
+              >
                 {[
-                  { label: "Schools", value: "500+", icon: <GraduationCap className="h-6 w-6 mx-auto mb-2 opacity-80" /> },
-                  { label: "Students", value: "50K+", icon: <Users className="h-6 w-6 mx-auto mb-2 opacity-80" /> },
-                  { label: "Teachers", value: "5K+", icon: <BookOpen className="h-6 w-6 mx-auto mb-2 opacity-80" /> },
-                  { label: "Parents", value: "100K+", icon: <Heart className="h-6 w-6 mx-auto mb-2 opacity-80" /> },
+                  { label: "Schools", target: 500, suffix: "+", icon: <GraduationCap className="h-6 w-6 mx-auto mb-2 opacity-80" /> },
+                  { label: "Students", target: 50, suffix: "K+", icon: <Users className="h-6 w-6 mx-auto mb-2 opacity-80" /> },
+                  { label: "Teachers", target: 5, suffix: "K+", icon: <BookOpen className="h-6 w-6 mx-auto mb-2 opacity-80" /> },
+                  { label: "Parents", target: 100, suffix: "K+", icon: <Heart className="h-6 w-6 mx-auto mb-2 opacity-80" /> },
                 ].map((stat, i) => (
-                  <div key={i} className="group hover:scale-110 transition-transform duration-300">
-                    {stat.icon}
-                    <div className="text-3xl font-bold mb-2">{stat.value}</div>
-                    <div className="text-sm text-white/80">{stat.label}</div>
-                  </div>
+                  <motion.div 
+                    key={i} 
+                    className="group hover:scale-110 transition-transform duration-300 cursor-pointer"
+                    variants={{
+                      hidden: { opacity: 0, y: 30 },
+                      visible: { opacity: 1, y: 0 }
+                    }}
+                    transition={{ type: "spring", stiffness: 100, damping: 15 }}
+                  >
+                    <div className="group-hover:scale-110 group-hover:text-[#FFA600] transition-all duration-300">
+                      {stat.icon}
+                    </div>
+                    <div className="text-3xl font-extrabold mb-2 tracking-tight group-hover:text-[#FFA600] transition-colors duration-300">
+                      <StatCounter target={stat.target} suffix={stat.suffix} />
+                    </div>
+                    <div className="text-sm font-medium text-white/80 group-hover:text-white transition-colors duration-300">{stat.label}</div>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             </CardContent>
           </Card>
         </div>
@@ -997,7 +1041,7 @@ export default function LandingPage() {
 
       <footer className="border-t border-[#6A7626]/20 bg-white">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 pb-6">
-          <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-5">
+          <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
             <div className="lg:col-span-2">
               <div className="flex items-center gap-3 mb-4">
                 <div className="relative h-20 w-auto flex items-center justify-center rounded-xl bg-white p-2 shadow-md border border-[#1D496C]/10">
@@ -1035,7 +1079,7 @@ export default function LandingPage() {
                 <ul className="space-y-3">
                   {section.links.map((link, j) => (
                     <li key={j}>
-                      <Link href={link === "Modules" ? "/modules" : link === "Contact" ? "/contact" : "#"} className="text-sm text-[#475569] hover:text-[#285E89] transition-colors">
+                      <Link href={getLinkHref(link)} className="text-sm text-[#475569] hover:text-[#285E89] transition-colors">
                         {link}
                       </Link>
                     </li>
@@ -1216,6 +1260,17 @@ const whyChooseUsData = [
   "Scalable for any school size"
 ];
 
+const getLinkHref = (link: string) => {
+  switch (link) {
+    case "Modules": return "/modules";
+    case "Contact": return "/contact";
+    case "About Us": return "https://h-techsolutions.in/aboutus";
+    case "Service": return "https://h-techsolutions.in/service";
+    case "Gallery": return "https://h-techsolutions.in/gallery";
+    default: return "#";
+  }
+};
+
 const footerLinks = [
   {
     title: "Product",
@@ -1223,11 +1278,7 @@ const footerLinks = [
   },
   {
     title: "Company",
-    links: ["About Us", "Blog", "Careers", "Press", "Contact"]
-  },
-  {
-    title: "Support",
-    links: ["Documentation", "Help Center", "Community", "Status", "Privacy"]
+    links: ["About Us", "Service", "Gallery", "Blog", "Contact"]
   }
 ];
 
