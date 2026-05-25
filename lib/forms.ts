@@ -3281,3 +3281,10 @@ export async function deactivateAllTempUsers(): Promise<void> {
 }
 
 
+export async function getMainAcademicYear(): Promise<{ id: number; name: string }[]> {
+
+  const response = await fetchWithAuth(`${API_BASE_URL}/main-academic-year/`)
+  if (!response.ok) return []
+  const data = await response.json();
+  return Array.isArray(data) ? data : (data ? [data] : [])
+}

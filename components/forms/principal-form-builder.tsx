@@ -33,6 +33,7 @@ import {
 import {
   createAdmissionForm,
   getSchoolClasses,
+  getMainAcademicYear,
   type SchoolClass,
 } from "@/lib/forms";
 import {
@@ -472,7 +473,10 @@ export default function PrincipalFormBuilder({
   onSuccess?: (form: AdmissionFormResponse) => void;
 }) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [academicYear, setAcademicYear] = useState("2025-2026");
+  const [academicYearOptions, setAcademicYearOptions] = useState<{ id: number; name: string }[]>([]);
+  const [academicYear, setAcademicYear] = useState("");
+  const [academicYearId, setAcademicYearId] = useState<number | null>(null);
+
   const [title, setTitle] = useState("Student Admission Form");
   const [description, setDescription] = useState("");
   const [documentSectionTitle, setDocumentSectionTitle] = useState("Required Documents");
@@ -510,6 +514,17 @@ export default function PrincipalFormBuilder({
   useEffect(() => {
     async function fetchClasses() {
       try {
+        // Fetch academic year from API
+        const yearList = await getMainAcademicYear();
+        if (yearList.length > 0) {
+          setAcademicYearOptions(yearList);
+          setAcademicYear(yearList[0].name);
+          setAcademicYearId(yearList[0].id);
+          setTitle(`Student Admission Form ${yearList[0].name}`);
+
+        }
+
+
         const data = await getSchoolClasses();
         if (data && data.length > 0) {
           const sortedData = [...data].sort((a, b) => {
@@ -542,31 +557,35 @@ export default function PrincipalFormBuilder({
   }, []);
 
   const payload = useMemo<AdmissionFormCreatePayload>(() => {
-    const formattedSections = sections.map((section, index) => ({
-      title: section.title.trim() || `Section ${index + 1}`,
-      order: index + 1,
-      fields: toPayloadFields(section.fields),
-    }));
     const document_fields = documentFields.filter((field) => field.selected).map((field) => field.label.trim());
-    const formTitle = `${title.trim()} ${shortYear(academicYear)}`.trim();
+    const defaultTitle = "Student Admission Form";
+    const defaultSectionTitle = "Student Information";
+    const effectiveTitle = title.trim() || defaultTitle;
+    const formTitle = effectiveTitle; // title already has year from state
+
+
     return {
       fees_enable: feesEnabled,
       fees: feesEnabled && feeType === "general" ? Number(feesAmount) || 0 : null,
       title: formTitle,
-      description: description.trim() || `Admission form for academic year ${shortYear(academicYear)}`,
+      academic_year: academicYearId,
+      description: description.trim() || `Admission form for academic year ${academicYear}`,
       unique_link: slugify(formTitle),
       fee_type: feeType,
       payment_mode: feesEnabled ? paymentMode : null,
-      sections: formattedSections,
+      sections: sections.map((section, index) => ({
+        title: section.title.trim() || (index === 0 ? defaultSectionTitle : `Section ${index + 1}`),
+        order: index + 1,
+        fields: toPayloadFields(section.fields),
+      })),
       document_fields,
-      fee_structures_input:
-        feesEnabled && feeType === "individual"
-          ? Object.entries(individualFees)
-            .filter(([_, amt]) => amt && Number(amt) > 0)
-            .map(([id, amt]) => ({ class_name: Number(id), fee_amount: Number(amt).toFixed(2) }))
-          : [],
+      fee_structures_input: feesEnabled && feeType === "individual"
+        ? Object.entries(individualFees)
+          .filter(([_, amt]) => amt && Number(amt) > 0)
+          .map(([id, amt]) => ({ class_name: Number(id), fee_amount: Number(amt).toFixed(2) }))
+        : [],
     };
-  }, [academicYear, description, documentFields, feeType, feesAmount, feesEnabled, individualFees, sections, title]);
+  }, [academicYear, academicYearId, description, documentFields, feeType, feesAmount, feesEnabled, individualFees, paymentMode, sections, title]);
 
   const validateStep = (step: number) => {
     const nextErrors: ErrorMap = {};
@@ -657,16 +676,36 @@ export default function PrincipalFormBuilder({
               </div>
             </div>
 
-            <select
-              className="h-9 w-full sm:w-auto rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none focus:ring-2 focus:ring-violet-400"
-
-              value={academicYear}
-              onChange={(e: any) => setAcademicYear(e.target.value)}
-            >
-              <option value="2024-2025">2024 – 2025</option>
-              <option value="2025-2026">2025 – 2026</option>
-              <option value="2026-2027">2026 – 2027</option>
-            </select>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">
+                Academic Year
+              </span>
+              <select
+                value={academicYearId ?? ""}
+                onChange={(e) => {
+                  const selected = academicYearOptions.find((y) => y.id === Number(e.target.value));
+                  if (selected) {
+                    setAcademicYearId(selected.id);
+                    setAcademicYear(selected.name);
+                    setTitle((prev) => {
+                      const base = prev.replace(/\s+\S+-\S+$/, "").trim();
+                      return `${base} ${selected.name}`;
+                    });
+                  }
+                }}
+                className="h-9 w-full sm:w-auto rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none focus:ring-2 focus:ring-violet-400"
+              >
+                {academicYearOptions.length === 0 ? (
+                  <option>Loading...</option>
+                ) : (
+                  academicYearOptions.map((y) => (
+                    <option key={y.id} value={y.id}>
+                      {y.name.replace("-", " – ")}
+                    </option>
+                  ))
+                )}
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -748,7 +787,8 @@ export default function PrincipalFormBuilder({
                       <Input
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        placeholder="e.g., Class XI Admission"
+                        placeholder="Student Admission Form"
+
                         className={cn(
                           "h-10 rounded-xl border-slate-200 bg-slate-50 text-sm focus-visible:ring-violet-400 focus-visible:bg-white transition-colors",
                           errors.title && "border-red-300 bg-red-50",
@@ -789,8 +829,8 @@ export default function PrincipalFormBuilder({
                   <div key={section.id} className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
                     {/* Section header */}
                     <div className="flex flex-col gap-2 border-b border-slate-100 bg-slate-50/60 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-3.5">
-                      {/* Row 1 on mobile: icon + title + badge */}
-                      <div className="flex items-center gap-2 min-w-0">
+                      {/* Row 1: icon + title + badge + delete */}
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
                         <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-violet-100">
                           <LayoutGrid className="h-3.5 w-3.5 text-violet-600" />
                         </div>
@@ -811,9 +851,20 @@ export default function PrincipalFormBuilder({
                         <span className="shrink-0 rounded-full bg-violet-100 px-2 py-0.5 text-[11px] font-semibold text-violet-700 whitespace-nowrap">
                           {getSelectedCount(section.fields)}/{section.fields.length} selected
                         </span>
+
+                        {/* ← ADD THIS: delete button only for sections after the first */}
+                        {sectionIndex > 0 && (
+                          <button
+                            onClick={() => setSections((prev) => prev.filter((s) => s.id !== section.id))}
+                            className="ml-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-slate-300 hover:bg-red-50 hover:text-red-500 transition-colors"
+                            title="Delete section"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        )}
                       </div>
 
-                      {/* Row 2 on mobile: Add Field button (left-aligned) */}
+                      {/* Add Field button */}
                       <Button
                         variant="ghost"
                         size="sm"
@@ -828,7 +879,6 @@ export default function PrincipalFormBuilder({
                         <Plus className="h-3.5 w-3.5" /> Add Field
                       </Button>
                     </div>
-
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3">
                       <AnimatePresence initial={false}>
                         {sortFields(section.fields).map((field, fIndex) => (

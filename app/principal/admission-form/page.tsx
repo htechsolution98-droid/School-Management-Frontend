@@ -341,7 +341,8 @@ function FormTableRow({
           </span>
         </div>
       </td>
-      <td className="px-6 py-4 text-right">
+      {/* This is the currently not used but after some time use  */}
+      {/* <td className="px-6 py-4 text-right">
         <Button
           variant="outline"
           size="sm"
@@ -351,7 +352,7 @@ function FormTableRow({
           <Eye className="h-3.5 w-3.5" />
           View
         </Button>
-      </td>
+      </td> */}
     </motion.tr>
   );
 }
@@ -525,17 +526,10 @@ export default function AdmissionFormPage() {
         {/* Page header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 text-sm text-slate-400 mb-1">
-              <span>Principal</span>
-              <ChevronRight className="h-3.5 w-3.5" />
-              <span className="text-slate-700 font-medium">
-                Admission Forms
-              </span>
-            </div>
             <h1 className="text-2xl font-bold text-slate-900">
               Admission Forms
             </h1>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-sm text-slate-500 mt-1"> 
               Manage and distribute admission forms for incoming students.
             </p>
           </div>
@@ -665,7 +659,8 @@ export default function AdmissionFormPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50/70">
+                  {/* this is the temparary change for the action column -- S */}
+                  {/* <tr className="border-b border-slate-100 bg-slate-50/70">
                     {[
                       "Form",
                       "Description",
@@ -673,6 +668,22 @@ export default function AdmissionFormPage() {
                       "Sections",
                       "Publish",
                       "Actions",
+                    ].map((h) => (
+                      <th
+                        key={h}
+                        className={`px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-400 ${h === "Actions" ? "text-right" : ""}`}
+                      >
+                        {h}
+                      </th>
+                    ))}
+                  </tr> */}
+                  <tr className="border-b border-slate-100 bg-slate-50/70">
+                    {[
+                      "Form",
+                      "Description",
+                      "Fees",
+                      "Sections",
+                      "Publish",
                     ].map((h) => (
                       <th
                         key={h}
@@ -716,3 +727,5 @@ export default function AdmissionFormPage() {
     </>
   );
 }
+
+

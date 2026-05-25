@@ -20,7 +20,8 @@ import {
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { getFeatures , createFeature,
+import {
+  getFeatures, createFeature,
   type FeatureType,
 } from "@/lib/feature"
 
@@ -80,7 +81,7 @@ export default function FeaturesPage() {
 
     try {
       const data = await getFeatures()
-      
+
       setFeatures(data)
     } catch (err: any) {
       setError(err.message || "Failed to load features")
@@ -96,60 +97,72 @@ export default function FeaturesPage() {
   // ================= CREATE FEATURE =================
 
   const handleCreateFeature = async () => {
-  if (!selectedFeature) {
-    setError("Please select a feature")
-    return
-  }
 
-  const featureData = SCHOOL_FEATURES.find(
-    (item) => item.code === selectedFeature
-  )
-
-  if (!featureData) {
-    setError("Invalid feature selected")
-    return
-  }
-
-  const alreadyExists = features.some(
-    (feature) =>
-      feature.name.toLowerCase() ===
-      featureData.label.toLowerCase()
-  )
-
-  if (alreadyExists) {
-    setError("Feature already exists")
-    return
-  }
-
-  setSubmitting(true)
-  setError("")
-  setSuccess("")
-
-  try {
-    await createFeature({
-      name: featureData.label.toUpperCase(),
-    })
-
-    setSuccess(
-      `${featureData.label} feature created successfully`
+    const allAdded = SCHOOL_FEATURES.every((item) =>
+      features.some(
+        (feature) => feature.name.toLowerCase() === item.label.toLowerCase()
+      )
     )
 
-    setTimeout(() => {
-      setSuccess("")
-    }, 2000)
+    if (allAdded) {
+      setError("All features are already created")
+      return
+    }
 
-    setSelectedFeature("")
+    if (!selectedFeature) {
+      setError("Please select a feature")
+      return
+    }
 
-    await fetchFeatures()
-
-  } catch (err: any) {
-    setError(
-      err.message || "Failed to create feature"
+    const featureData = SCHOOL_FEATURES.find(
+      (item) => item.code === selectedFeature
     )
-  } finally {
-    setSubmitting(false)
+
+    if (!featureData) {
+      setError("Invalid feature selected")
+      return
+    }
+
+    const alreadyExists = features.some(
+      (feature) =>
+        feature.name.toLowerCase() ===
+        featureData.label.toLowerCase()
+    )
+
+    if (alreadyExists) {
+      setError("Feature already exists")
+      return
+    }
+
+    setSubmitting(true)
+    setError("")
+    setSuccess("")
+
+    try {
+      await createFeature({
+        name: featureData.label.toUpperCase(),
+      })
+
+      setSuccess(
+        `${featureData.label} feature created successfully`
+      )
+
+      setTimeout(() => {
+        setSuccess("")
+      }, 2000)
+
+      setSelectedFeature("")
+
+      await fetchFeatures()
+
+    } catch (err: any) {
+      setError(
+        err.message || "Failed to create feature"
+      )
+    } finally {
+      setSubmitting(false)
+    }
   }
-}
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -236,7 +249,7 @@ export default function FeaturesPage() {
 
             return (
               <motion.button
-                whileTap={ { scale: alreadyExists ? 1 : 0.98 } }
+                whileTap={{ scale: alreadyExists ? 1 : 0.98 }}
                 key={item.code}
                 disabled={alreadyExists}
                 onClick={() => {
@@ -245,12 +258,11 @@ export default function FeaturesPage() {
                   }
                 }}
                 className={`border rounded-2xl p-5 text-left transition-all
-                  ${
-                    alreadyExists
-                      ? "border-emerald-200 bg-emerald-50 cursor-not-allowed opacity-70"
-                      : isSelected
-                        ? "border-violet-500 bg-violet-50"
-                        : "border-slate-200 hover:border-violet-300 hover:bg-slate-50"
+                  ${alreadyExists
+                    ? "border-emerald-200 bg-emerald-50 cursor-not-allowed opacity-70"
+                    : isSelected
+                      ? "border-violet-500 bg-violet-50"
+                      : "border-slate-200 hover:border-violet-300 hover:bg-slate-50"
                   }
                 `}
               >
@@ -258,13 +270,12 @@ export default function FeaturesPage() {
 
                   <div
                     className={`h-11 w-11 rounded-xl flex items-center justify-center
-                    ${
-                      alreadyExists
+                    ${alreadyExists
                         ? "bg-emerald-600 text-white"
                         : isSelected
                           ? "bg-violet-600 text-white"
                           : "bg-slate-100 text-slate-600"
-                    }`}
+                      }`}
                   >
                     <Icon className="h-5 w-5" />
                   </div>
