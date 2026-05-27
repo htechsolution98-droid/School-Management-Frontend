@@ -29,7 +29,6 @@ import {
 
 import {
   getFeeTypes,
-  getSchoolClasses,
   getFeeWiseClasses,
   createFeeWiseClass,
   updateFeeWiseClass,
@@ -38,7 +37,8 @@ import {
   type FeeWiseClass,
   type FeeWiseClassPayload,
   type LateFeeType,
-} from "@/lib/forms";
+} from "@/lib/fees";
+import { getSchoolClasses } from "@/lib/clerk";
 
 // ─── Zod schema ───────────────────────────────────────────────────────────────
 

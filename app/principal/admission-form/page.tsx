@@ -24,8 +24,8 @@ import {
   getAdmissionForms,
   toggleFormStatus,
   getPublishedFormLink,
-} from "@/lib/forms";
-import type { AdmissionFormResponse } from "@/lib/form-builder-config";
+} from "@/lib/principal";
+import type { AdmissionFormResponse } from "@/types/principal";
 import PrincipalFormBuilder from "@/components/forms/principal-form-builder";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

@@ -32,9 +32,9 @@ import {
 import {
   getFeeVerifyList,
   verifyFee,
-  getClasses,
   type FeeVerifyRecord,
-} from "@/lib/forms";
+} from "@/lib/fees";
+import { getClasses } from "@/lib/clerk";
 import { cn } from "@/lib/utils";
 
 /* ─── Animated counter ───────────────────────────────────────────────────── */

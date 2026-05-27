@@ -35,7 +35,7 @@ import {
   getBillingCycleLabel,
   getBillingCycleBadgeColor,
   getFeeTypeIconBg,
-} from "@/lib/forms";
+} from "@/lib/fees";
 
 // ─── Icon Map ────────────────────────────────────────────────────────────────
 const getIconComponent = (name: string) => {

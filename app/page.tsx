@@ -34,7 +34,7 @@ import {
   X,
   Loader2,
 } from "lucide-react";
-import { getPublishedFormLink } from "@/lib/forms";
+import { getPublishedFormLink } from "@/lib/principal";
 import { toast } from "sonner";
 
 export default function LandingPage() {

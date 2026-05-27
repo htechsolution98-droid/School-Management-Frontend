@@ -15,7 +15,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { getSchoolClasses, saveSchoolClasses, deleteSchoolClass, type SchoolClass } from "@/lib/forms"
+import { getSchoolClasses, saveSchoolClasses, deleteSchoolClass, type SchoolClass } from "@/lib/principal"
 import { SCHOOL_CLASS_OPTIONS } from "@/lib/form-builder-config"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"

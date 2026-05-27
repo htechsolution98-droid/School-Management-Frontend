@@ -45,7 +45,7 @@ import {
   type StudentFee,
   type AcademicYear,
   type FeeWiseClass,
-} from "@/lib/forms";
+} from "@/lib/fees";
 
 // Status Badge Component
 const StatusBadge = ({ status }: { status: StudentFee["status"] }) => {

@@ -28,93 +28,19 @@ import {
   getSalaryComponents,
   createStaffSalaryComponent,
   getStaffList,
+  getAllStaffSalaryComponents,
+  deleteStaffSalaryComponent,
+  updateStaffSalaryComponent,
+  type CalcType,
   type SalaryComponent,
+  type StaffSalaryAssignment as Assignment,
   type StaffMember,
-} from "@/lib/forms";
+} from "@/lib/fees";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-type CalcType = "fixed" | "percentage";
-
-interface Assignment {
-  id: number;
-  staffId: number;
-  staffName: string;
-  component: number;
-  componentName: string;
-  componentType: "earning" | "deduction";
-  calculation_type: CalcType;
-  value: string;
-  isActive: boolean;
-}
-
 // ─── API helpers ──────────────────────────────────────────────────────────────
-import { fetchWithAuth } from "@/lib/auth";
-import { API_BASE_URL } from "@/lib/config";
-
-async function getAllStaffSalaryComponents(): Promise<Assignment[]> {
-  const response = await fetchWithAuth(`${API_BASE_URL}/staff-salary-component/`);
-  if (!response.ok) {
-    let message = "Failed to fetch assigned components.";
-    try {
-      const err = await response.json();
-      message = err?.detail || err?.message || message;
-    } catch { }
-    throw new Error(message);
-  }
-  const data = await response.json();
-  const raw: any[] = Array.isArray(data) ? data : (data.results ?? data.data ?? []);
-  return raw.map((item) => ({
-    id: item.id,
-    staffId: item.staff,
-    staffName: item.staff_name ?? `Staff #${item.staff}`,
-    component: item.component,
-    componentName: item.component_name ?? "Unknown",
-    componentType: item.component_type ?? "earning",
-    calculation_type: item.calculation_type,
-    value: item.value,
-    isActive: item.is_active ?? true,
-  }));
-}
-
-async function deleteStaffSalaryComponent(id: number): Promise<void> {
-  const response = await fetchWithAuth(
-    `${API_BASE_URL}/staff-salary-component/${id}/`,
-    { method: "DELETE" }
-  );
-  if (!response.ok && response.status !== 204) {
-    let message = "Failed to delete component.";
-    try {
-      const err = await response.json();
-      message = err?.detail || err?.message || message;
-    } catch { }
-    throw new Error(message);
-  }
-}
-
 // ─── NEW: Update API helper ───────────────────────────────────────────────────
 // PATCH /staff-salary-component/{id}/ with { calculation_type, value }
-async function updateStaffSalaryComponent(
-  id: number,
-  payload: { calculation_type: CalcType; value: string }
-): Promise<void> {
-  const response = await fetchWithAuth(
-    `${API_BASE_URL}/staff-salary-component/${id}/`,
-    {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    }
-  );
-  if (!response.ok) {
-    let message = "Failed to update component.";
-    try {
-      const err = await response.json();
-      message = err?.detail || err?.message || message;
-    } catch { }
-    throw new Error(message);
-  }
-}
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const AVATAR_COLORS = [
   ["#e0e7ff", "#4f46e5"],
@@ -342,7 +268,7 @@ function EditModal({
                 <button
                   onClick={onClose}
                   className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors"
-                >
+                > 
                   <X className="h-4 w-4 text-slate-500" />
                 </button>
               </div>

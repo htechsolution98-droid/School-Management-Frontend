@@ -19,9 +19,8 @@ import {
   getDivisions,
   saveDivision,
   deleteDivision,
-  type SchoolClass,
-  type Division,
-} from "@/lib/forms";
+} from "@/lib/clerk";
+import type { Division, SchoolClass } from "@/types/clerk";
 import { Badge } from "@/components/ui/badge";
 import { SCHOOL_CLASS_OPTIONS } from "@/lib/form-builder-config";
 import { cn } from "@/lib/utils";

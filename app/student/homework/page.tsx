@@ -33,7 +33,7 @@ import {
   submitHomework,
   type HomeworkItem,
   type HomeworkSubmission,
-} from "@/lib/forms";
+} from "@/lib/student";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type TabType = "today" | "all";

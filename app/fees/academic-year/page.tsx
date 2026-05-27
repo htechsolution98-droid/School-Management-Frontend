@@ -19,7 +19,7 @@ import {
   getAcademicYears,
   createAcademicYear,
   type AcademicYear,
-} from "@/lib/forms"; // ← adjust this path to wherever your forms.ts lives
+} from "@/lib/fees"; 
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Users, GraduationCap, FileText, ClipboardList } from "lucide-react";
 import { motion } from "framer-motion";
-import { fetchDashboardCount, type DashboardCount } from "@/lib/forms";
+import { fetchDashboardCount, type DashboardCount } from "@/lib/principal";
 
 export default function PrincipalDashboard() {
   const [data, setData] = useState<DashboardCount | null>(null);

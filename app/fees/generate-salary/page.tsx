@@ -26,7 +26,7 @@ import {
   Building2,
   Download,
 } from "lucide-react";
-import { getSalaryPayments, generateSalary, getStaffList } from "@/lib/forms";
+import { getSalaryPayments, generateSalary, getStaffList } from "@/lib/fees";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 

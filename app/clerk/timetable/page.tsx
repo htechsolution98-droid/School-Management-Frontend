@@ -34,78 +34,18 @@ import {
   createTimetable,
   updateTimetable,
   getAssignedTeachers,
-} from "@/lib/forms";
+} from "@/lib/clerk";
+import type {
+  AssignedTeacher,
+  TimetableDivision as Division,
+  Teacher,
+  TimetableFormData as FormDataType,
+  TimetableFormSlot as Slot,
+  TimetableRecord,
+  TimetableSubject as Subject,
+} from "@/types/clerk";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
-interface Division {
-  id: number;
-  class_name: string;
-  division: string;
-}
-
-interface Subject {
-  id: number;
-  name: string;
-  division?: number;
-  school?: number;
-}
-
-interface Teacher {
-  id: number;
-  name: string;
-}
-
-interface AssignedTeacher {
-  teacher: number | string;
-  subject: number | string;
-  teacher_name?: string;
-  subject_name?: string;
-  is_class_teacher?: boolean;
-  division?: number | string;
-}
-
-interface Slot {
-  id: string;
-  slot_number: number;
-  is_lecture: boolean;
-  is_break: boolean;
-  slot_start_time: string;
-  slot_end_time: string;
-  subject: string | number | null;
-  teacher: string | number | null;
-  subject_name?: string;
-  teacher_name?: string;
-}
-
-interface FormDataType {
-  day: string;
-  class_division: string | number;
-  total_lecture: number;
-  total_breaks: number;
-  start_time: string;
-  end_time: string;
-  academicYear: string;
-  lecture_duration: number;
-  break_duration: number;
-}
-interface TimetableRecord {
-  id: number;
-  day: string;
-  class_division: number;
-  total_lecture: number;
-  start_time: string;
-  end_time: string;
-  slots: {
-    slot_number: number;
-    is_lecture: boolean;
-    is_break: boolean;
-    slot_start_time: string;
-    slot_end_time: string;
-    subject: number | null;
-    teacher: number | null;
-  }[];
-}
-
 interface ToastData {
   msg: string;
   type: "success" | "error" | "info" | "warning";

@@ -29,8 +29,8 @@ import {
   verifyRazorPayment,
   createOfflinePayment,
   getAdmissionReceipt,
-} from "@/lib/forms";
-import { submitDocuments } from "@/lib/forms";
+  submitDocuments,
+} from "@/lib/user";
 
 // ────────────────────────────────────────────
 // Static Data

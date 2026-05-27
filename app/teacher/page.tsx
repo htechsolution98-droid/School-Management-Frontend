@@ -20,9 +20,8 @@ import {
 import {
   getTodayAttendance,
   markAttendance,
-  type TodayAttendance,
-  type AttendanceLocationSettings,
-} from "@/lib/forms";
+} from "@/lib/teacher";
+import type { TodayAttendance, AttendanceLocationSettings } from "@/types/teacher";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

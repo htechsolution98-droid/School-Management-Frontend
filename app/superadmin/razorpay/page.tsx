@@ -24,80 +24,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { fetchWithAuth } from "@/lib/auth";
-import { API_BASE_URL } from "@/lib/config";
+import {
+  getSchoolList,
+  saveRazorpayData,
+  updateRazorpayData,
+  deleteRazorpayData,
+  getRazorpayList,
+} from "@/lib/superadmin";
+import type { RazorpaySchool, RazorpayRecord } from "@/types";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface School {
-  id: number;
-  name: string;
-}
-
-interface RazorpayRecord {
-  id?: number;
-  school: number;
-  razorpay_key_id: string;
-  razorpay_secret_key: string;
-  school_name?: string;
-}
-
-// ─── API helpers ──────────────────────────────────────────────────────────────
-
-async function getSchoolList(): Promise<School[]> {
-  const res = await fetchWithAuth(`${API_BASE_URL}/schoollist/`);
-  if (!res.ok) throw new Error("Failed to fetch schools");
-  const data = await res.json();
-  return Array.isArray(data) ? data : (data.results ?? []);
-}
-
-async function saveRazorpayData(payload: Omit<RazorpayRecord, "id" | "school_name">): Promise<RazorpayRecord> {
-  const res = await fetchWithAuth(`${API_BASE_URL}/razardata/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    let msg = "Failed to save credentials";
-    try {
-      const err = await res.json();
-      msg = err?.detail || err?.message || msg;
-    } catch { }
-    throw new Error(msg);
-  }
-  return res.json();
-}
-
-async function updateRazorpayData(id: number, payload: Omit<RazorpayRecord, "id" | "school_name">): Promise<RazorpayRecord> {
-  const res = await fetchWithAuth(`${API_BASE_URL}/razardata/${id}/`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    let msg = "Failed to update credentials";
-    try {
-      const err = await res.json();
-      msg = err?.detail || err?.message || msg;
-    } catch { }
-    throw new Error(msg);
-  }
-  return res.json();
-}
-
-async function deleteRazorpayData(id: number): Promise<void> {
-  const res = await fetchWithAuth(`${API_BASE_URL}/razardata/${id}/`, {
-    method: "DELETE",
-  });
-  if (!res.ok) throw new Error("Failed to delete credentials");
-}
-
-async function getRazorpayList(): Promise<RazorpayRecord[]> {
-  const res = await fetchWithAuth(`${API_BASE_URL}/razardata/`);
-  if (!res.ok) throw new Error("Failed to fetch Razorpay records");
-  const data = await res.json();
-  return Array.isArray(data) ? data : (data.results ?? []);
-}
 
 // ─── Masked secret display ────────────────────────────────────────────────────
 
@@ -129,7 +64,7 @@ function SchoolSelect({
   onChange,
   disabled,
 }: {
-  schools: School[];
+  schools: RazorpaySchool[];
   value: number | "";
   onChange: (id: number) => void;
   disabled?: boolean;
@@ -201,7 +136,7 @@ function CredentialForm({
   onSuccess,
   onCancel,
 }: {
-  schools: School[];
+  schools: RazorpaySchool[];
   existing?: RazorpayRecord;
   existingRecords: RazorpayRecord[];
   onSuccess: () => void;
@@ -401,7 +336,7 @@ function DeleteModal({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function RazorpayCredentialsPage() {
-  const [schools, setSchools] = useState<School[]>([]);
+  const [schools, setSchools] = useState<RazorpaySchool[]>([]);
   const [records, setRecords] = useState<RazorpayRecord[]>([]);
   const [isFetching, setIsFetching] = useState(true);
   const [isAdding, setIsAdding] = useState(false);

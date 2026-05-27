@@ -11,7 +11,7 @@ import {
     updateAcademicYearForPrincipal,
     deleteAcademicYearForPrincipal,
     type AcademicYear,
-} from "@/lib/forms";
+} from "@/lib/principal";
 
 // ─── MONTHS ───────────────────────────────────────────────────────────────────
 const MONTHS = [

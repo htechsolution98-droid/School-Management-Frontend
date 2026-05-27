@@ -21,9 +21,10 @@ import {
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
-  getFeatures, createFeature,
-  type FeatureType,
-} from "@/lib/feature"
+  getFeatures,
+  createFeature,
+} from "@/lib/superadmin"
+import type { FeatureType } from "@/types"
 
 const SCHOOL_FEATURES = [
   {

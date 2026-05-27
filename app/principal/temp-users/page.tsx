@@ -14,7 +14,7 @@ import {
     Loader2,
     Zap,
 } from "lucide-react";
-import { getTempUsersForPrincipal, activateTempUser, deactivateTempUser, deactivateAllTempUsers } from "@/lib/forms";
+import { getTempUsersForPrincipal, activateTempUser, deactivateTempUser, deactivateAllTempUsers } from "@/lib/principal";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

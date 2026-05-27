@@ -61,9 +61,9 @@ import {
   patchFieldValues,
   patchDocuments,
   assignGrNumber,
-  type Admission,
-} from "@/lib/forms";
-import { getClasses } from "@/lib/forms";
+  getClasses,
+} from "@/lib/clerk";
+import type { Admission } from "@/types/clerk";
 
 // ─── Assign GR Number API ─────────────────────────────────────────────────────
 

@@ -35,20 +35,22 @@ import {
   getSchoolClasses,
   getMainAcademicYear,
   type SchoolClass,
-} from "@/lib/forms";
+} from "@/lib/principal";
 import {
   createConfiguredField,
   DOCUMENT_FIELD_TEMPLATES,
   FIELD_TYPE_OPTIONS,
   PERSONAL_FIELD_TEMPLATES,
   SCHOOL_CLASS_OPTIONS,
-  type AdmissionFormCreatePayload,
-  type AdmissionFormFieldPayload,
-  type AdmissionFormResponse,
-  type BuilderFieldType,
-  type BuilderOption,
-  type ConfiguredField,
 } from "@/lib/form-builder-config";
+import type {
+  AdmissionFormCreatePayload,
+  AdmissionFormFieldPayload,
+  AdmissionFormResponse,
+  BuilderFieldType,
+  BuilderOption,
+  ConfiguredField,
+} from "@/types/principal";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {

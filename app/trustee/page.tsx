@@ -12,6 +12,7 @@ import {
   RefreshCw,
   UserPlus,
   Users,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -161,8 +162,17 @@ export default function TrusteeDashboard() {
               }}
               className="bg-white text-teal-700 hover:bg-teal-50"
             >
-              <UserPlus className="mr-2 h-4 w-4" />
-              {isAdding ? "Close Form" : "Add Staff"}
+              {isAdding ? (
+                <>
+                  <X className="mr-2 h-4 w-4" />
+                  Close Form
+                </>
+              ) : (
+                <>
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Add Staff
+                </>
+              )}
             </Button>
             <Button
               variant="outline"
