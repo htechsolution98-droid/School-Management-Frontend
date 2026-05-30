@@ -16,6 +16,10 @@ import {
   MessageSquare,
   ChevronRight,
   TrendingUp,
+  Smartphone,
+  Cpu,
+  CheckSquare,
+  LayoutGrid,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -104,6 +108,36 @@ export default function AdminLayout({
       name: "Modules Manager",
       href: "/admin/modules",
       icon: <CreditCard className="h-5 w-5" />,
+    },
+    {
+      name: "Why Choose Us",
+      href: "/admin/why-choose-us",
+      icon: <Sparkles className="h-5 w-5" />,
+    },
+    {
+      name: "Stats Manager",
+      href: "/admin/stats",
+      icon: <TrendingUp className="h-5 w-5" />,
+    },
+    {
+      name: "Mobile App Roles",
+      href: "/admin/mobile-app",
+      icon: <Smartphone className="h-5 w-5" />,
+    },
+    {
+      name: "Mobile Infrastructure",
+      href: "/admin/mobile-infrastructure",
+      icon: <Cpu className="h-5 w-5" />,
+    },
+    {
+      name: "Modules Hero Tags",
+      href: "/admin/modules-hero-tags",
+      icon: <CheckSquare className="h-5 w-5" />,
+    },
+    {
+      name: "Modules Grid Cards",
+      href: "/admin/modules-grid",
+      icon: <LayoutGrid className="h-5 w-5" />,
     },
     {
       name: "Testimonials Manager",

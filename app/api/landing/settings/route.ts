@@ -3,6 +3,8 @@ import dbConnect from "@/lib/mongodb";
 import { LandingSettings } from "@/lib/models/LandingContent";
 import { fsGetSettings, fsSaveSettings } from "@/lib/fileStore";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     await dbConnect();
@@ -36,6 +38,11 @@ export async function PUT(request: Request) {
         settings.satisfactionRate = body.satisfactionRate;
         if (body.stats) settings.stats = body.stats;
         if (body.whyChooseUs) settings.whyChooseUs = body.whyChooseUs;
+        if (body.mobileTabs) settings.mobileTabs = body.mobileTabs;
+        if (body.mobileInfrastructure) settings.mobileInfrastructure = body.mobileInfrastructure;
+        if (body.modulesHeroTags) settings.modulesHeroTags = body.modulesHeroTags;
+        if (body.modulesHeroImage !== undefined) settings.modulesHeroImage = body.modulesHeroImage;
+        if (body.modulesGridCards) settings.modulesGridCards = body.modulesGridCards;
       }
       await settings.save();
       return NextResponse.json({ success: true, settings, message: "Settings updated successfully!" });

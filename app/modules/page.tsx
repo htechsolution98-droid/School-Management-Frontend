@@ -20,11 +20,31 @@ import {
   Sparkles,
   Home,
   Check,
-  ChevronDown
+  ChevronDown,
+  Layers,
+  BookOpen,
+  Award,
+  Shield,
+  Bell,
+  Star,
+  Calendar,
+  TrendingUp,
 } from "lucide-react";
 
 export default function ModulesPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [heroTags, setHeroTags] = useState<string[]>([
+    "Admission Management",
+    "Fee Management",
+    "Attendance & Geo Tracking",
+    "Homework & Assignments",
+    "Timetable Management",
+    "Online Examination",
+    "Progress Reports",
+    "Parent & Student Panels",
+  ]);
+  const [heroImage, setHeroImage] = useState("/moduleg.jpeg");
+  const [gridCards, setGridCards] = useState<any[]>([]);
 
   // Custom lagging cursor follower spring physics
   const [isTouchDevice, setIsTouchDevice] = useState(true);
@@ -56,113 +76,59 @@ export default function ModulesPage() {
     };
   }, [mouseX, mouseY]);
 
-  const modules = [
-    {
-      title: "Student Dashboard",
-      emoji: "👨‍🎓",
-      icon: <GraduationCap className="h-6 w-6" />,
-      desc: "Designed to keep students organized, motivated, academic-centric, and highly engaged.",
-      points: [
-        "Attendance percentage",
-        "Academic performance analytics",
-        "Timetable & upcoming exams",
-        "Homework and assignment tracker"
-      ],
-      hoverStyle: "hover:bg-gradient-to-br hover:from-[#1D496C] hover:via-[#285E89] hover:to-[#429CE4] hover:text-white hover:border-transparent hover:shadow-2xl hover:shadow-[#429CE4]/20",
-      iconBg: "bg-[#1D496C]/10 text-[#1D496C] group-hover:bg-white/20 group-hover:text-white",
-      checkStyle: "text-[#429CE4] group-hover:text-[#E4FF4C]"
-    },
-    {
-      title: "Parent Portal",
-      emoji: "👨‍👩‍👧",
-      icon: <Users className="h-6 w-6" />,
-      desc: "Instant tracking companion providing real-time data sync, fee alerts, and direct chats.",
-      points: [
-        "Real-time student updates",
-        "Fee payment alerts",
-        "Direct communication with teachers",
-        "Daily activity reports"
-      ],
-      hoverStyle: "hover:bg-gradient-to-br hover:from-[#6A7626] hover:to-[#4F581D] hover:text-white hover:border-transparent hover:shadow-2xl hover:shadow-[#6A7626]/20",
-      iconBg: "bg-[#6A7626]/10 text-[#6A7626] group-hover:bg-white/20 group-hover:text-white",
-      checkStyle: "text-[#6A7626] group-hover:text-[#E4FF4C]"
-    },
-    {
-      title: "Online Fee Management",
-      emoji: "💳",
-      icon: <CreditCard className="h-6 w-6" />,
-      desc: "Secure banking integration handling automatic reminders, instant receipts, and payouts.",
-      points: [
-        "UPI/card/net banking integration",
-        "Auto fee reminders",
-        "Downloadable receipts",
-        "Pending fee analytics"
-      ],
-      hoverStyle: "hover:bg-gradient-to-br hover:from-[#FFA600] hover:to-[#ED6708] hover:text-white hover:border-transparent hover:shadow-2xl hover:shadow-[#FFA600]/20",
-      iconBg: "bg-[#FFA600]/10 text-[#FFA600] group-hover:bg-white/20 group-hover:text-white",
-      checkStyle: "text-[#FFA600] group-hover:text-[#E4FF4C]"
-    },
-    {
-      title: "AI-Based Features",
-      emoji: "🧠",
-      icon: <Brain className="h-6 w-6" />,
-      desc: "Smarter school intelligence systems generating predictions, notes, and report remarks.",
-      points: [
-        "AI chatbot for student queries",
-        "Smart performance prediction",
-        "Personalized study recommendations",
-        "AI-generated report cards/remarks"
-      ],
-      hoverStyle: "hover:bg-gradient-to-br hover:from-[#285E89] hover:to-[#429CE4] hover:text-white hover:border-transparent hover:shadow-2xl hover:shadow-[#429CE4]/20",
-      iconBg: "bg-[#285E89]/10 text-[#285E89] group-hover:bg-white/20 group-hover:text-white",
-      checkStyle: "text-[#429CE4] group-hover:text-[#E4FF4C]"
-    },
-    {
-      title: "Smart Attendance System",
-      emoji: "📅",
-      icon: <Fingerprint className="h-6 w-6" />,
-      desc: "Instant roll-calls utilizing dynamic biometric readers, QR checks, and fast parent alerts.",
-      points: [
-        "Face recognition attendance",
-        "RFID/QR code attendance",
-        "Biometric integration",
-        "Instant parent SMS alerts for absentees"
-      ],
-      hoverStyle: "hover:bg-gradient-to-br hover:from-[#6A7626] hover:to-[#4F581D] hover:text-white hover:border-transparent hover:shadow-2xl hover:shadow-[#6A7626]/20",
-      iconBg: "bg-[#6A7626]/10 text-[#6A7626] group-hover:bg-white/20 group-hover:text-white",
-      checkStyle: "text-[#6A7626] group-hover:text-[#E4FF4C]"
-    },
-    {
-      title: "Learning Management Features",
-      emoji: "📚",
-      icon: <Laptop className="h-6 w-6" />,
-      desc: "Comprehensive virtual classrooms allowing easy study uploads, recordings, and gradings.",
-      points: [
-        "Online classes integration",
-        "Study materials & notes upload",
-        "Assignment submission portal",
-        "Recorded lecture access"
-      ],
-      hoverStyle: "hover:bg-gradient-to-br hover:from-[#FFA600] hover:to-[#ED6708] hover:text-white hover:border-transparent hover:shadow-2xl hover:shadow-[#FFA600]/20",
-      iconBg: "bg-[#FFA600]/10 text-[#FFA600] group-hover:bg-white/20 group-hover:text-white",
-      checkStyle: "text-[#FFA600] group-hover:text-[#E4FF4C]"
-    },
-    {
-      title: "Communication Features",
-      emoji: "💬",
-      icon: <MessageSquare className="h-6 w-6" />,
-      desc: "Integrated micro-sockets connecting chat channels, live broadcasts, and meet systems.",
-      points: [
-        "Teacher-parent chat",
-        "Broadcast messaging",
-        "Email/SMS integration",
-        "Video meeting integration"
-      ],
-      hoverStyle: "hover:bg-gradient-to-br hover:from-[#1D496C] hover:to-[#FFA600] hover:text-white hover:border-transparent hover:shadow-2xl hover:shadow-[#FFA600]/20",
-      iconBg: "bg-[#1D496C]/10 text-[#1D496C] group-hover:bg-white/20 group-hover:text-white",
-      checkStyle: "text-[#1D496C] group-hover:text-[#E4FF4C]"
-    }
+  // Load hero settings + grid cards dynamically from settings API
+  useEffect(() => {
+    fetch(`/api/landing/settings?t=${Date.now()}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success && data.settings) {
+          if (Array.isArray(data.settings.modulesHeroTags) && data.settings.modulesHeroTags.length > 0) {
+            setHeroTags(data.settings.modulesHeroTags);
+          }
+          if (data.settings.modulesHeroImage) {
+            setHeroImage(data.settings.modulesHeroImage);
+          }
+          if (Array.isArray(data.settings.modulesGridCards) && data.settings.modulesGridCards.length > 0) {
+            setGridCards(data.settings.modulesGridCards);
+          }
+        }
+      })
+      .catch(() => {
+        // Keep static fallback silently
+      });
+  }, []);
+
+  // Icon registry for dynamic cards
+  const ICON_LOOKUP: Record<string, React.ReactNode> = {
+    GraduationCap: <GraduationCap className="h-6 w-6" />,
+    Users: <Users className="h-6 w-6" />,
+    CreditCard: <CreditCard className="h-6 w-6" />,
+    Brain: <Brain className="h-6 w-6" />,
+    Fingerprint: <Fingerprint className="h-6 w-6" />,
+    Laptop: <Laptop className="h-6 w-6" />,
+    MessageSquare: <MessageSquare className="h-6 w-6" />,
+    Layers: <Layers className="h-6 w-6" />,
+    BookOpen: <BookOpen className="h-6 w-6" />,
+    Award: <Award className="h-6 w-6" />,
+    Shield: <Shield className="h-6 w-6" />,
+    Bell: <Bell className="h-6 w-6" />,
+    Star: <Star className="h-6 w-6" />,
+    Calendar: <Calendar className="h-6 w-6" />,
+    TrendingUp: <TrendingUp className="h-6 w-6" />,
+  };
+
+  // Static fallback cards (used when DB cards haven't loaded yet)
+  const STATIC_FALLBACK = [
+    { title: "Student Dashboard",       emoji: "👨‍🎓", iconName: "GraduationCap", desc: "Designed to keep students organized, motivated, academic-centric, and highly engaged.",         points: ["Attendance percentage","Academic performance analytics","Timetable & upcoming exams","Homework and assignment tracker"],       hoverFrom: "#1D496C", hoverTo: "#429CE4", accentColor: "#429CE4" },
+    { title: "Parent Portal",           emoji: "👨‍👩‍👧", iconName: "Users",         desc: "Instant tracking companion providing real-time data sync, fee alerts, and direct chats.",       points: ["Real-time student updates","Fee payment alerts","Direct communication with teachers","Daily activity reports"],                hoverFrom: "#6A7626", hoverTo: "#4F581D", accentColor: "#6A7626" },
+    { title: "Online Fee Management",   emoji: "💳", iconName: "CreditCard",    desc: "Secure banking integration handling automatic reminders, instant receipts, and payouts.",       points: ["UPI/card/net banking integration","Auto fee reminders","Downloadable receipts","Pending fee analytics"],                         hoverFrom: "#FFA600", hoverTo: "#ED6708", accentColor: "#FFA600" },
+    { title: "AI-Based Features",       emoji: "🧠", iconName: "Brain",         desc: "Smarter school intelligence systems generating predictions, notes, and report remarks.",         points: ["AI chatbot for student queries","Smart performance prediction","Personalized study recommendations","AI-generated report cards/remarks"], hoverFrom: "#285E89", hoverTo: "#429CE4", accentColor: "#429CE4" },
+    { title: "Smart Attendance System", emoji: "📅", iconName: "Fingerprint",   desc: "Instant roll-calls utilizing dynamic biometric readers, QR checks, and fast parent alerts.",    points: ["Face recognition attendance","RFID/QR code attendance","Biometric integration","Instant parent SMS alerts for absentees"],       hoverFrom: "#6A7626", hoverTo: "#4F581D", accentColor: "#6A7626" },
+    { title: "Learning Management",     emoji: "📚", iconName: "Laptop",        desc: "Comprehensive virtual classrooms allowing easy study uploads, recordings, and gradings.",         points: ["Online classes integration","Study materials & notes upload","Assignment submission portal","Recorded lecture access"],              hoverFrom: "#FFA600", hoverTo: "#ED6708", accentColor: "#FFA600" },
+    { title: "Communication Features",  emoji: "💬", iconName: "MessageSquare", desc: "Integrated micro-sockets connecting chat channels, live broadcasts, and meet systems.",           points: ["Teacher-parent chat","Broadcast messaging","Email/SMS integration","Video meeting integration"],                                   hoverFrom: "#1D496C", hoverTo: "#FFA600", accentColor: "#1D496C" },
   ];
+
+  const activeCards = gridCards.length > 0 ? gridCards : STATIC_FALLBACK;
 
   return (
     <div className="flex min-h-screen flex-col bg-white text-slate-800 overflow-x-clip relative font-sans">
@@ -289,16 +255,7 @@ export default function ModulesPage() {
 
                 {/* 2-column feature tag list */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
-                  {[
-                    "Admission Management",
-                    "Fee Management",
-                    "Attendance & Geo Tracking",
-                    "Homework & Assignments",
-                    "Timetable Management",
-                    "Online Examination",
-                    "Progress Reports",
-                    "Parent & Student Panels"
-                  ].map((feat, index) => (
+                  {heroTags.map((feat, index) => (
                     <motion.div
                       key={index}
                       initial={{ opacity: 0, x: -10 }}
@@ -364,10 +321,10 @@ export default function ModulesPage() {
                       </div>
                     </div>
 
-                    {/* Content Image rendering /module-bg.png */}
+                    {/* Content Image rendering from admin settings */}
                     <div className="w-full aspect-[16/10] overflow-hidden bg-slate-900 relative rounded-b-2xl">
                       <img 
-                        src="/moduleg.jpeg" 
+                        src={heroImage} 
                         alt="VidyaSanchalan Modules dashboard mockup"
                         onError={(e) => {
                           e.currentTarget.style.display = 'none';
@@ -420,16 +377,30 @@ export default function ModulesPage() {
 
           {/* Interactive Dynamic Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {modules.map((mod, idx) => (
+            {activeCards.map((mod: any, idx: number) => (
               <motion.div
                 key={idx}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: idx * 0.1 }}
-                className={`${idx === 6 ? "md:col-span-2 lg:col-span-3 lg:max-w-2xl lg:mx-auto lg:w-full" : ""}`}
+                className={`${idx === activeCards.length - 1 && activeCards.length % 3 === 1 ? "md:col-span-2 lg:col-span-3 lg:max-w-2xl lg:mx-auto lg:w-full" : ""}`}
               >
-                <Card className={`group relative h-full border border-slate-100 bg-white/75 shadow-md rounded-[2.5rem] p-6.5 sm:p-8 transition-all duration-500 hover:-translate-y-2 cursor-pointer ${mod.hoverStyle}`}>
-                  
+                <Card className="group relative h-full border border-slate-100 bg-white/75 shadow-md rounded-[2.5rem] p-6 sm:p-8 transition-all duration-500 hover:-translate-y-2 cursor-pointer overflow-hidden"
+                  style={{
+                    ["--hover-from" as any]: mod.hoverFrom,
+                    ["--hover-to" as any]: mod.hoverTo,
+                  }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLElement).style.background = `linear-gradient(135deg, ${mod.hoverFrom}, ${mod.hoverTo})`;
+                    (e.currentTarget as HTMLElement).style.boxShadow = `0 25px 50px -12px ${mod.hoverFrom}33`;
+                    (e.currentTarget as HTMLElement).style.borderColor = "transparent";
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLElement).style.background = "";
+                    (e.currentTarget as HTMLElement).style.boxShadow = "";
+                    (e.currentTarget as HTMLElement).style.borderColor = "";
+                  }}
+                >
                   {/* Decorative corner shape */}
                   <div className="absolute top-0 right-0 w-[120px] h-[120px] bg-slate-50/10 rounded-full blur-2xl pointer-events-none group-hover:bg-white/10 transition-colors"></div>
 
@@ -438,8 +409,14 @@ export default function ModulesPage() {
                     {/* Header info */}
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
-                        <div className={`h-12 w-12 rounded-xl flex items-center justify-center border border-slate-100 shadow-sm transition-all duration-500 ${mod.iconBg}`}>
-                          {mod.icon}
+                        <div
+                          className="h-12 w-12 rounded-xl flex items-center justify-center border border-slate-100 shadow-sm transition-all duration-500 text-white"
+                          style={{ background: `linear-gradient(135deg, ${mod.hoverFrom}20, ${mod.hoverFrom}40)`, color: mod.accentColor }}
+                          onMouseEnter={() => {}}
+                        >
+                          <span className="group-hover:text-white transition-colors">
+                            {ICON_LOOKUP[mod.iconName] || <Layers className="h-6 w-6" />}
+                          </span>
                         </div>
                         <span className="text-3xl select-none group-hover:scale-110 transition-transform duration-300">
                           {mod.emoji}
@@ -459,9 +436,9 @@ export default function ModulesPage() {
                     {/* Points grid */}
                     <div className="border-t border-slate-100/60 pt-5 group-hover:border-white/10 transition-colors">
                       <ul className="space-y-3 text-left">
-                        {mod.points.map((point, pIdx) => (
+                        {mod.points.map((point: string, pIdx: number) => (
                           <li key={pIdx} className="flex items-start gap-3 text-sm">
-                            <CheckCircle2 className={`mt-0.5 h-4.5 w-4.5 stroke-[2.5] shrink-0 transition-colors ${mod.checkStyle}`} />
+                            <CheckCircle2 className="mt-0.5 h-4 w-4 stroke-[2.5] shrink-0 transition-colors group-hover:text-[#E4FF4C]" style={{ color: mod.accentColor }} />
                             <span className="font-bold leading-relaxed text-slate-700 group-hover:text-slate-100 transition-colors duration-300">
                               {point}
                             </span>
