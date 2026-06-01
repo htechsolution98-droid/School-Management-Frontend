@@ -37,69 +37,38 @@ import {
   MessageSquare,
   Activity,
   FileText,
-  Cpu,
   Network,
-  HardDrive
+  HardDrive,
+  ShieldAlert,
+  Key,
+  Database,
+  Cpu,
 } from "lucide-react";
 
+const getInfraIcon = (name: string, className?: string) => {
+  switch (name) {
+    case "Lock": return <Lock className={className} />;
+    case "Wifi": return <Wifi className={className} />;
+    case "Bell": return <Bell className={className} />;
+    case "Fingerprint": return <Fingerprint className={className} />;
+    case "Activity": return <Activity className={className} />;
+    case "Cpu": return <Cpu className={className} />;
+    case "ShieldAlert": return <ShieldAlert className={className} />;
+    case "Key": return <Key className={className} />;
+    case "Database": return <Database className={className} />;
+    case "Sparkles": return <Sparkles className={className} />;
+    case "Smartphone": return <Smartphone className={className} />;
+    default: return <Cpu className={className} />;
+  }
+};
+
 export default function FeaturesPage() {
-  const [activeTab, setActiveTab] = useState<"student" | "parent" | "teacher">("parent");
+  const [activeTab, setActiveTab] = useState<string>("parent");
   const [sliderIndex, setSliderIndex] = useState(1); // Default center (mobile-2 is active)
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [tabIds, setTabIds] = useState<string[]>(["parent", "student", "teacher"]);
 
-  // Custom lagging cursor follower spring physics
-  const [isTouchDevice, setIsTouchDevice] = useState(true);
-  const mouseX = useMotionValue(-100);
-  const mouseY = useMotionValue(-100);
-
-  const springConfig = { damping: 30, stiffness: 220, mass: 0.6 };
-  const cursorX = useSpring(mouseX, springConfig);
-  const cursorY = useSpring(mouseY, springConfig);
-
-  useEffect(() => {
-    const touchQuery = window.matchMedia("(pointer: coarse)");
-    setIsTouchDevice(touchQuery.matches);
-
-    const listener = (e: MediaQueryListEvent) => {
-      setIsTouchDevice(e.matches);
-    };
-    touchQuery.addEventListener("change", listener);
-
-    const handleMouseMove = (e: MouseEvent) => {
-      mouseX.set(e.clientX - 16);
-      mouseY.set(e.clientY - 16);
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => {
-      touchQuery.removeEventListener("change", listener);
-      window.removeEventListener("mousemove", handleMouseMove);
-    };
-  }, [mouseX, mouseY]);
-
-  // Mobile App screenshots fallback defaults
-  const staticScreens = [
-    {
-      id: 0,
-      title: "Student Portal UI",
-      image: "/mobile-1.png",
-      description: "Direct access to homework schedules, exam tables, marksheet analytics, and virtual classrooms.",
-    },
-    {
-      id: 1,
-      title: "Parent Companion UI",
-      image: "/mobile-2.png",
-      description: "Instant notifications for attendance alerts, online fee invoice payments, and teacher chat boards.",
-    },
-    {
-      id: 2,
-      title: "Teacher Administration UI",
-      image: "/mobile-3.png",
-      description: "Smart geo-fenced attendance registration, digital grading interfaces, and rapid notice distributions.",
-    },
-  ];
-
-  const staticTabs = {
+  const [tabsContent, setTabsContent] = useState<Record<string, any>>({
     student: {
       badge: "Student Application",
       title: "Learn Smarter, Grow Faster",
@@ -139,98 +108,179 @@ export default function FeaturesPage() {
       color: "from-[#6A7626] to-[#4F581D]",
       accent: "text-[#E4FF4C] bg-white/10 border-white/20",
     },
-  };
+  });
 
-  const staticCapabilities = [
+  const [mobileInfrastructure, setMobileInfrastructure] = useState<any[]>([
     {
       title: "Bank-Grade Encryption",
       desc: "All financial data and API transactions are locked under high-strength TLS protocols ensuring completely secure fees transactions.",
       iconName: "Lock",
+      hoverBg: "hover:bg-[#429CE4] hover:border-[#429CE4] hover:shadow-xl hover:shadow-[#429CE4]/20",
     },
     {
       title: "Offline Operations Mode",
       desc: "Never lose school data inside poor networks. The application synchronizes critical homework and logs directly from local cashiers.",
       iconName: "Wifi",
+      hoverBg: "hover:bg-[#6A7626] hover:border-[#6A7626] hover:shadow-xl hover:shadow-[#6A7626]/20",
     },
     {
       title: "Instant Broadcaster Alerts",
       desc: "Integrated micro-sockets delivery engine providing notifications the exact millisecond announcements go active.",
       iconName: "Bell",
+      hoverBg: "hover:bg-[#ED6708] hover:border-[#ED6708] hover:shadow-xl hover:shadow-[#ED6708]/20",
     },
     {
       title: "Biometric & Geo-location",
       desc: "Security tracking logs for teacher roll-call ensuring verifiable attendance entries using mobile GPS services.",
       iconName: "Fingerprint",
+      hoverBg: "hover:bg-[#FFA600] hover:border-[#FFA600] hover:shadow-xl hover:shadow-[#FFA600]/20",
     },
-  ];
+  ]);
 
-  const getIcon = (name: string, className?: string) => {
-    switch (name) {
-      case "Lock": return <Lock className={className} />;
-      case "Wifi": return <Wifi className={className} />;
-      case "Bell": return <Bell className={className} />;
-      case "Fingerprint": return <Fingerprint className={className} />;
-      case "Shield": return <Shield className={className} />;
-      case "Activity": return <Activity className={className} />;
-      case "Cpu": return <Cpu className={className} />;
-      case "Network": return <Network className={className} />;
-      case "HardDrive": return <HardDrive className={className} />;
-      default: return <Sparkles className={className} />;
-    }
-  };
+  const [capabilities, setCapabilities] = useState<any[]>([]);
 
-  const [appScreens, setAppScreens] = useState<any[]>(staticScreens);
-  const [tabsContent, setTabsContent] = useState<any>(staticTabs);
-  const [capabilities, setCapabilities] = useState<any[]>(staticCapabilities);
+  // Custom lagging cursor follower spring physics
+  const [isTouchDevice, setIsTouchDevice] = useState(true);
+  const mouseX = useMotionValue(-100);
+  const mouseY = useMotionValue(-100);
+
+  const springConfig = { damping: 30, stiffness: 220, mass: 0.6 };
+  const cursorX = useSpring(mouseX, springConfig);
+  const cursorY = useSpring(mouseY, springConfig);
 
   useEffect(() => {
-    fetch("/api/landing/settings")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && data.settings) {
-          if (data.settings.mobileScreens && data.settings.mobileScreens.length > 0) {
-            const mapped = data.settings.mobileScreens.map((s: any, idx: number) => ({
-              id: idx,
-              title: s.title,
-              image: s.image,
-              description: s.description
-            }));
-            setAppScreens(mapped);
+    const touchQuery = window.matchMedia("(pointer: coarse)");
+    setIsTouchDevice(touchQuery.matches);
+
+    const listener = (e: MediaQueryListEvent) => {
+      setIsTouchDevice(e.matches);
+    };
+    touchQuery.addEventListener("change", listener);
+
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX.set(e.clientX - 16);
+      mouseY.set(e.clientY - 16);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      touchQuery.removeEventListener("change", listener);
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, [mouseX, mouseY]);
+
+  useEffect(() => {
+    async function loadDynamicMobileTabs() {
+      try {
+        const res = await fetch("/api/landing/settings?t=" + Date.now(), { cache: "no-store" });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          if (data.settings?.mobileTabs?.length > 0) {
+            const fetchedTabs = data.settings.mobileTabs;
+            const contentMap: Record<string, any> = {};
+            const ids: string[] = [];
+            
+            fetchedTabs.forEach((tab: any) => {
+              contentMap[tab.tabId] = {
+                badge: tab.badge,
+                title: tab.title,
+                desc: tab.desc,
+                points: tab.points || [],
+                color: tab.color,
+                accent: tab.accent,
+              };
+              ids.push(tab.tabId);
+            });
+
+            setTabsContent(contentMap);
+            setTabIds(ids);
+
+            // Update activeTab if not in new IDs
+            if (ids.length > 0) {
+              const defaultActive = ids.includes("parent") ? "parent" : ids[0];
+              setActiveTab(defaultActive);
+              setSliderIndex(ids.indexOf(defaultActive));
+            }
+          } else {
+            const dynTabs: any = {};
+            let hasDynTabs = false;
+            if (data.settings.mobileStudent) {
+              dynTabs.student = {
+                ...data.settings.mobileStudent,
+                color: "from-[#429CE4] to-[#1D496C]",
+                accent: "text-[#429CE4] bg-white/10 border-[#429CE4]/20"
+              };
+              hasDynTabs = true;
+            }
+            if (data.settings.mobileParent) {
+              dynTabs.parent = {
+                ...data.settings.mobileParent,
+                color: "from-[#FFA600] to-[#ED6708]",
+                accent: "text-[#FFA600] bg-white/10 border-[#FFA600]/20"
+              };
+              hasDynTabs = true;
+            }
+            if (data.settings.mobileTeacher) {
+              dynTabs.teacher = {
+                ...data.settings.mobileTeacher,
+                color: "from-[#6A7626] to-[#4F581D]",
+                accent: "text-[#E4FF4C] bg-white/10 border-white/20"
+              };
+              hasDynTabs = true;
+            }
+            if (hasDynTabs) {
+              setTabsContent((prev: any) => ({ ...prev, ...dynTabs }));
+            }
           }
-          if (data.settings.mobileCapabilities && data.settings.mobileCapabilities.length > 0) {
+
+          if (data.settings?.mobileInfrastructure?.length > 0) {
+            setMobileInfrastructure(data.settings.mobileInfrastructure);
+          }
+          if (data.settings?.mobileCapabilities?.length > 0) {
             setCapabilities(data.settings.mobileCapabilities);
           }
-          const dynTabs: any = {};
-          dynTabs.student = data.settings.mobileStudent ? {
-            ...data.settings.mobileStudent,
-            color: "from-[#429CE4] to-[#1D496C]",
-            accent: "text-[#429CE4] bg-white/10 border-[#429CE4]/20"
-          } : staticTabs.student;
-
-          dynTabs.parent = data.settings.mobileParent ? {
-            ...data.settings.mobileParent,
-            color: "from-[#FFA600] to-[#ED6708]",
-            accent: "text-[#FFA600] bg-white/10 border-[#FFA600]/20"
-          } : staticTabs.parent;
-
-          dynTabs.teacher = data.settings.mobileTeacher ? {
-            ...data.settings.mobileTeacher,
-            color: "from-[#6A7626] to-[#4F581D]",
-            accent: "text-[#E4FF4C] bg-white/10 border-white/20"
-          } : staticTabs.teacher;
-
-          setTabsContent(dynTabs);
         }
-      })
-      .catch((err) => console.log("Failed to load dynamic ecosystem settings", err));
+      } catch (err) {
+        console.error("Failed to load dynamic mobile roles:", err);
+      }
+    }
+    loadDynamicMobileTabs();
   }, []);
 
+  // Dynamic appScreens list based on loaded tabIds and content
+  const appScreens = tabIds.map((tabId, idx) => {
+    const tabData = tabsContent[tabId] || {};
+    let img = "/mobile-2.png";
+    if (tabId === "student") img = "/mobile-1.png";
+    else if (tabId === "parent") img = "/mobile-2.png";
+    else if (tabId === "teacher") img = "/mobile-3.png";
+    else {
+      // Custom tab uses rotating images
+      const imgIdx = (idx % 3) + 1;
+      img = `/mobile-${imgIdx}.png`;
+    }
+
+    return {
+      id: idx,
+      title: tabData.badge || "System Portal UI",
+      image: img,
+      description: tabData.desc || "Complete interactive administrative workspace interface.",
+      tabId: tabId
+    };
+  });
+
   const handleNextSlide = () => {
-    setSliderIndex((prev) => (prev + 1) % appScreens.length);
+    if (appScreens.length === 0) return;
+    const nextIdx = (sliderIndex + 1) % appScreens.length;
+    setSliderIndex(nextIdx);
+    setActiveTab(appScreens[nextIdx].tabId);
   };
 
   const handlePrevSlide = () => {
-    setSliderIndex((prev) => (prev - 1 + appScreens.length) % appScreens.length);
+    if (appScreens.length === 0) return;
+    const prevIdx = (sliderIndex - 1 + appScreens.length) % appScreens.length;
+    setSliderIndex(prevIdx);
+    setActiveTab(appScreens[prevIdx].tabId);
   };
 
   return (
@@ -363,10 +413,13 @@ export default function FeaturesPage() {
 
               {/* Interactive Segmented Tabs (using brand colors) */}
               <div className="bg-[#153957] border border-[#1b4363] p-1.5 rounded-2xl flex max-w-md shadow-inner shadow-black/20">
-                {(["parent", "student", "teacher"] as const).map((tab) => (
+                {tabIds.map((tab) => (
                   <button
                     key={tab}
-                    onClick={() => setActiveTab(tab)}
+                    onClick={() => {
+                      setActiveTab(tab);
+                      setSliderIndex(tabIds.indexOf(tab));
+                    }}
                     className={`flex-1 py-3 text-xs sm:text-sm font-black rounded-xl capitalize tracking-wide transition-all duration-300 relative overflow-hidden ${activeTab === tab
                       ? "text-white shadow-lg z-10"
                       : "text-slate-300 hover:text-slate-100"
@@ -375,7 +428,7 @@ export default function FeaturesPage() {
                     {activeTab === tab && (
                       <motion.div
                         layoutId="activeTabBg"
-                        className={`absolute inset-0 bg-gradient-to-r ${tabsContent[tab].color} -z-10`}
+                        className={`absolute inset-0 bg-gradient-to-r ${tabsContent[tab]?.color || "from-[#429CE4] to-[#1D496C]"} -z-10`}
                         transition={{ type: "spring", stiffness: 380, damping: 30 }}
                       />
                     )}
@@ -395,15 +448,15 @@ export default function FeaturesPage() {
                   className="space-y-6 max-w-xl"
                 >
                   <div className="space-y-2">
-                    <span className={`inline-block px-3 py-1 rounded-full border text-[11px] font-black tracking-wider uppercase ${tabsContent[activeTab].accent}`}>
-                      {tabsContent[activeTab].badge}
+                    <span className={`inline-block px-3 py-1 rounded-full border text-[11px] font-black tracking-wider uppercase ${tabsContent[activeTab]?.accent || ""}`}>
+                      {tabsContent[activeTab]?.badge || ""}
                     </span>
-                    <h2 className="text-2xl sm:text-3xl font-black text-white">{tabsContent[activeTab].title}</h2>
-                    <p className="text-sm font-medium text-slate-200/80 leading-relaxed">{tabsContent[activeTab].desc}</p>
+                    <h2 className="text-2xl sm:text-3xl font-black text-white">{tabsContent[activeTab]?.title || ""}</h2>
+                    <p className="text-sm font-medium text-slate-200/80 leading-relaxed">{tabsContent[activeTab]?.desc || ""}</p>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
-                    {tabsContent[activeTab].points.map((point: string, index: number) => (
+                    {tabsContent[activeTab]?.points?.map((point: string, index: number) => (
                       <motion.div
                         key={index}
                         initial={{ opacity: 0, x: -10 }}
@@ -488,7 +541,10 @@ export default function FeaturesPage() {
                         damping: 28,
                       }}
                       className="absolute w-[220px] sm:w-[245px] transition-shadow duration-500 select-none cursor-pointer"
-                      onClick={() => setSliderIndex(screen.id)}
+                      onClick={() => {
+                        setSliderIndex(screen.id);
+                        setActiveTab(screen.tabId);
+                      }}
                     >
                       {/* Premium Mobile Phone Frame */}
                       <div className="relative w-full aspect-[9/19] rounded-[2.2rem] bg-slate-950 p-[6px] shadow-[0_20px_50px_rgba(0,0,0,0.8)] border border-slate-800/85">
@@ -535,15 +591,18 @@ export default function FeaturesPage() {
 
               {/* Active Slide Label & Description */}
               <div className="mt-8 text-center max-w-[280px] z-10">
-                <h4 className="text-sm font-black text-white uppercase tracking-wider">{appScreens[sliderIndex].title}</h4>
-                <p className="text-xs font-semibold text-slate-300 mt-1.5 leading-relaxed">{appScreens[sliderIndex].description}</p>
+                <h4 className="text-sm font-black text-white uppercase tracking-wider">{appScreens[sliderIndex]?.title || ""}</h4>
+                <p className="text-xs font-semibold text-slate-300 mt-1.5 leading-relaxed">{appScreens[sliderIndex]?.description || ""}</p>
 
                 {/* Dots indicator using 429CE4 and FFA600 */}
                 <div className="flex justify-center gap-1.5 mt-4">
                   {appScreens.map((_, i) => (
                     <button
                       key={i}
-                      onClick={() => setSliderIndex(i)}
+                      onClick={() => {
+                        setSliderIndex(i);
+                        setActiveTab(appScreens[i].tabId);
+                      }}
                       className={`h-1.5 rounded-full transition-all duration-500 ${i === sliderIndex
                         ? "w-6 bg-[#FFA600]"
                         : "w-1.5 bg-[#429CE4]/40 hover:bg-[#429CE4]"
@@ -580,27 +639,29 @@ export default function FeaturesPage() {
 
           {/* Hover cards with brand-specific hover background color changes */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {capabilities.map((card, i) => {
-              const hoverBgs = [
-                "hover:bg-[#429CE4] hover:border-[#429CE4] hover:shadow-xl hover:shadow-[#429CE4]/20",
-                "hover:bg-[#6A7626] hover:border-[#6A7626] hover:shadow-xl hover:shadow-[#6A7626]/20",
-                "hover:bg-[#ED6708] hover:border-[#ED6708] hover:shadow-xl hover:shadow-[#ED6708]/20",
-                "hover:bg-[#FFA600] hover:border-[#FFA600] hover:shadow-xl hover:shadow-[#FFA600]/20"
-              ];
-              const hoverBg = hoverBgs[i % hoverBgs.length];
-              return (
-                <Card
-                  key={i}
-                  className={`border border-slate-100 bg-white shadow-md rounded-[2rem] p-5 transition-all duration-500 hover:-translate-y-2 group cursor-pointer ${hoverBg}`}
-                >
-                  <div className="h-12 w-12 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100 group-hover:bg-white/20 group-hover:border-transparent transition-all shadow-sm">
-                    {getIcon(card.iconName, "h-6 w-6 text-[#1D496C] group-hover:text-white transition-colors")}
-                  </div>
-                  <h3 className="text-base font-extrabold text-[#1D496C] mt-4 group-hover:text-white transition-colors">{card.title}</h3>
-                  <p className="text-xs font-semibold text-slate-500 group-hover:text-white/90 leading-relaxed mt-2 transition-colors">{card.desc}</p>
-                </Card>
-              );
-            })}
+            {(() => {
+              const activeCapabilities = capabilities.length > 0 ? capabilities : mobileInfrastructure;
+              return activeCapabilities.map((card, i) => {
+                const hoverBg = card.hoverBg || [
+                  "hover:bg-[#429CE4] hover:border-[#429CE4] hover:shadow-xl hover:shadow-[#429CE4]/20",
+                  "hover:bg-[#6A7626] hover:border-[#6A7626] hover:shadow-xl hover:shadow-[#6A7626]/20",
+                  "hover:bg-[#ED6708] hover:border-[#ED6708] hover:shadow-xl hover:shadow-[#ED6708]/20",
+                  "hover:bg-[#FFA600] hover:border-[#FFA600] hover:shadow-xl hover:shadow-[#FFA600]/20"
+                ][i % 4];
+                return (
+                  <Card
+                    key={i}
+                    className={`border border-slate-100 bg-white shadow-md rounded-[2rem] p-5 transition-all duration-500 hover:-translate-y-2 group cursor-pointer ${hoverBg}`}
+                  >
+                    <div className="h-12 w-12 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100 group-hover:bg-white/20 group-hover:border-transparent transition-all shadow-sm">
+                      {getInfraIcon(card.iconName, "h-6 w-6 text-[#1D496C] group-hover:text-white transition-colors")}
+                    </div>
+                    <h3 className="text-base font-extrabold text-[#1D496C] mt-4 group-hover:text-white transition-colors">{card.title}</h3>
+                    <p className="text-xs font-semibold text-slate-500 group-hover:text-white/90 leading-relaxed mt-2 transition-colors">{card.desc}</p>
+                  </Card>
+                );
+              });
+            })()}
           </div>
         </div>
       </section>

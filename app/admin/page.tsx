@@ -18,6 +18,9 @@ import {
   RefreshCw,
   Sparkles,
   ListCollapse,
+  Smartphone,
+  Cpu,
+  CheckSquare,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,6 +38,10 @@ export default function AdminDashboard() {
     inquiries: 0,
     aboutHighlights: 0,
     capabilities: 0,
+    whyChooseUs: 0,
+    mobileTabs: 0,
+    mobileInfrastructure: 0,
+    modulesHeroTags: 0,
   });
 
   // Settings state
@@ -64,6 +71,10 @@ export default function AdminDashboard() {
       
       let aboutHighlightsCount = 2;
       let capabilitiesCount = 4;
+      let whyChooseUsCount = 3;
+      let mobileTabsCount = 3;
+      let mobileInfrastructureCount = 4;
+      let modulesHeroTagsCount = 8;
       if (settingsRes.ok && settingsData.success) {
         setIsDbConnected(true);
         setIsSeeded(settingsData.isSeeded);
@@ -78,6 +89,18 @@ export default function AdminDashboard() {
           }
           if (settingsData.settings.mobileCapabilities) {
             capabilitiesCount = settingsData.settings.mobileCapabilities.length;
+          }
+          if (settingsData.settings.whyChooseUs) {
+            whyChooseUsCount = settingsData.settings.whyChooseUs.length;
+          }
+          if (settingsData.settings.mobileTabs) {
+            mobileTabsCount = settingsData.settings.mobileTabs.length;
+          }
+          if (settingsData.settings.mobileInfrastructure) {
+            mobileInfrastructureCount = settingsData.settings.mobileInfrastructure.length;
+          }
+          if (settingsData.settings.modulesHeroTags) {
+            modulesHeroTagsCount = settingsData.settings.modulesHeroTags.length;
           }
         }
       } else {
@@ -106,6 +129,10 @@ export default function AdminDashboard() {
         inquiries: 0, // Fallback placeholder
         aboutHighlights: aboutHighlightsCount,
         capabilities: capabilitiesCount,
+        whyChooseUs: whyChooseUsCount,
+        mobileTabs: mobileTabsCount,
+        mobileInfrastructure: mobileInfrastructureCount,
+        modulesHeroTags: modulesHeroTagsCount,
       });
     } catch (err) {
       console.error("Dashboard Load Error:", err);
@@ -118,6 +145,10 @@ export default function AdminDashboard() {
         inquiries: 0,
         aboutHighlights: 2,
         capabilities: 4,
+        whyChooseUs: 3,
+        mobileTabs: 3,
+        mobileInfrastructure: 4,
+        modulesHeroTags: 8,
       });
     } finally {
       setIsLoading(false);
@@ -205,6 +236,36 @@ export default function AdminDashboard() {
       href: "/admin/modules",
     },
     {
+      title: "Why Choose Us",
+      value: stats.whyChooseUs,
+      description: "Homepage value propositions",
+      icon: <Sparkles className="h-6 w-6" />,
+      color: "border-l-4 border-l-[#5D3FD3]",
+      iconColor: "text-[#5D3FD3]",
+      bg: "bg-[#5D3FD3]/5",
+      href: "/admin/why-choose-us",
+    },
+    {
+      title: "Mobile App Roles",
+      value: stats.mobileTabs,
+      description: "Interactive ecosystem tabs",
+      icon: <Smartphone className="h-6 w-6" />,
+      color: "border-l-4 border-l-[#ED6708]",
+      iconColor: "text-[#ED6708]",
+      bg: "bg-[#ED6708]/5",
+      href: "/admin/mobile-app",
+    },
+    {
+      title: "Mobile Infrastructure",
+      value: stats.mobileInfrastructure,
+      description: "Technical capability showcase",
+      icon: <Cpu className="h-6 w-6" />,
+      color: "border-l-4 border-l-[#10b981]",
+      iconColor: "text-[#10b981]",
+      bg: "bg-[#10b981]/5",
+      href: "/admin/mobile-infrastructure",
+    },
+    {
       title: "User Testimonials",
       value: stats.testimonials,
       description: "Student, parent, trustee reviews",
@@ -244,6 +305,16 @@ export default function AdminDashboard() {
       bg: "bg-[#429CE4]/5",
       href: "/admin/capabilities",
     },
+    {
+      title: "Modules Hero Tags",
+      value: stats.modulesHeroTags,
+      description: "Checklist items in modules page hero",
+      icon: <CheckSquare className="h-6 w-6" />,
+      color: "border-l-4 border-l-[#8B5CF6]",
+      iconColor: "text-[#8B5CF6]",
+      bg: "bg-[#8B5CF6]/5",
+      href: "/admin/modules-hero-tags",
+    },
   ];
 
   return (
@@ -264,7 +335,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Database Sync Status Card */}
-      <Card className={`overflow-hidden shadow-md border-0 bg-white`}>
+      <Card className="overflow-hidden shadow-md border-0 bg-white">
         <div className="bg-slate-50 px-6 py-4 border-b border-slate-100 flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-3">
             <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${isDbConnected ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
@@ -325,8 +396,8 @@ export default function AdminDashboard() {
         </CardContent>
       </Card>
 
-      {/* Statistics Cards */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+      {/* Statistics Cards Grid */}
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {statCards.map((card, index) => (
           <motion.div
             key={card.title}

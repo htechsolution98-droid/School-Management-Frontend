@@ -3,6 +3,8 @@ import dbConnect from "@/lib/mongodb";
 import { LandingSettings } from "@/lib/models/LandingContent";
 import { fsGetSettings, fsSaveSettings } from "@/lib/fileStore";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     await dbConnect();
@@ -36,7 +38,6 @@ export async function PUT(request: Request) {
         settings.satisfactionRate = body.satisfactionRate;
         if (body.stats) settings.stats = body.stats;
         if (body.whyChooseUs) settings.whyChooseUs = body.whyChooseUs;
-        
         // About Section fields
         if (body.aboutBadge !== undefined) settings.aboutBadge = body.aboutBadge;
         if (body.aboutTitle !== undefined) settings.aboutTitle = body.aboutTitle;
@@ -70,6 +71,13 @@ export async function PUT(request: Request) {
         if (body.modulePoints !== undefined) settings.modulePoints = body.modulePoints;
         if (body.moduleScreens !== undefined) settings.moduleScreens = body.moduleScreens;
         if (body.gridModules !== undefined) settings.gridModules = body.gridModules;
+
+        // Incoming branch fields
+        if (body.mobileTabs !== undefined) settings.mobileTabs = body.mobileTabs;
+        if (body.mobileInfrastructure !== undefined) settings.mobileInfrastructure = body.mobileInfrastructure;
+        if (body.modulesHeroTags !== undefined) settings.modulesHeroTags = body.modulesHeroTags;
+        if (body.modulesHeroImage !== undefined) settings.modulesHeroImage = body.modulesHeroImage;
+        if (body.modulesGridCards !== undefined) settings.modulesGridCards = body.modulesGridCards;
       }
       await settings.save();
       return NextResponse.json({ success: true, settings, message: "Settings updated successfully!" });

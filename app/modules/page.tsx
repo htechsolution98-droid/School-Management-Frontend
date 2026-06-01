@@ -17,16 +17,32 @@ import {
   ArrowRight,
   CheckCircle2,
   Menu,
-  Sparkles,
-  Home,
-  Check,
-  ChevronDown,
+  Layers,
+  BookOpen,
+  Award,
   Shield,
   Bell,
+  Star,
+  Calendar,
+  TrendingUp,
+  Check,
+  Sparkles,
 } from "lucide-react";
 
 export default function ModulesPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [heroTags, setHeroTags] = useState<string[]>([
+    "Admission Management",
+    "Fee Management",
+    "Attendance & Geo Tracking",
+    "Homework & Assignments",
+    "Timetable Management",
+    "Online Examination",
+    "Progress Reports",
+    "Parent & Student Panels",
+  ]);
+  const [heroImage, setHeroImage] = useState("/moduleg.jpeg");
+  const [gridCards, setGridCards] = useState<any[]>([]);
 
   // Custom lagging cursor follower spring physics
   const [isTouchDevice, setIsTouchDevice] = useState(true);
@@ -178,30 +194,45 @@ export default function ModulesPage() {
     };
   }, [mouseX, mouseY]);
 
-  // Fetch dynamic ecosystem content from API
+  // Load dynamic ecosystem content from API
   useEffect(() => {
-    fetch("/api/landing/settings")
+    fetch(`/api/landing/settings?t=${Date.now()}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.settings) {
           if (data.settings.moduleHeroBadge) setHeroBadge(data.settings.moduleHeroBadge);
           if (data.settings.moduleHeroTitle) setHeroTitle(data.settings.moduleHeroTitle);
           if (data.settings.moduleHeroDesc) setHeroDesc(data.settings.moduleHeroDesc);
+          
           if (data.settings.modulePoints && data.settings.modulePoints.length > 0) {
             setModulePoints(data.settings.modulePoints);
           }
+          if (Array.isArray(data.settings.modulesHeroTags) && data.settings.modulesHeroTags.length > 0) {
+            setHeroTags(data.settings.modulesHeroTags);
+          }
+
           if (data.settings.moduleScreens && data.settings.moduleScreens.length > 0) {
             setModuleScreens(data.settings.moduleScreens);
+          } else if (data.settings.modulesHeroImage) {
+            setModuleScreens([data.settings.modulesHeroImage]);
           }
+
+          if (data.settings.modulesHeroImage) {
+            setHeroImage(data.settings.modulesHeroImage);
+          }
+
           if (data.settings.gridModules && data.settings.gridModules.length > 0) {
             setGridModules(data.settings.gridModules);
+          }
+          if (Array.isArray(data.settings.modulesGridCards) && data.settings.modulesGridCards.length > 0) {
+            setGridCards(data.settings.modulesGridCards);
           }
         }
       })
       .catch((err) => console.log("Failed to load ecosystem modules settings", err));
   }, []);
 
-  // Autoplay slider interval
+  // Autoplay slider interval for screenshots slideshow
   useEffect(() => {
     if (moduleScreens.length <= 1) return;
     const interval = setInterval(() => {
@@ -209,6 +240,38 @@ export default function ModulesPage() {
     }, 4000);
     return () => clearInterval(interval);
   }, [moduleScreens]);
+
+  // Icon registry for dynamic cards
+  const ICON_LOOKUP: Record<string, React.ReactNode> = {
+    GraduationCap: <GraduationCap className="h-6 w-6" />,
+    Users: <Users className="h-6 w-6" />,
+    CreditCard: <CreditCard className="h-6 w-6" />,
+    Brain: <Brain className="h-6 w-6" />,
+    Fingerprint: <Fingerprint className="h-6 w-6" />,
+    Laptop: <Laptop className="h-6 w-6" />,
+    MessageSquare: <MessageSquare className="h-6 w-6" />,
+    Layers: <Layers className="h-6 w-6" />,
+    BookOpen: <BookOpen className="h-6 w-6" />,
+    Award: <Award className="h-6 w-6" />,
+    Shield: <Shield className="h-6 w-6" />,
+    Bell: <Bell className="h-6 w-6" />,
+    Star: <Star className="h-6 w-6" />,
+    Calendar: <Calendar className="h-6 w-6" />,
+    TrendingUp: <TrendingUp className="h-6 w-6" />,
+  };
+
+  // Static fallback cards (used when DB cards haven't loaded yet)
+  const STATIC_FALLBACK = [
+    { title: "Student Dashboard",       emoji: "👨‍🎓", iconName: "GraduationCap", desc: "Designed to keep students organized, motivated, academic-centric, and highly engaged.",         points: ["Attendance percentage","Academic performance analytics","Timetable & upcoming exams","Homework and assignment tracker"],       hoverFrom: "#1D496C", hoverTo: "#429CE4", accentColor: "#429CE4" },
+    { title: "Parent Portal",           emoji: "👨‍👩‍👧", iconName: "Users",         desc: "Instant tracking companion providing real-time data sync, fee alerts, and direct chats.",       points: ["Real-time student updates","Fee payment alerts","Direct communication with teachers","Daily activity reports"],                hoverFrom: "#6A7626", hoverTo: "#4F581D", accentColor: "#6A7626" },
+    { title: "Online Fee Management",   emoji: "💳", iconName: "CreditCard",    desc: "Secure banking integration handling automatic reminders, instant receipts, and payouts.",       points: ["UPI/card/net banking integration","Auto fee reminders","Downloadable receipts","Pending fee analytics"],                         hoverFrom: "#FFA600", hoverTo: "#ED6708", accentColor: "#FFA600" },
+    { title: "AI-Based Features",       emoji: "🧠", iconName: "Brain",         desc: "Smarter school intelligence systems generating predictions, notes, and report remarks.",         points: ["AI chatbot for student queries","Smart performance prediction","Personalized study recommendations","AI-generated report cards/remarks"], hoverFrom: "#285E89", hoverTo: "#429CE4", accentColor: "#429CE4" },
+    { title: "Smart Attendance System", emoji: "📅", iconName: "Fingerprint",   desc: "Instant roll-calls utilizing dynamic biometric readers, QR checks, and fast parent alerts.",    points: ["Face recognition attendance","RFID/QR code attendance","Biometric integration","Instant parent SMS alerts for absentees"],       hoverFrom: "#6A7626", hoverTo: "#4F581D", accentColor: "#6A7626" },
+    { title: "Learning Management",     emoji: "📚", iconName: "Laptop",        desc: "Comprehensive virtual classrooms allowing easy study uploads, recordings, and gradings.",         points: ["Online classes integration","Study materials & notes upload","Assignment submission portal","Recorded lecture access"],              hoverFrom: "#FFA600", hoverTo: "#ED6708", accentColor: "#FFA600" },
+    { title: "Communication Features",  emoji: "💬", iconName: "MessageSquare", desc: "Integrated micro-sockets connecting chat channels, live broadcasts, and meet systems.",           points: ["Teacher-parent chat","Broadcast messaging","Email/SMS integration","Video meeting integration"],                                   hoverFrom: "#1D496C", hoverTo: "#FFA600", accentColor: "#1D496C" },
+  ];
+
+  const activeCards = gridCards.length > 0 ? gridCards : STATIC_FALLBACK;
 
   return (
     <div className="flex min-h-screen flex-col bg-white text-slate-800 overflow-x-clip relative font-sans">
@@ -335,7 +398,7 @@ export default function ModulesPage() {
 
                 {/* 2-column feature tag list */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
-                  {modulePoints.map((feat, index) => (
+                  {heroTags.map((feat, index) => (
                     <motion.div
                       key={index}
                       initial={{ opacity: 0, x: -10 }}
@@ -401,10 +464,10 @@ export default function ModulesPage() {
                       </div>
                     </div>
 
-                    {/* Content Image rendering /module-bg.png */}
+                    {/* Content Image rendering with autoplaying slider support */}
                     <div className="w-full aspect-[16/10] overflow-hidden bg-slate-900 relative rounded-b-2xl flex items-center justify-center">
                       <AnimatePresence mode="wait">
-                        {moduleScreens.length > 0 ? (
+                        {moduleScreens.length > 0 && moduleScreens[currentSlideIndex] ? (
                           <motion.img 
                             key={currentSlideIndex}
                             src={moduleScreens[currentSlideIndex]} 
@@ -413,6 +476,17 @@ export default function ModulesPage() {
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 1.05 }}
                             transition={{ duration: 0.5 }}
+                            onError={(e) => {
+                              if (heroImage && moduleScreens[currentSlideIndex] !== heroImage) {
+                                setModuleScreens([heroImage]);
+                              }
+                            }}
+                            className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
+                          />
+                        ) : heroImage ? (
+                          <img 
+                            src={heroImage} 
+                            alt="VidyaSanchalan Modules dashboard mockup"
                             className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
                           />
                         ) : (
@@ -479,94 +553,126 @@ export default function ModulesPage() {
 
           {/* Interactive Dynamic Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {gridModules.map((mod, idx) => {
-              const dynamicStyles = [
-                {
-                  hoverStyle: "hover:bg-gradient-to-br hover:from-[#1D496C] hover:via-[#285E89] hover:to-[#429CE4] hover:text-white hover:border-transparent hover:shadow-2xl hover:shadow-[#429CE4]/20",
-                  iconBg: "bg-[#1D496C]/10 text-[#1D496C] group-hover:bg-white/20 group-hover:text-white",
-                  checkStyle: "text-[#429CE4] group-hover:text-[#E4FF4C]"
-                },
-                {
-                  hoverStyle: "hover:bg-gradient-to-br hover:from-[#6A7626] hover:to-[#4F581D] hover:text-white hover:border-transparent hover:shadow-2xl hover:shadow-[#6A7626]/20",
-                  iconBg: "bg-[#6A7626]/10 text-[#6A7626] group-hover:bg-white/20 group-hover:text-white",
-                  checkStyle: "text-[#6A7626] group-hover:text-[#E4FF4C]"
-                },
-                {
-                  hoverStyle: "hover:bg-gradient-to-br hover:from-[#FFA600] hover:to-[#ED6708] hover:text-white hover:border-transparent hover:shadow-2xl hover:shadow-[#FFA600]/20",
-                  iconBg: "bg-[#FFA600]/10 text-[#FFA600] group-hover:bg-white/20 group-hover:text-white",
-                  checkStyle: "text-[#FFA600] group-hover:text-[#E4FF4C]"
-                },
-                {
-                  hoverStyle: "hover:bg-gradient-to-br hover:from-[#285E89] hover:to-[#429CE4] hover:text-white hover:border-transparent hover:shadow-2xl hover:shadow-[#429CE4]/20",
-                  iconBg: "bg-[#285E89]/10 text-[#285E89] group-hover:bg-white/20 group-hover:text-white",
-                  checkStyle: "text-[#429CE4] group-hover:text-[#E4FF4C]"
-                }
-              ];
-              const styles = dynamicStyles[idx % dynamicStyles.length];
-              const isLastRowSpan = idx === gridModules.length - 1 && gridModules.length % 3 === 1;
-              const isTwoLeftSpan = idx >= gridModules.length - 2 && gridModules.length % 3 === 2;
+            {(() => {
+              const cardsToRender = gridCards.length > 0 ? gridCards : gridModules;
+              return cardsToRender.map((mod: any, idx: number) => {
+                const dynamicStyles = [
+                  {
+                    hoverStyle: "hover:bg-gradient-to-br hover:from-[#1D496C] hover:via-[#285E89] hover:to-[#429CE4] hover:text-white hover:border-transparent hover:shadow-2xl hover:shadow-[#429CE4]/20",
+                    iconBg: "bg-[#1D496C]/10 text-[#1D496C] group-hover:bg-white/20 group-hover:text-white",
+                    checkStyle: "text-[#429CE4] group-hover:text-[#E4FF4C]"
+                  },
+                  {
+                    hoverStyle: "hover:bg-gradient-to-br hover:from-[#6A7626] hover:to-[#4F581D] hover:text-white hover:border-transparent hover:shadow-2xl hover:shadow-[#6A7626]/20",
+                    iconBg: "bg-[#6A7626]/10 text-[#6A7626] group-hover:bg-white/20 group-hover:text-white",
+                    checkStyle: "text-[#6A7626] group-hover:text-[#E4FF4C]"
+                  },
+                  {
+                    hoverStyle: "hover:bg-gradient-to-br hover:from-[#FFA600] hover:to-[#ED6708] hover:text-white hover:border-transparent hover:shadow-2xl hover:shadow-[#FFA600]/20",
+                    iconBg: "bg-[#FFA600]/10 text-[#FFA600] group-hover:bg-white/20 group-hover:text-white",
+                    checkStyle: "text-[#FFA600] group-hover:text-[#E4FF4C]"
+                  },
+                  {
+                    hoverStyle: "hover:bg-gradient-to-br hover:from-[#285E89] hover:to-[#429CE4] hover:text-white hover:border-transparent hover:shadow-2xl hover:shadow-[#429CE4]/20",
+                    iconBg: "bg-[#285E89]/10 text-[#285E89] group-hover:bg-white/20 group-hover:text-white",
+                    checkStyle: "text-[#429CE4] group-hover:text-[#E4FF4C]"
+                  }
+                ];
+                const styles = dynamicStyles[idx % dynamicStyles.length];
+                const isLastRowSpan = idx === cardsToRender.length - 1 && cardsToRender.length % 3 === 1;
 
-              return (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: idx * 0.08 }}
-                  className={`${
-                    isLastRowSpan 
-                      ? "md:col-span-2 lg:col-span-3 lg:max-w-2xl lg:mx-auto lg:w-full" 
-                      : ""
-                  }`}
-                >
-                  <Card className={`group relative h-full border border-slate-100 bg-white/75 shadow-md rounded-[2.5rem] p-6.5 sm:p-8 transition-all duration-500 hover:-translate-y-2 cursor-pointer ${styles.hoverStyle}`}>
-                    
-                    {/* Decorative corner shape */}
-                    <div className="absolute top-0 right-0 w-[120px] h-[120px] bg-slate-50/10 rounded-full blur-2xl pointer-events-none group-hover:bg-white/10 transition-colors"></div>
+                const hasCustomHover = mod.hoverFrom && mod.hoverTo;
 
-                    <CardContent className="p-0 relative flex flex-col justify-between h-full space-y-6">
-                      
-                      {/* Header info */}
-                      <div className="space-y-4">
-                        <div className="flex justify-between items-center">
-                          <div className={`h-12 w-12 rounded-xl flex items-center justify-center border border-slate-100 shadow-sm transition-all duration-500 ${styles.iconBg}`}>
-                            {getIcon(mod.iconName || "Sparkles", "h-6 w-6")}
-                          </div>
-                          <span className="text-3xl select-none group-hover:scale-110 transition-transform duration-300">
-                            {mod.emoji || "💡"}
-                          </span>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <h3 className="text-xl sm:text-2xl font-extrabold text-[#1D496C] tracking-tight group-hover:text-white transition-colors duration-300">
-                            {mod.title}
-                          </h3>
-                          <p className="text-slate-500 text-sm leading-relaxed group-hover:text-slate-100 transition-colors duration-300 font-medium">
-                            {mod.desc}
-                          </p>
-                        </div>
-                      </div>
+                return (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: idx * 0.08 }}
+                    className={`${isLastRowSpan ? "md:col-span-2 lg:col-span-3 lg:max-w-2xl lg:mx-auto lg:w-full" : ""}`}
+                  >
+                    <Card
+                      className={`group relative h-full border border-slate-100 bg-white/75 shadow-md rounded-[2.5rem] p-6.5 sm:p-8 transition-all duration-500 hover:-translate-y-2 cursor-pointer overflow-hidden ${!hasCustomHover ? styles.hoverStyle : ""}`}
+                      style={hasCustomHover ? {
+                        ["--hover-from" as any]: mod.hoverFrom,
+                        ["--hover-to" as any]: mod.hoverTo,
+                      } : undefined}
+                      onMouseEnter={hasCustomHover ? e => {
+                        (e.currentTarget as HTMLElement).style.background = `linear-gradient(135deg, ${mod.hoverFrom}, ${mod.hoverTo})`;
+                        (e.currentTarget as HTMLElement).style.boxShadow = `0 25px 50px -12px ${mod.hoverFrom}33`;
+                        (e.currentTarget as HTMLElement).style.borderColor = "transparent";
+                        const textElements = (e.currentTarget as HTMLElement).querySelectorAll('.group-hover\\:text-white, .group-hover\\:text-slate-100');
+                        textElements.forEach((el: any) => el.style.color = '#ffffff');
+                      } : undefined}
+                      onMouseLeave={hasCustomHover ? e => {
+                        (e.currentTarget as HTMLElement).style.background = "";
+                        (e.currentTarget as HTMLElement).style.boxShadow = "";
+                        (e.currentTarget as HTMLElement).style.borderColor = "";
+                        const textElements = (e.currentTarget as HTMLElement).querySelectorAll('.group-hover\\:text-white, .group-hover\\:text-slate-100');
+                        textElements.forEach((el: any) => el.style.color = '');
+                      } : undefined}
+                    >
+                      {/* Decorative corner shape */}
+                      <div className="absolute top-0 right-0 w-[120px] h-[120px] bg-slate-50/10 rounded-full blur-2xl pointer-events-none group-hover:bg-white/10 transition-colors"></div>
 
-                      {/* Points grid */}
-                      {mod.points && mod.points.length > 0 && (
-                        <div className="border-t border-slate-100/60 pt-5 group-hover:border-white/10 transition-colors">
-                          <ul className="space-y-3 text-left">
-                            {mod.points.map((point: string, pIdx: number) => (
-                              <li key={pIdx} className="flex items-start gap-3 text-sm">
-                                <CheckCircle2 className={`mt-0.5 h-4.5 w-4.5 stroke-[2.5] shrink-0 transition-colors ${styles.checkStyle}`} />
-                                <span className="font-bold leading-relaxed text-slate-700 group-hover:text-slate-100 transition-colors duration-300">
-                                  {point}
+                      <CardContent className="p-0 relative flex flex-col justify-between h-full space-y-6">
+                        {/* Header info */}
+                        <div className="space-y-4">
+                          <div className="flex justify-between items-center">
+                            {hasCustomHover ? (
+                              <div
+                                className="h-12 w-12 rounded-xl flex items-center justify-center border border-slate-100 shadow-sm transition-all duration-500 text-white"
+                                style={{ background: `linear-gradient(135deg, ${mod.hoverFrom}20, ${mod.hoverFrom}40)`, color: mod.accentColor }}
+                              >
+                                <span className="group-hover:text-white transition-colors">
+                                  {ICON_LOOKUP[mod.iconName] || getIcon(mod.iconName || "Sparkles", "h-6 w-6")}
                                 </span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+                              </div>
+                            ) : (
+                              <div className={`h-12 w-12 rounded-xl flex items-center justify-center border border-slate-100 shadow-sm transition-all duration-500 ${styles.iconBg}`}>
+                                {getIcon(mod.iconName || "Sparkles", "h-6 w-6")}
+                              </div>
+                            )}
+                            <span className="text-3xl select-none group-hover:scale-110 transition-transform duration-300">
+                              {mod.emoji || "💡"}
+                            </span>
+                          </div>
 
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })}
+                          <div className="space-y-2">
+                            <h3 className="text-xl sm:text-2xl font-extrabold text-[#1D496C] tracking-tight group-hover:text-white transition-colors duration-300">
+                              {mod.title}
+                            </h3>
+                            <p className="text-slate-500 text-sm leading-relaxed group-hover:text-slate-100 transition-colors duration-300 font-medium">
+                              {mod.desc}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Points grid */}
+                        {mod.points && mod.points.length > 0 && (
+                          <div className="border-t border-slate-100/60 pt-5 group-hover:border-white/10 transition-colors">
+                            <ul className="space-y-3 text-left">
+                              {mod.points.map((point: string, pIdx: number) => (
+                                <li key={pIdx} className="flex items-start gap-3 text-sm">
+                                  {hasCustomHover ? (
+                                    <CheckCircle2 className="mt-0.5 h-4 w-4 stroke-[2.5] shrink-0 transition-colors group-hover:text-[#E4FF4C]" style={{ color: mod.accentColor }} />
+                                  ) : (
+                                    <CheckCircle2 className={`mt-0.5 h-4.5 w-4.5 stroke-[2.5] shrink-0 transition-colors ${styles.checkStyle}`} />
+                                  )}
+                                  <span className="font-bold leading-relaxed text-slate-700 group-hover:text-slate-100 transition-colors duration-300">
+                                    {point}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              });
+            })()}
           </div>
 
           {/* Bottom CTA Block */}

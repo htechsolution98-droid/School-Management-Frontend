@@ -91,6 +91,40 @@ const LandingSettingsSchema = new Schema({
       points: { type: [String], default: [] }
     }
   ],
+  mobileTabs: [
+    {
+      tabId: { type: String, required: true },
+      badge: { type: String, required: true },
+      title: { type: String, required: true },
+      desc: { type: String, required: true },
+      points: [{ type: String }],
+      color: { type: String, default: "from-[#429CE4] to-[#1D496C]" },
+      accent: { type: String, default: "text-[#429CE4] bg-white/10 border-[#429CE4]/20" }
+    }
+  ],
+  mobileInfrastructure: [
+    {
+      title: { type: String, required: true },
+      desc: { type: String, required: true },
+      iconName: { type: String, required: true },
+      hoverBg: { type: String, default: "hover:bg-[#429CE4] hover:border-[#429CE4] hover:shadow-xl hover:shadow-[#429CE4]/20" }
+    }
+  ],
+  modulesHeroTags: [{ type: String }],
+  modulesHeroImage: { type: String, default: "/moduleg.jpeg" },
+  modulesGridCards: [
+    {
+      title: { type: String, required: true },
+      emoji: { type: String, default: "📋" },
+      iconName: { type: String, default: "Layers" },
+      desc: { type: String, required: true },
+      points: [{ type: String }],
+      hoverFrom: { type: String, default: "#1D496C" },
+      hoverTo: { type: String, default: "#429CE4" },
+      accentColor: { type: String, default: "#429CE4" },
+      order: { type: Number, default: 0 }
+    }
+  ],
   isSeeded: { type: Boolean, default: false }
 }, { timestamps: true });
 
@@ -146,7 +180,20 @@ const InquirySchema = new Schema({
   isRead: { type: Boolean, default: false }
 }, { timestamps: true });
 
-// Export Models (prevent OverwriteModelError in Next.js serverless environment)
+// Export Models (prevent OverwriteModelError in Next.js hot-reloading Mongoose cache)
+if (mongoose.models.LandingSettings) {
+  const schemaPaths = mongoose.models.LandingSettings.schema.paths;
+  if (
+    !schemaPaths.mobileInfrastructure ||
+    !schemaPaths.mobileTabs ||
+    !schemaPaths.modulesHeroTags ||
+    !schemaPaths.modulesHeroImage ||
+    !schemaPaths.modulesGridCards
+  ) {
+    delete mongoose.models.LandingSettings;
+  }
+}
+
 export const LandingSettings = mongoose.models.LandingSettings || mongoose.model("LandingSettings", LandingSettingsSchema);
 export const Feature = mongoose.models.Feature || mongoose.model("Feature", FeatureSchema);
 export const Testimonial = mongoose.models.Testimonial || mongoose.model("Testimonial", TestimonialSchema);
