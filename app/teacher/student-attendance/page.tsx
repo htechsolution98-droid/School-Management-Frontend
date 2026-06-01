@@ -24,8 +24,8 @@ import {
 import {
   getStudentsForAttendance,
   submitStudentAttendance,
-  type StudentAttendanceListResponse,
-} from "@/lib/forms";
+} from "@/lib/teacher";
+import type { StudentAttendanceListResponse } from "@/types/teacher";
 
 // ─── Font ─────────────────────────────────────────────────────────────────────
 

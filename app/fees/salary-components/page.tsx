@@ -11,7 +11,7 @@ import {
   createSalaryComponent,
   getSalaryComponents,
   type SalaryComponent,
-} from "@/lib/forms";
+} from "@/lib/fees";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

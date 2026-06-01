@@ -15,7 +15,7 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
-import { getSchoolClasses, saveSchoolClasses, deleteSchoolClass, type SchoolClass } from "@/lib/forms"
+import { getSchoolClasses, saveSchoolClasses, deleteSchoolClass, type SchoolClass } from "@/lib/principal"
 import { SCHOOL_CLASS_OPTIONS } from "@/lib/form-builder-config"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -49,6 +49,8 @@ export default function ClassesPage() {
   const [deleteTarget, setDeleteTarget] = useState<SchoolClass | null>(null)
   const [error, setError] = useState<string | null>(null)
 
+  // ── ALL API LOGIC UNCHANGED ──────────────────────────────────────────────────
+
   const fetchClasses = async () => {
     setIsLoading(true)
     setError(null)
@@ -60,7 +62,6 @@ export default function ClassesPage() {
         return indexA - indexB
       })
       setExistingClasses(sorted)
-      // Pre-select classes that exist in our predefined list (backend returns values)
       const values = data.map(c => c.school_class)
       const validValues = SCHOOL_CLASS_OPTIONS.map(o => o.value)
       setSelectedClasses(values.filter(val => validValues.includes(val)))
@@ -96,10 +97,9 @@ export default function ClassesPage() {
 
     setIsSaving(true)
     try {
-      // Filter out classes that are already active (backend only wants new ones)
       const activeValues = existingClasses.map(c => c.school_class)
       const newOnly = selectedClasses.filter(val => !activeValues.includes(val))
-      
+
       if (newOnly.length === 0) {
         toast.info("No new classes to add")
         setIsSaving(false)
@@ -108,7 +108,7 @@ export default function ClassesPage() {
 
       await saveSchoolClasses(newOnly)
       toast.success("New school classes added successfully")
-      await fetchClasses() // Refresh the list
+      await fetchClasses()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to save classes")
     } finally {
@@ -117,18 +117,14 @@ export default function ClassesPage() {
   }
 
   const selectAll = () => {
-    // Current active classes (must stay selected)
     const activeValues = existingClasses.map(c => c.school_class)
-    // Add all other options that are not already active
     const selectableValues = SCHOOL_CLASS_OPTIONS
       .map(o => o.value)
       .filter(val => !activeValues.includes(val))
-    
     setSelectedClasses([...activeValues, ...selectableValues])
   }
 
   const deselectAll = () => {
-    // Only keep classes that are already active (the disabled ones)
     const existingValues = existingClasses.map(c => c.school_class)
     setSelectedClasses(existingValues)
   }
@@ -153,29 +149,41 @@ export default function ClassesPage() {
     }
   }
 
+  // ── RENDER ───────────────────────────────────────────────────────────────────
+
   return (
-    <div className="flex-1 space-y-6 p-8 pt-6 bg-white min-h-screen">
-      <div className="flex items-center justify-between">
+    <div className="flex-1 space-y-4 sm:space-y-6 p-4 sm:p-8 sm:pt-6 bg-white min-h-screen">
+
+      {/* ── Header ── */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
-            <School className="h-8 w-8 text-primary" />
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-2 sm:gap-3">
+            <School className="h-6 w-6 sm:h-8 sm:w-8 text-primary flex-shrink-0" />
             Class Management
           </h2>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">
             Configure the specific classes available in your school.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+
+        {/* Action buttons — stack on mobile, row on desktop */}
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           <Button
             variant="outline"
             onClick={fetchClasses}
             disabled={isLoading || isSaving}
-            className="hidden sm:flex"
+            size="sm"
+            className="flex-1 sm:flex-none"
           >
             <RefreshCw className={cn("mr-2 h-4 w-4", isLoading && "animate-spin")} />
             Refresh
           </Button>
-          <Button onClick={handleSave} disabled={isLoading || isSaving || selectedClasses.length === 0}>
+          <Button
+            onClick={handleSave}
+            disabled={isLoading || isSaving || selectedClasses.length === 0}
+            size="sm"
+            className="flex-1 sm:flex-none"
+          >
             {isSaving ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
@@ -188,6 +196,7 @@ export default function ClassesPage() {
 
       <Separator />
 
+      {/* ── Error ── */}
       {error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -196,21 +205,24 @@ export default function ClassesPage() {
         </Alert>
       )}
 
-      <div className="grid gap-6 md:grid-cols-7 items-stretch">
-        {/* Summary Area */}
+      {/* ── Main Grid — stacks on mobile ── */}
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-7 items-stretch">
+
+        {/* ── Created Classes (left / top on mobile) ── */}
         <div className="md:col-span-3 flex flex-col">
           <Card className="shadow-sm border-slate-200 flex flex-col h-full">
-            <CardHeader className="pb-3 px-6 pt-6">
-              <CardTitle className="text-lg">Created Classes</CardTitle>
-              <CardDescription>
+            <CardHeader className="pb-3 px-4 sm:px-6 pt-4 sm:pt-6">
+              <CardTitle className="text-base sm:text-lg">Created Classes</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">
                 List of classes currently active in the school
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex-1 flex flex-col px-6 pb-6">
-              <ScrollArea className="flex-1">
+            <CardContent className="flex-1 flex flex-col px-4 sm:px-6 pb-4 sm:pb-6">
+              <ScrollArea className="flex-1 max-h-[280px] sm:max-h-none">
                 {existingClasses.length > 0 ? (
                   <div className="rounded-md border border-slate-200 overflow-hidden">
-                    <table className="w-full text-sm">
+                    {/* Desktop table */}
+                    <table className="w-full text-sm hidden sm:table">
                       <thead className="bg-slate-50 border-b border-slate-200 text-slate-600">
                         <tr>
                           <th className="px-4 py-2.5 text-left font-semibold">#</th>
@@ -224,9 +236,7 @@ export default function ClassesPage() {
                           return (
                             <tr key={index} className="hover:bg-primary/5 transition-colors group">
                               <td className="px-4 py-3 text-slate-400 font-mono text-xs">{index + 1}</td>
-                              <td className="px-4 py-3 text-slate-700 font-medium">
-                                {label}
-                              </td>
+                              <td className="px-4 py-3 text-slate-700 font-medium">{label}</td>
                               <td className="px-4 py-3 text-right">
                                 <Button
                                   variant="ghost"
@@ -242,9 +252,32 @@ export default function ClassesPage() {
                         })}
                       </tbody>
                     </table>
+
+                    {/* Mobile list */}
+                    <div className="sm:hidden divide-y divide-slate-100">
+                      {existingClasses.map((c, index) => {
+                        const label = SCHOOL_CLASS_OPTIONS.find(o => o.value === c.school_class)?.label || c.school_class
+                        return (
+                          <div key={index} className="flex items-center justify-between px-3 py-3 hover:bg-primary/5 transition-colors">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="text-slate-400 font-mono text-xs w-5 flex-shrink-0">{index + 1}</span>
+                              <span className="text-slate-700 font-medium text-sm truncate">{label}</span>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteRequest(c)}
+                              className="h-8 w-8 text-slate-400 hover:text-destructive hover:bg-destructive/10 flex-shrink-0 ml-2"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )
+                      })}
+                    </div>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-20 text-center">
+                  <div className="flex flex-col items-center justify-center py-12 sm:py-20 text-center">
                     <AlertCircle className="h-10 w-10 text-slate-200 mb-3" />
                     <p className="text-sm text-slate-400">No classes created yet</p>
                   </div>
@@ -254,45 +287,47 @@ export default function ClassesPage() {
           </Card>
         </div>
 
-        {/* Selection Area */}
+        {/* ── Select Classes (right / bottom on mobile) ── */}
         <Card className="md:col-span-4 shadow-sm border-slate-200 flex flex-col h-full">
-          <CardHeader className="pb-3 px-6 pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Select Classes</CardTitle>
-                <CardDescription>
+          <CardHeader className="pb-3 px-4 sm:px-6 pt-4 sm:pt-6">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <CardTitle className="text-base sm:text-lg">Select Classes</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
                   Choose the classes to be active for your school
                 </CardDescription>
               </div>
-              <div className="flex gap-2">
-                <Button variant="ghost" size="sm" onClick={selectAll} className="text-xs h-8">
-                  Select All
+              <div className="flex gap-1 sm:gap-2 flex-shrink-0">
+                <Button variant="ghost" size="sm" onClick={selectAll} className="text-xs h-8 px-2 sm:px-3">
+                  All
                 </Button>
-                <Button variant="ghost" size="sm" onClick={deselectAll} className="text-xs h-8 text-destructive hover:text-destructive">
-                  Clear All
+                <Button variant="ghost" size="sm" onClick={deselectAll} className="text-xs h-8 px-2 sm:px-3 text-destructive hover:text-destructive">
+                  Clear
                 </Button>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="flex-1 flex flex-col space-y-4 px-6 pb-6">
+          <CardContent className="flex-1 flex flex-col space-y-3 sm:space-y-4 px-4 sm:px-6 pb-4 sm:pb-6">
+            {/* Search */}
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search classes..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 bg-slate-50 border-slate-200"
+                className="pl-9 bg-slate-50 border-slate-200 text-sm"
               />
             </div>
 
-            <ScrollArea className="flex-1 h-[350px] pr-4">
+            {/* Class grid */}
+            <ScrollArea className="flex-1 h-[300px] sm:h-[350px] pr-1 sm:pr-4">
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center h-full py-20 text-muted-foreground">
                   <Loader2 className="h-10 w-10 animate-spin mb-4 text-primary/40" />
-                  <p>Loading available classes...</p>
+                  <p className="text-sm">Loading available classes...</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 pb-4">
                   {filteredOptions.map((option) => {
                     const isSelected = selectedClasses.includes(option.value)
                     const isAlreadyCreated = existingClasses.some(c => c.school_class === option.value)
@@ -314,7 +349,7 @@ export default function ClassesPage() {
                           checked={isSelected}
                           onCheckedChange={() => !isAlreadyCreated && toggleClass(option.value)}
                           disabled={isAlreadyCreated}
-                          className="rounded-md"
+                          className="rounded-md flex-shrink-0"
                         />
                         <div className="flex-1 min-w-0">
                           <p className={cn(
@@ -340,19 +375,25 @@ export default function ClassesPage() {
         </Card>
       </div>
 
+      {/* ── Delete Confirm Dialog ── */}
       <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="w-[calc(100%-2rem)] max-w-[425px] rounded-xl sm:rounded-lg">
           <DialogHeader>
             <DialogTitle>Delete Class</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete <span className="font-semibold text-slate-900">{SCHOOL_CLASS_OPTIONS.find(o => o.value === deleteTarget?.school_class)?.label || deleteTarget?.school_class}</span>? This action cannot be undone.
+              Are you sure you want to delete{" "}
+              <span className="font-semibold text-slate-900">
+                {SCHOOL_CLASS_OPTIONS.find(o => o.value === deleteTarget?.school_class)?.label || deleteTarget?.school_class}
+              </span>
+              ? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter className="flex-col-reverse sm:flex-row gap-2 sm:gap-0">
             <Button
               variant="outline"
               onClick={() => setDeleteTarget(null)}
               disabled={isDeleting}
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
@@ -360,6 +401,7 @@ export default function ClassesPage() {
               variant="destructive"
               onClick={confirmDelete}
               disabled={isDeleting}
+              className="w-full sm:w-auto"
             >
               {isDeleting ? (
                 <>

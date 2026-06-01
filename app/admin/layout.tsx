@@ -16,6 +16,12 @@ import {
   MessageSquare,
   ChevronRight,
   TrendingUp,
+  Smartphone,
+  Cpu,
+  CheckSquare,
+  LayoutGrid,
+  HelpCircle,
+  ListCollapse,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -106,9 +112,64 @@ export default function AdminLayout({
       icon: <CreditCard className="h-5 w-5" />,
     },
     {
+      name: "Why Choose Us",
+      href: "/admin/why-choose-us",
+      icon: <Sparkles className="h-5 w-5" />,
+    },
+    {
+      name: "Stats Manager",
+      href: "/admin/stats",
+      icon: <TrendingUp className="h-5 w-5" />,
+    },
+    {
+      name: "Mobile App Roles",
+      href: "/admin/mobile-app",
+      icon: <Smartphone className="h-5 w-5" />,
+    },
+    {
+      name: "Mobile Infrastructure",
+      href: "/admin/mobile-infrastructure",
+      icon: <Cpu className="h-5 w-5" />,
+    },
+    {
+      name: "Modules Hero Tags",
+      href: "/admin/modules-hero-tags",
+      icon: <CheckSquare className="h-5 w-5" />,
+    },
+    {
+      name: "Modules Grid Cards",
+      href: "/admin/modules-grid",
+      icon: <LayoutGrid className="h-5 w-5" />,
+    },
+    {
       name: "Testimonials Manager",
       href: "/admin/testimonials",
       icon: <Users className="h-5 w-5" />,
+    },
+    {
+      name: "About Manager",
+      href: "/admin/about",
+      icon: <Sparkles className="h-5 w-5" />,
+    },
+    {
+      name: "Why Choose Us",
+      href: "/admin/why-choose",
+      icon: <HelpCircle className="h-5 w-5" />,
+    },
+    {
+      name: "Counters Manager",
+      href: "/admin/stats",
+      icon: <TrendingUp className="h-5 w-5" />,
+    },
+    {
+      name: "Mobile Ecosystem",
+      href: "/admin/mobile",
+      icon: <Smartphone className="h-5 w-5" />,
+    },
+    {
+      name: "Capabilities Manager",
+      href: "/admin/capabilities",
+      icon: <ListCollapse className="h-5 w-5" />,
     },
     {
       name: "Contact Inquiries",

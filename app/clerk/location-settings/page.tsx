@@ -19,43 +19,11 @@ import {
   Info,
   Trash2,
 } from "lucide-react";
-import { fetchWithAuth } from "@/lib/auth";
-import { saveLocationSettings } from "@/lib/forms";
-
-const API_BASE = "https://school-management-system-sms-z8kv.onrender.com/api";
-const GET_LOCATION_URL = `${API_BASE}/get-location/`;
-
-// ─── API helpers ──────────────────────────────────────────────────────────────
-
-async function getLocationSettings() {
-  const response = await fetchWithAuth(GET_LOCATION_URL);
-  if (!response.ok) {
-    if (response.status === 404) return null;
-    let message = "Failed to fetch location settings.";
-    try {
-      const err = await response.json();
-      message = err?.detail || err?.message || message;
-    } catch {}
-    throw new Error(message);
-  }
-  const data = await response.json();
-  // Handle array response (list endpoint) or single object
-  if (Array.isArray(data)) return data.length > 0 ? data[0] : null;
-  return data;
-}
-
-async function deleteLocationSettings(id: number | string) {
-  const url = id ? `${GET_LOCATION_URL}${id}/` : GET_LOCATION_URL;
-  const response = await fetchWithAuth(url, { method: "DELETE" });
-  if (!response.ok && response.status !== 204) {
-    let message = "Failed to delete location settings.";
-    try {
-      const err = await response.json();
-      message = err?.detail || err?.message || message;
-    } catch {}
-    throw new Error(message);
-  }
-}
+import {
+  deleteLocationSettings,
+  getLocationSettings,
+  saveLocationSettings,
+} from "@/lib/clerk";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

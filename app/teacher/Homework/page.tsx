@@ -2,12 +2,7 @@
 
 import React, { useState } from "react";
 import {
-  LayoutDashboard,
-  ClipboardList,
-  Users,
   Search,
-  Bell,
-  Settings2,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -23,9 +18,9 @@ import {
   CheckCircle,
   Clock,
   AlertCircle,
-  BookOpen,
+  ClipboardList,
+  Users,
   Filter,
-  LogOut,
   X,
   Check,
 } from "lucide-react";
@@ -199,418 +194,6 @@ const colorMap: Record<string, { bg: string; text: string; icon: string }> = {
   pink: { bg: "#fce7f3", text: "#db2777", icon: "#db2777" },
 };
 
-// ─── Sidebar ──────────────────────────────────────────────────────────────────
-
-const sidebarLinks = [
-  { title: "Dashboard", href: "/teacher", icon: LayoutDashboard },
-  { title: "Attendance", href: "/teacher/attendance", icon: ClipboardList },
-  {
-    title: "Homework",
-    href: "/teacher/homework",
-    icon: BookOpen,
-    children: [
-      { title: "All Homework", href: "/teacher/homework" },
-      { title: "Create Homework", href: "/teacher/homework/create" },
-      { title: "Submissions", href: "/teacher/homework/submissions" },
-    ],
-  },
-  { title: "Students", href: "/teacher/students", icon: Users },
-];
-
-function Sidebar({
-  activeHref,
-  onNav,
-}: {
-  activeHref: string;
-  onNav: (href: string) => void;
-}) {
-  const [openGroup, setOpenGroup] = useState<string | null>("Homework");
-
-  return (
-    <aside
-      style={{
-        width: 220,
-        minHeight: "100vh",
-        background: "#0f0f2d",
-        display: "flex",
-        flexDirection: "column",
-        flexShrink: 0,
-      }}
-    >
-      {/* Logo */}
-      <div style={{ padding: "20px 20px 16px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 10,
-              background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <BookOpen size={18} color="#fff" />
-          </div>
-          <div>
-            <div
-              style={{
-                fontSize: 15,
-                fontWeight: 700,
-                color: "#fff",
-                lineHeight: 1.2,
-              }}
-            >
-              Edu<span style={{ color: "#818cf8" }}>Manage</span>
-            </div>
-            <div
-              style={{
-                fontSize: 10,
-                color: "#64748b",
-                letterSpacing: "0.05em",
-              }}
-            >
-              School Management
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Role Badge */}
-      <div style={{ padding: "0 12px 16px" }}>
-        <div
-          style={{
-            background: "#1e1b4b",
-            borderRadius: 10,
-            padding: "10px 12px",
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            border: "1px solid #312e81",
-          }}
-        >
-          <div
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 8,
-              background: "#6366f1",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 12,
-              fontWeight: 700,
-              color: "#fff",
-            }}
-          >
-            SA
-          </div>
-          <div>
-            <div
-              style={{
-                fontSize: 9,
-                color: "#818cf8",
-                letterSpacing: "0.08em",
-                fontWeight: 600,
-              }}
-            >
-              CURRENT ROLE
-            </div>
-            <div style={{ fontSize: 13, color: "#fff", fontWeight: 600 }}>
-              Teacher
-            </div>
-          </div>
-          <Settings2
-            size={14}
-            color="#64748b"
-            style={{ marginLeft: "auto", cursor: "pointer" }}
-          />
-        </div>
-      </div>
-
-      <div style={{ padding: "0 12px 8px" }}>
-        <div
-          style={{
-            fontSize: 9,
-            color: "#475569",
-            letterSpacing: "0.1em",
-            fontWeight: 600,
-            paddingLeft: 8,
-          }}
-        >
-          NAVIGATION
-        </div>
-      </div>
-
-      {/* Nav Links */}
-      <nav
-        style={{
-          flex: 1,
-          padding: "0 12px",
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-        }}
-      >
-        {sidebarLinks.map((link) => {
-          const isGroupActive = link.children
-            ? link.children.some((c) => c.href === activeHref)
-            : activeHref === link.href;
-          const isGroupOpen = openGroup === link.title;
-          const Icon = link.icon;
-
-          return (
-            <div key={link.href}>
-              <button
-                onClick={() => {
-                  if (link.children) {
-                    setOpenGroup(isGroupOpen ? null : link.title);
-                  } else {
-                    onNav(link.href);
-                  }
-                }}
-                style={{
-                  width: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  padding: "9px 12px",
-                  borderRadius: 8,
-                  border: "none",
-                  background:
-                    isGroupActive && !link.children ? "#312e81" : "transparent",
-                  color: isGroupActive ? "#fff" : "#94a3b8",
-                  fontSize: 13,
-                  fontWeight: isGroupActive ? 600 : 400,
-                  cursor: "pointer",
-                  textAlign: "left",
-                  transition: "background 0.15s",
-                }}
-                onMouseEnter={(e) => {
-                  if (!isGroupActive || link.children)
-                    (e.currentTarget as HTMLButtonElement).style.background =
-                      "#1e293b";
-                }}
-                onMouseLeave={(e) => {
-                  if (!isGroupActive || link.children)
-                    (e.currentTarget as HTMLButtonElement).style.background =
-                      isGroupActive && !link.children
-                        ? "#312e81"
-                        : "transparent";
-                }}
-              >
-                <Icon size={17} />
-                <span style={{ flex: 1 }}>{link.title}</span>
-                {link.children && (
-                  <ChevronDown
-                    size={14}
-                    style={{
-                      transform: isGroupOpen
-                        ? "rotate(180deg)"
-                        : "rotate(0deg)",
-                      transition: "transform 0.2s",
-                    }}
-                  />
-                )}
-              </button>
-
-              {link.children && isGroupOpen && (
-                <div
-                  style={{
-                    marginLeft: 28,
-                    marginTop: 2,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 1,
-                  }}
-                >
-                  {link.children.map((child) => (
-                    <button
-                      key={child.href}
-                      onClick={() => onNav(child.href)}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 8,
-                        padding: "7px 12px",
-                        borderRadius: 6,
-                        border: "none",
-                        background:
-                          activeHref === child.href ? "#1e1b4b" : "transparent",
-                        color:
-                          activeHref === child.href ? "#818cf8" : "#64748b",
-                        fontSize: 12,
-                        fontWeight: activeHref === child.href ? 600 : 400,
-                        cursor: "pointer",
-                        textAlign: "left",
-                        width: "100%",
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: 5,
-                          height: 5,
-                          borderRadius: "50%",
-                          background:
-                            activeHref === child.href ? "#818cf8" : "#334155",
-                        }}
-                      />
-                      {child.title}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </nav>
-
-      {/* Sign Out */}
-      <div style={{ padding: "12px 12px 20px" }}>
-        <button
-          style={{
-            width: "100%",
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            padding: "9px 12px",
-            borderRadius: 8,
-            border: "none",
-            background: "transparent",
-            color: "#64748b",
-            fontSize: 13,
-            cursor: "pointer",
-          }}
-        >
-          <LogOut size={17} />
-          Sign Out
-        </button>
-      </div>
-    </aside>
-  );
-}
-
-// ─── Topbar ───────────────────────────────────────────────────────────────────
-
-function Topbar({ breadcrumbs }: { breadcrumbs: string[] }) {
-  return (
-    <header
-      style={{
-        height: 60,
-        background: "#fff",
-        borderBottom: "1px solid #f1f5f9",
-        display: "flex",
-        alignItems: "center",
-        padding: "0 28px",
-        gap: 16,
-        position: "sticky",
-        top: 0,
-        zIndex: 10,
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1 }}>
-        {breadcrumbs.map((b, i) => (
-          <React.Fragment key={b}>
-            <span
-              style={{
-                fontSize: 13,
-                color: i === breadcrumbs.length - 1 ? "#1e293b" : "#94a3b8",
-                fontWeight: i === breadcrumbs.length - 1 ? 600 : 400,
-              }}
-            >
-              {b}
-            </span>
-            {i < breadcrumbs.length - 1 && (
-              <ChevronRight size={14} color="#cbd5e1" />
-            )}
-          </React.Fragment>
-        ))}
-      </div>
-
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          background: "#f8fafc",
-          border: "1px solid #e2e8f0",
-          borderRadius: 8,
-          padding: "0 12px",
-          height: 36,
-        }}
-      >
-        <Search size={14} color="#94a3b8" />
-        <input
-          placeholder="Quick search..."
-          style={{
-            border: "none",
-            background: "transparent",
-            fontSize: 13,
-            color: "#1e293b",
-            outline: "none",
-            width: 180,
-          }}
-        />
-      </div>
-
-      <button
-        style={{
-          position: "relative",
-          width: 36,
-          height: 36,
-          borderRadius: 8,
-          border: "1px solid #e2e8f0",
-          background: "#fff",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: "pointer",
-        }}
-      >
-        <Bell size={16} color="#64748b" />
-        <span
-          style={{
-            position: "absolute",
-            top: 6,
-            right: 6,
-            width: 7,
-            height: 7,
-            borderRadius: "50%",
-            background: "#ef4444",
-            border: "2px solid #fff",
-          }}
-        />
-      </button>
-
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <div
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 10,
-            background: "#6366f1",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 12,
-            fontWeight: 700,
-            color: "#fff",
-          }}
-        >
-          SA
-        </div>
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "#1e293b" }}>
-            Admin
-          </div>
-          <div style={{ fontSize: 11, color: "#94a3b8" }}>Teacher</div>
-        </div>
-      </div>
-    </header>
-  );
-}
-
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: string }) {
@@ -632,6 +215,7 @@ function StatusBadge({ status }: { status: string }) {
         background: s.bg,
         color: s.color,
         whiteSpace: "nowrap",
+        display: "inline-block",
       }}
     >
       {status}
@@ -639,7 +223,7 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-// ─── Homework Card (Left List) ────────────────────────────────────────────────
+// ─── Homework Card ────────────────────────────────────────────────────────────
 
 function HomeworkCard({
   hw,
@@ -666,6 +250,7 @@ function HomeworkCard({
         display: "flex",
         gap: 12,
         alignItems: "flex-start",
+        boxSizing: "border-box",
       }}
     >
       <div
@@ -714,6 +299,8 @@ function HomeworkCard({
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 4,
           }}
         >
           <span style={{ fontSize: 11, color: "#ef4444", fontWeight: 500 }}>
@@ -728,6 +315,156 @@ function HomeworkCard({
         </div>
       </div>
     </button>
+  );
+}
+
+// ─── Mobile Submission Card ───────────────────────────────────────────────────
+
+function MobileSubmissionCard({
+  sub,
+  onMark,
+}: {
+  sub: Submission;
+  onMark: () => void;
+}) {
+  return (
+    <div
+      style={{
+        background: "#fff",
+        border: "1.5px solid #f1f5f9",
+        borderRadius: 12,
+        padding: "14px 16px",
+        display: "flex",
+        flexDirection: "column",
+        gap: 10,
+      }}
+    >
+      {/* Top row */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: "50%",
+              background: sub.avatarColor,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 12,
+              fontWeight: 700,
+              color: "#fff",
+              flexShrink: 0,
+            }}
+          >
+            {sub.initials}
+          </div>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "#1e293b" }}>
+              {sub.name}
+            </div>
+            {sub.submittedAt && (
+              <div style={{ fontSize: 11, color: "#94a3b8" }}>
+                {sub.submittedAt.replace("\n", " ")}
+              </div>
+            )}
+          </div>
+        </div>
+        <StatusBadge status={sub.status} />
+      </div>
+
+      {/* Details row */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 8,
+        }}
+      >
+        {sub.attachment ? (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 5,
+              color: "#ef4444",
+              fontSize: 12,
+            }}
+          >
+            <FileText size={13} />
+            <span>{sub.attachment}</span>
+            <span style={{ color: "#94a3b8", fontSize: 11 }}>
+              ({sub.attachmentSize})
+            </span>
+          </div>
+        ) : (
+          <span style={{ color: "#cbd5e1", fontSize: 12 }}>No attachment</span>
+        )}
+
+        {sub.marks !== null ? (
+          <span style={{ fontSize: 12, fontWeight: 600, color: "#6366f1" }}>
+            {sub.marks}/100
+          </span>
+        ) : (
+          <span style={{ fontSize: 12, color: "#cbd5e1" }}>No marks</span>
+        )}
+      </div>
+
+      {/* Action row */}
+      {sub.status !== "Pending" && (
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            style={{
+              flex: 1,
+              padding: "8px",
+              borderRadius: 8,
+              border: "1.5px solid #e2e8f0",
+              background: "#fff",
+              fontSize: 12,
+              fontWeight: 500,
+              color: "#64748b",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 4,
+            }}
+          >
+            <Eye size={13} />
+            View
+          </button>
+          <button
+            onClick={onMark}
+            style={{
+              flex: 1,
+              padding: "8px",
+              borderRadius: 8,
+              border: "none",
+              background: sub.marks !== null ? "#dcfce7" : "#ede9fe",
+              fontSize: 12,
+              fontWeight: 600,
+              color: sub.marks !== null ? "#16a34a" : "#6366f1",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 4,
+            }}
+          >
+            {sub.marks !== null ? <Check size={13} /> : <Edit size={13} />}
+            {sub.marks !== null ? "Graded" : "Grade"}
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -748,11 +485,13 @@ function MarkModal({
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(0,0,0,0.4)",
+        background: "rgba(0,0,0,0.45)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         zIndex: 1000,
+        padding: 16,
+        boxSizing: "border-box",
       }}
       onClick={onClose}
     >
@@ -761,8 +500,10 @@ function MarkModal({
           background: "#fff",
           borderRadius: 16,
           padding: 28,
-          width: 380,
+          width: "100%",
+          maxWidth: 380,
           boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
+          boxSizing: "border-box",
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -775,12 +516,7 @@ function MarkModal({
           }}
         >
           <h3
-            style={{
-              margin: 0,
-              fontSize: 16,
-              fontWeight: 700,
-              color: "#1e293b",
-            }}
+            style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1e293b" }}
           >
             Grade Submission
           </h3>
@@ -821,6 +557,7 @@ function MarkModal({
               fontSize: 13,
               fontWeight: 700,
               color: "#fff",
+              flexShrink: 0,
             }}
           >
             {student.initials}
@@ -918,11 +655,13 @@ function CreateHomeworkModal({ onClose }: { onClose: () => void }) {
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(0,0,0,0.4)",
+        background: "rgba(0,0,0,0.45)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         zIndex: 1000,
+        padding: 16,
+        boxSizing: "border-box",
       }}
       onClick={onClose}
     >
@@ -930,9 +669,13 @@ function CreateHomeworkModal({ onClose }: { onClose: () => void }) {
         style={{
           background: "#fff",
           borderRadius: 16,
-          padding: 28,
-          width: 480,
+          padding: 24,
+          width: "100%",
+          maxWidth: 480,
           boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
+          boxSizing: "border-box",
+          maxHeight: "90vh",
+          overflowY: "auto",
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -972,51 +715,45 @@ function CreateHomeworkModal({ onClose }: { onClose: () => void }) {
               alignItems: "center",
               justifyContent: "center",
               color: "#64748b",
+              flexShrink: 0,
             }}
           >
             <X size={16} />
           </button>
         </div>
 
-        <div
-          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}
-        >
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           {(
             [
               {
                 label: "Title",
                 key: "title",
                 placeholder: "e.g. Chapter 5 Exercise",
-                col: 2,
               },
               {
                 label: "Class",
                 key: "class",
                 placeholder: "e.g. Class 10",
-                col: 1,
               },
               {
                 label: "Division",
                 key: "division",
                 placeholder: "e.g. Division A",
-                col: 1,
               },
               {
                 label: "Due Date",
                 key: "dueDate",
                 placeholder: "",
-                col: 2,
                 type: "date",
               },
             ] as Array<{
               label: string;
               key: keyof typeof form;
               placeholder: string;
-              col: number;
               type?: string;
             }>
           ).map((f) => (
-            <div key={f.key} style={{ gridColumn: `span ${f.col}` }}>
+            <div key={f.key}>
               <label
                 style={{
                   display: "block",
@@ -1046,7 +783,7 @@ function CreateHomeworkModal({ onClose }: { onClose: () => void }) {
               />
             </div>
           ))}
-          <div style={{ gridColumn: "span 2" }}>
+          <div>
             <label
               style={{
                 display: "block",
@@ -1124,923 +861,6 @@ function CreateHomeworkModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
-
-export default function AllHomeworkPage() {
-  const [activeHref, setActiveHref] = useState("/teacher/homework");
-  const [selected, setSelected] = useState<Homework>(homeworkList[0]);
-  const [searchHW, setSearchHW] = useState("");
-  const [searchStudent, setSearchStudent] = useState("");
-  const [activeTab, setActiveTab] = useState<"submissions" | "pending">(
-    "submissions",
-  );
-  const [statusFilter, setStatusFilter] = useState("All Status");
-  const [submissions, setSubmissions] = useState<Submission[]>(submissionsData);
-  const [hwPage, setHwPage] = useState(1);
-  const [subPage, setSubPage] = useState(1);
-  const [markModal, setMarkModal] = useState<Submission | null>(null);
-  const [createModal, setCreateModal] = useState(false);
-
-  const hwPerPage = 4;
-  const subPerPage = 5;
-
-  const filteredHW = homeworkList.filter(
-    (h) =>
-      h.title.toLowerCase().includes(searchHW.toLowerCase()) ||
-      h.class.toLowerCase().includes(searchHW.toLowerCase()),
-  );
-  const pagedHW = filteredHW.slice(
-    (hwPage - 1) * hwPerPage,
-    hwPage * hwPerPage,
-  );
-  const hwTotalPages = Math.ceil(filteredHW.length / hwPerPage);
-
-  const displayedSubs = submissions.filter((s) => {
-    const matchSearch = s.name
-      .toLowerCase()
-      .includes(searchStudent.toLowerCase());
-    const matchStatus =
-      statusFilter === "All Status" || s.status === statusFilter;
-    return matchSearch && matchStatus;
-  });
-  const activeSubs = displayedSubs.filter((s) => s.status !== "Pending");
-  const pendingSubs = displayedSubs.filter((s) => s.status === "Pending");
-  const tabSubs = activeTab === "submissions" ? activeSubs : pendingSubs;
-  const pagedSubs = tabSubs.slice(
-    (subPage - 1) * subPerPage,
-    subPage * subPerPage,
-  );
-  const subTotalPages = Math.ceil(tabSubs.length / subPerPage);
-
-  const pct = Math.round((selected.submitted / selected.total) * 100);
-
-  const handleSaveMarks = (id: string, marks: number) => {
-    setSubmissions((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, marks } : s)),
-    );
-    setMarkModal(null);
-  };
-
-  return (
-    <div
-      style={{
-        display: "flex",
-        height: "100vh",
-        fontFamily: "'Inter', sans-serif",
-        background: "#f8fafc",
-      }}
-    >
-      <Sidebar activeHref={activeHref} onNav={setActiveHref} />
-
-      <div
-        style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-        }}
-      >
-        <Topbar breadcrumbs={["Teacher", "Homework", "All Homework"]} />
-
-        <main style={{ flex: 1, overflow: "auto", padding: 24 }}>
-          {/* Page Header */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: 22,
-            }}
-          >
-            <h1
-              style={{
-                margin: 0,
-                fontSize: 22,
-                fontWeight: 700,
-                color: "#1e293b",
-              }}
-            >
-              All Homework
-            </h1>
-            <button
-              onClick={() => setCreateModal(true)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "10px 18px",
-                borderRadius: 10,
-                border: "none",
-                background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
-                color: "#fff",
-                fontSize: 13,
-                fontWeight: 600,
-                cursor: "pointer",
-                boxShadow: "0 4px 15px rgba(99,102,241,0.35)",
-              }}
-            >
-              <Plus size={16} />
-              Create Homework
-            </button>
-          </div>
-
-          <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
-            {/* ── Left Panel ── */}
-            <div
-              style={{
-                width: 300,
-                flexShrink: 0,
-                display: "flex",
-                flexDirection: "column",
-                gap: 12,
-              }}
-            >
-              {/* Search */}
-              <div
-                style={{
-                  display: "flex",
-                  gap: 8,
-                  alignItems: "center",
-                  background: "#fff",
-                  border: "1.5px solid #f1f5f9",
-                  borderRadius: 10,
-                  padding: "0 12px",
-                  height: 40,
-                }}
-              >
-                <Search size={14} color="#94a3b8" />
-                <input
-                  value={searchHW}
-                  onChange={(e) => {
-                    setSearchHW(e.target.value);
-                    setHwPage(1);
-                  }}
-                  placeholder="Search homework..."
-                  style={{
-                    flex: 1,
-                    border: "none",
-                    background: "transparent",
-                    fontSize: 13,
-                    outline: "none",
-                    color: "#1e293b",
-                  }}
-                />
-                <Filter
-                  size={14}
-                  color="#94a3b8"
-                  style={{ cursor: "pointer" }}
-                />
-              </div>
-
-              {/* Homework Cards */}
-              <div
-                style={{ display: "flex", flexDirection: "column", gap: 10 }}
-              >
-                {pagedHW.map((hw) => (
-                  <HomeworkCard
-                    key={hw.id}
-                    hw={hw}
-                    selected={selected.id === hw.id}
-                    onSelect={() => setSelected(hw)}
-                  />
-                ))}
-              </div>
-
-              {/* Pagination */}
-              {hwTotalPages > 1 && (
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 6,
-                  }}
-                >
-                  <button
-                    onClick={() => setHwPage(1)}
-                    disabled={hwPage === 1}
-                    style={pageBtnStyle(false)}
-                  >
-                    <ChevronsLeft size={13} />
-                  </button>
-                  <button
-                    onClick={() => setHwPage((p) => Math.max(1, p - 1))}
-                    disabled={hwPage === 1}
-                    style={pageBtnStyle(false)}
-                  >
-                    <ChevronLeft size={13} />
-                  </button>
-                  {Array.from({ length: hwTotalPages }, (_, i) => i + 1).map(
-                    (p) => (
-                      <button
-                        key={p}
-                        onClick={() => setHwPage(p)}
-                        style={pageBtnStyle(p === hwPage)}
-                      >
-                        {p}
-                      </button>
-                    ),
-                  )}
-                  <button
-                    onClick={() =>
-                      setHwPage((p) => Math.min(hwTotalPages, p + 1))
-                    }
-                    disabled={hwPage === hwTotalPages}
-                    style={pageBtnStyle(false)}
-                  >
-                    <ChevronRight size={13} />
-                  </button>
-                  <button
-                    onClick={() => setHwPage(hwTotalPages)}
-                    disabled={hwPage === hwTotalPages}
-                    style={pageBtnStyle(false)}
-                  >
-                    <ChevronsRight size={13} />
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* ── Right Panel ── */}
-            <div
-              style={{
-                flex: 1,
-                background: "#fff",
-                borderRadius: 16,
-                border: "1.5px solid #f1f5f9",
-                overflow: "hidden",
-              }}
-            >
-              {/* Header */}
-              <div
-                style={{
-                  padding: "20px 24px",
-                  borderBottom: "1px solid #f1f5f9",
-                  display: "flex",
-                  alignItems: "flex-start",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-                  <div
-                    style={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: 12,
-                      background: colorMap[selected.color].bg,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <FileText size={22} color={colorMap[selected.color].icon} />
-                  </div>
-                  <div>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 10,
-                        marginBottom: 4,
-                      }}
-                    >
-                      <h2
-                        style={{
-                          margin: 0,
-                          fontSize: 18,
-                          fontWeight: 700,
-                          color: "#1e293b",
-                        }}
-                      >
-                        {selected.title}
-                      </h2>
-                      <StatusBadge status={selected.status} />
-                    </div>
-                    <div style={{ fontSize: 13, color: "#94a3b8" }}>
-                      {selected.class} · {selected.division}
-                    </div>
-                  </div>
-                </div>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <button
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                      padding: "8px 14px",
-                      borderRadius: 8,
-                      border: "1.5px solid #e2e8f0",
-                      background: "#fff",
-                      fontSize: 13,
-                      fontWeight: 500,
-                      color: "#64748b",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <Edit size={14} />
-                    Edit
-                  </button>
-                  <button
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                      padding: "8px 14px",
-                      borderRadius: 8,
-                      border: "1.5px solid #fecaca",
-                      background: "#fff",
-                      fontSize: 13,
-                      fontWeight: 500,
-                      color: "#ef4444",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <Trash2 size={14} />
-                    Delete
-                  </button>
-                </div>
-              </div>
-
-              {/* Info Row */}
-              <div
-                style={{
-                  padding: "16px 24px",
-                  borderBottom: "1px solid #f1f5f9",
-                  display: "flex",
-                  gap: 24,
-                  flexWrap: "wrap",
-                }}
-              >
-                <div>
-                  <p
-                    style={{
-                      margin: "0 0 12px",
-                      fontSize: 13,
-                      color: "#64748b",
-                    }}
-                  >
-                    {selected.description}
-                  </p>
-                  {selected.attachment && (
-                    <div
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 6,
-                        padding: "6px 12px",
-                        borderRadius: 8,
-                        border: "1.5px solid #e2e8f0",
-                        fontSize: 12,
-                        color: "#6366f1",
-                        cursor: "pointer",
-                        fontWeight: 500,
-                      }}
-                    >
-                      <Paperclip size={13} />
-                      {selected.attachment}
-                    </div>
-                  )}
-                </div>
-                <div
-                  style={{
-                    marginLeft: "auto",
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "8px 32px",
-                  }}
-                >
-                  {[
-                    {
-                      label: "Due Date",
-                      value: selected.dueDate,
-                      icon: <Clock size={14} color="#94a3b8" />,
-                    },
-                    {
-                      label: "Assigned Date",
-                      value: selected.assignedDate,
-                      icon: <ClipboardList size={14} color="#94a3b8" />,
-                    },
-                    {
-                      label: "Total Students",
-                      value: String(selected.total),
-                      icon: <Users size={14} color="#94a3b8" />,
-                    },
-                    {
-                      label: "Submissions",
-                      value: `${selected.submitted} (${pct}%)`,
-                      icon: <CheckCircle size={14} color="#94a3b8" />,
-                    },
-                  ].map((item) => (
-                    <div
-                      key={item.label}
-                      style={{ display: "flex", alignItems: "center", gap: 8 }}
-                    >
-                      {item.icon}
-                      <div>
-                        <div style={{ fontSize: 11, color: "#94a3b8" }}>
-                          {item.label}
-                        </div>
-                        <div
-                          style={{
-                            fontSize: 13,
-                            fontWeight: 600,
-                            color: "#1e293b",
-                          }}
-                        >
-                          {item.value}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Progress bar */}
-              <div
-                style={{
-                  padding: "10px 24px",
-                  borderBottom: "1px solid #f1f5f9",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: 6,
-                  }}
-                >
-                  <span style={{ fontSize: 12, color: "#94a3b8" }}>
-                    Submission Progress
-                  </span>
-                  <span
-                    style={{ fontSize: 12, fontWeight: 600, color: "#6366f1" }}
-                  >
-                    {pct}%
-                  </span>
-                </div>
-                <div
-                  style={{ height: 6, background: "#f1f5f9", borderRadius: 99 }}
-                >
-                  <div
-                    style={{
-                      height: "100%",
-                      width: `${pct}%`,
-                      background: "linear-gradient(90deg,#6366f1,#8b5cf6)",
-                      borderRadius: 99,
-                      transition: "width 0.4s ease",
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Tabs */}
-              <div
-                style={{
-                  padding: "0 24px",
-                  borderBottom: "1px solid #f1f5f9",
-                  display: "flex",
-                  gap: 4,
-                }}
-              >
-                
-                {[
-                  {
-                    key: "submissions" as const,
-                    label: `Submissions (${activeSubs.length})`,
-                  },
-                  {
-                    key: "pending" as const,
-                    label: `Pending (${pendingSubs.length})`,
-                  },
-                ].map((tab) => (
-                  <button
-                    key={tab.key}
-                    onClick={() => {
-                      setActiveTab(tab.key);
-                      setSubPage(1);
-                    }}
-                    style={{
-                      padding: "14px 4px",
-                      marginRight: 20,
-                      border: "none",
-                      background: "transparent",
-                      fontSize: 13,
-                      fontWeight: activeTab === tab.key ? 600 : 400,
-                      color: activeTab === tab.key ? "#6366f1" : "#94a3b8",
-                      borderBottom:
-                        activeTab === tab.key
-                          ? "2.5px solid #6366f1"
-                          : "2.5px solid transparent",
-                      cursor: "pointer",
-                      marginBottom: -1,
-                    }}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Filter Row */}
-              <div
-                style={{
-                  padding: "14px 24px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 12,
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    background: "#f8fafc",
-                    border: "1.5px solid #f1f5f9",
-                    borderRadius: 8,
-                    padding: "0 12px",
-                    height: 36,
-                    flex: 1,
-                    maxWidth: 280,
-                  }}
-                >
-                  <Search size={13} color="#94a3b8" />
-                  <input
-                    value={searchStudent}
-                    onChange={(e) => {
-                      setSearchStudent(e.target.value);
-                      setSubPage(1);
-                    }}
-                    placeholder="Search student..."
-                    style={{
-                      flex: 1,
-                      border: "none",
-                      background: "transparent",
-                      fontSize: 13,
-                      outline: "none",
-                      color: "#1e293b",
-                    }}
-                  />
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    background: "#f8fafc",
-                    border: "1.5px solid #f1f5f9",
-                    borderRadius: 8,
-                    padding: "0 12px",
-                    height: 36,
-                    cursor: "pointer",
-                    position: "relative",
-                  }}
-                >
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => {
-                      setStatusFilter(e.target.value);
-                      setSubPage(1);
-                    }}
-                    style={{
-                      border: "none",
-                      background: "transparent",
-                      fontSize: 13,
-                      outline: "none",
-                      color: "#1e293b",
-                      cursor: "pointer",
-                      appearance: "none",
-                      paddingRight: 20,
-                    }}
-                  >
-                    {["All Status", "Submitted", "Late", "Pending"].map((s) => (
-                      <option key={s}>{s}</option>
-                    ))}
-                  </select>
-                  <ChevronDown
-                    size={13}
-                    color="#94a3b8"
-                    style={{
-                      pointerEvents: "none",
-                      position: "absolute",
-                      right: 10,
-                    }}
-                  />
-                </div>
-
-                <button
-                  style={{
-                    marginLeft: "auto",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    padding: "0 14px",
-                    height: 36,
-                    borderRadius: 8,
-                    border: "1.5px solid #e2e8f0",
-                    background: "#fff",
-                    fontSize: 13,
-                    color: "#64748b",
-                    fontWeight: 500,
-                    cursor: "pointer",
-                  }}
-                >
-                  <Download size={14} />
-                  Export
-                </button>
-              </div>
-
-              {/* Table */}
-              <div style={{ overflowX: "auto" }}>
-                <table
-                  style={{
-                    width: "100%",
-                    borderCollapse: "collapse",
-                    fontSize: 13,
-                  }}
-                >
-                  <thead>
-                    <tr style={{ background: "#f8fafc" }}>
-                      {[
-                        "Student",
-                        "Submitted At",
-                        "Status",
-                        "Attachment",
-                        "Marks",
-                        "Action",
-                      ].map((h) => (
-                        <th
-                          key={h}
-                          style={{
-                            padding: "10px 24px",
-                            textAlign: "left",
-                            fontSize: 11,
-                            fontWeight: 600,
-                            color: "#94a3b8",
-                            letterSpacing: "0.05em",
-                            textTransform: "uppercase",
-                            whiteSpace: "nowrap",
-                            borderBottom: "1px solid #f1f5f9",
-                          }}
-                        >
-                          {h}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {pagedSubs.map((sub, i) => (
-                      <tr
-                        key={sub.id}
-                        style={{
-                          borderBottom: "1px solid #f8fafc",
-                          background: i % 2 === 0 ? "#fff" : "#fafbfc",
-                        }}
-                      >
-                        {/* Student */}
-                        <td style={{ padding: "14px 24px" }}>
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 10,
-                            }}
-                          >
-                            <div
-                              style={{
-                                width: 34,
-                                height: 34,
-                                borderRadius: "50%",
-                                background: sub.avatarColor,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontSize: 12,
-                                fontWeight: 700,
-                                color: "#fff",
-                                flexShrink: 0,
-                              }}
-                            >
-                              {sub.initials}
-                            </div>
-                            <span style={{ fontWeight: 600, color: "#1e293b" }}>
-                              {sub.name}
-                            </span>
-                          </div>
-                        </td>
-                        {/* Submitted At */}
-                        <td style={{ padding: "14px 24px", color: "#64748b" }}>
-                          {sub.submittedAt ? (
-                            sub.submittedAt.split("\n").map((line, i) => (
-                              <div
-                                key={i}
-                                style={{
-                                  fontSize: i === 1 ? 11 : 13,
-                                  color: i === 1 ? "#94a3b8" : "#64748b",
-                                }}
-                              >
-                                {line}
-                              </div>
-                            ))
-                          ) : (
-                            <span style={{ color: "#cbd5e1" }}>—</span>
-                          )}
-                        </td>
-                        {/* Status */}
-                        <td style={{ padding: "14px 24px" }}>
-                          <StatusBadge status={sub.status} />
-                        </td>
-                        {/* Attachment */}
-                        <td style={{ padding: "14px 24px" }}>
-                          {sub.attachment ? (
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 6,
-                                color: "#ef4444",
-                                fontSize: 12,
-                                cursor: "pointer",
-                              }}
-                            >
-                              <FileText size={14} />
-                              <div>
-                                <div>{sub.attachment}</div>
-                                <div style={{ color: "#94a3b8", fontSize: 11 }}>
-                                  {sub.attachmentSize}
-                                </div>
-                              </div>
-                            </div>
-                          ) : (
-                            <span style={{ color: "#cbd5e1" }}>—</span>
-                          )}
-                        </td>
-                        {/* Marks */}
-                        <td style={{ padding: "14px 24px" }}>
-                          {sub.marks !== null ? (
-                            <span style={{ fontWeight: 600, color: "#6366f1" }}>
-                              {sub.marks}/100
-                            </span>
-                          ) : (
-                            <span style={{ color: "#cbd5e1" }}>—</span>
-                          )}
-                        </td>
-                        {/* Action */}
-                        <td style={{ padding: "14px 24px" }}>
-                          {sub.status === "Pending" ? (
-                            <span
-                              style={{
-                                fontSize: 12,
-                                color: "#94a3b8",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 4,
-                              }}
-                            >
-                              <Clock size={13} />
-                              Pending
-                            </span>
-                          ) : (
-                            <div style={{ display: "flex", gap: 8 }}>
-                              <button
-                                style={{
-                                  padding: "6px 12px",
-                                  borderRadius: 6,
-                                  border: "1.5px solid #e2e8f0",
-                                  background: "#fff",
-                                  fontSize: 12,
-                                  fontWeight: 500,
-                                  color: "#64748b",
-                                  cursor: "pointer",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 4,
-                                }}
-                              >
-                                <Eye size={13} />
-                                View
-                              </button>
-                              <button
-                                onClick={() => setMarkModal(sub)}
-                                style={{
-                                  padding: "6px 12px",
-                                  borderRadius: 6,
-                                  border: "none",
-                                  background:
-                                    sub.marks !== null ? "#dcfce7" : "#ede9fe",
-                                  fontSize: 12,
-                                  fontWeight: 600,
-                                  color:
-                                    sub.marks !== null ? "#16a34a" : "#6366f1",
-                                  cursor: "pointer",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 4,
-                                }}
-                              >
-                                {sub.marks !== null ? (
-                                  <Check size={13} />
-                                ) : (
-                                  <Edit size={13} />
-                                )}
-                                {sub.marks !== null ? "Graded" : "Check"}
-                              </button>
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-
-                    {pagedSubs.length === 0 && (
-                      <tr>
-                        <td
-                          colSpan={6}
-                          style={{
-                            padding: "40px 24px",
-                            textAlign: "center",
-                            color: "#94a3b8",
-                            fontSize: 13,
-                          }}
-                        >
-                          <AlertCircle
-                            size={20}
-                            style={{ display: "block", margin: "0 auto 8px" }}
-                          />
-                          No students found
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Table Pagination */}
-              <div
-                style={{
-                  padding: "14px 24px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  borderTop: "1px solid #f1f5f9",
-                }}
-              >
-                <span style={{ fontSize: 12, color: "#94a3b8" }}>
-                  Showing{" "}
-                  {Math.min((subPage - 1) * subPerPage + 1, tabSubs.length)}–
-                  {Math.min(subPage * subPerPage, tabSubs.length)} of{" "}
-                  {tabSubs.length} students
-                </span>
-                <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-                  <button
-                    onClick={() => setSubPage((p) => Math.max(1, p - 1))}
-                    disabled={subPage === 1}
-                    style={pageBtnStyle(false)}
-                  >
-                    <ChevronLeft size={14} />
-                  </button>
-                  {Array.from(
-                    { length: Math.max(1, subTotalPages) },
-                    (_, i) => i + 1,
-                  ).map((p) => (
-                    <button
-                      key={p}
-                      onClick={() => setSubPage(p)}
-                      style={pageBtnStyle(p === subPage)}
-                    >
-                      {p}
-                    </button>
-                  ))}
-                  <button
-                    onClick={() =>
-                      setSubPage((p) => Math.min(subTotalPages, p + 1))
-                    }
-                    disabled={subPage === subTotalPages || subTotalPages === 0}
-                    style={pageBtnStyle(false)}
-                  >
-                    <ChevronRight size={14} />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
-      </div>
-
-      {/* Modals */}
-      {markModal && (
-        <MarkModal
-          student={markModal}
-          onClose={() => setMarkModal(null)}
-          onSave={handleSaveMarks}
-        />
-      )}
-      {createModal && (
-        <CreateHomeworkModal onClose={() => setCreateModal(false)} />
-      )}
-    </div>
-  );
-}
-
 // ─── Pagination Button Style ──────────────────────────────────────────────────
 
 function pageBtnStyle(active: boolean): React.CSSProperties {
@@ -2057,5 +877,1030 @@ function pageBtnStyle(active: boolean): React.CSSProperties {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    flexShrink: 0,
   };
+}
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
+
+export default function AllHomeworkPage() {
+  const [selected, setSelected] = useState<Homework>(homeworkList[0]);
+  const [searchHW, setSearchHW] = useState("");
+  const [searchStudent, setSearchStudent] = useState("");
+  const [activeTab, setActiveTab] = useState<"submissions" | "pending">(
+    "submissions"
+  );
+  const [statusFilter, setStatusFilter] = useState("All Status");
+  const [submissions, setSubmissions] = useState<Submission[]>(submissionsData);
+  const [hwPage, setHwPage] = useState(1);
+  const [subPage, setSubPage] = useState(1);
+  const [markModal, setMarkModal] = useState<Submission | null>(null);
+  const [createModal, setCreateModal] = useState(false);
+  // Mobile: show list or detail
+  const [mobileView, setMobileView] = useState<"list" | "detail">("list");
+
+  const hwPerPage = 4;
+  const subPerPage = 5;
+
+  const filteredHW = homeworkList.filter(
+    (h) =>
+      h.title.toLowerCase().includes(searchHW.toLowerCase()) ||
+      h.class.toLowerCase().includes(searchHW.toLowerCase())
+  );
+  const pagedHW = filteredHW.slice(
+    (hwPage - 1) * hwPerPage,
+    hwPage * hwPerPage
+  );
+  const hwTotalPages = Math.ceil(filteredHW.length / hwPerPage);
+
+  const displayedSubs = submissions.filter((s) => {
+    const matchSearch = s.name
+      .toLowerCase()
+      .includes(searchStudent.toLowerCase());
+    const matchStatus =
+      statusFilter === "All Status" || s.status === statusFilter;
+    return matchSearch && matchStatus;
+  });
+  const activeSubs = displayedSubs.filter((s) => s.status !== "Pending");
+  const pendingSubs = displayedSubs.filter((s) => s.status === "Pending");
+  const tabSubs = activeTab === "submissions" ? activeSubs : pendingSubs;
+  const pagedSubs = tabSubs.slice(
+    (subPage - 1) * subPerPage,
+    subPage * subPerPage
+  );
+  const subTotalPages = Math.ceil(tabSubs.length / subPerPage);
+
+  const pct = Math.round((selected.submitted / selected.total) * 100);
+
+  const handleSaveMarks = (id: string, marks: number) => {
+    setSubmissions((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, marks } : s))
+    );
+    setMarkModal(null);
+  };
+
+  return (
+    <>
+      {/* ── Global style to kill ALL scrollbars except the page itself ── */}
+      <style>{`
+        * { box-sizing: border-box; }
+        body { margin: 0; overflow-x: hidden; }
+
+        /* Hide scrollbar but keep scroll functionality */
+        ::-webkit-scrollbar { width: 0px; height: 0px; }
+        * { scrollbar-width: none; -ms-overflow-style: none; }
+
+        /* Responsive helpers */
+        @media (max-width: 768px) {
+          .hw-layout { flex-direction: column !important; }
+          .hw-left   { width: 100% !important; }
+          .hw-right  { width: 100% !important; }
+          .info-grid { grid-template-columns: 1fr 1fr !important; }
+          .filter-row { flex-wrap: wrap !important; }
+          .table-wrap { display: none !important; }
+          .mobile-cards { display: flex !important; }
+          .desktop-only { display: none !important; }
+          .mobile-only  { display: flex !important; }
+          .page-header  { flex-wrap: wrap; gap: 10px; }
+        }
+        @media (min-width: 769px) {
+          .mobile-cards { display: none !important; }
+          .mobile-only  { display: none !important; }
+        }
+      `}</style>
+
+      <div
+        style={{
+          minHeight: "100vh",
+          background: "#f8fafc",
+          fontFamily: "'Inter', sans-serif",
+          padding: "20px 16px",
+          overflowX: "hidden",
+        }}
+      >
+        {/* ── Page Header ── */}
+        <div
+          className="page-header"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 22,
+          }}
+        >
+          <h1
+            style={{
+              margin: 0,
+              fontSize: 22,
+              fontWeight: 700,
+              color: "#1e293b",
+            }}
+          >
+            All Homework
+          </h1>
+          <button
+            onClick={() => setCreateModal(true)}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "10px 18px",
+              borderRadius: 10,
+              border: "none",
+              background: "linear-gradient(135deg,#6366f1,#8b5cf6)",
+              color: "#fff",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+              boxShadow: "0 4px 15px rgba(99,102,241,0.35)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <Plus size={16} />
+            Create Homework
+          </button>
+        </div>
+
+        {/* ── Two-column layout ── */}
+        <div
+          className="hw-layout"
+          style={{ display: "flex", gap: 20, alignItems: "flex-start" }}
+        >
+          {/* ════ LEFT PANEL ════ */}
+          <div
+            className="hw-left"
+            style={{
+              width: 300,
+              flexShrink: 0,
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+            }}
+          >
+            {/* Search */}
+            <div
+              style={{
+                display: "flex",
+                gap: 8,
+                alignItems: "center",
+                background: "#fff",
+                border: "1.5px solid #f1f5f9",
+                borderRadius: 10,
+                padding: "0 12px",
+                height: 40,
+              }}
+            >
+              <Search size={14} color="#94a3b8" />
+              <input
+                value={searchHW}
+                onChange={(e) => {
+                  setSearchHW(e.target.value);
+                  setHwPage(1);
+                }}
+                placeholder="Search homework..."
+                style={{
+                  flex: 1,
+                  border: "none",
+                  background: "transparent",
+                  fontSize: 13,
+                  outline: "none",
+                  color: "#1e293b",
+                  minWidth: 0,
+                }}
+              />
+              <Filter
+                size={14}
+                color="#94a3b8"
+                style={{ cursor: "pointer", flexShrink: 0 }}
+              />
+            </div>
+
+            {/* Homework Cards */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {pagedHW.map((hw) => (
+                <HomeworkCard
+                  key={hw.id}
+                  hw={hw}
+                  selected={selected.id === hw.id}
+                  onSelect={() => {
+                    setSelected(hw);
+                    setMobileView("detail");
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {hwTotalPages > 1 && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 4,
+                  flexWrap: "wrap",
+                }}
+              >
+                <button
+                  onClick={() => setHwPage(1)}
+                  disabled={hwPage === 1}
+                  style={pageBtnStyle(false)}
+                >
+                  <ChevronsLeft size={13} />
+                </button>
+                <button
+                  onClick={() => setHwPage((p) => Math.max(1, p - 1))}
+                  disabled={hwPage === 1}
+                  style={pageBtnStyle(false)}
+                >
+                  <ChevronLeft size={13} />
+                </button>
+                {Array.from({ length: hwTotalPages }, (_, i) => i + 1).map(
+                  (p) => (
+                    <button
+                      key={p}
+                      onClick={() => setHwPage(p)}
+                      style={pageBtnStyle(p === hwPage)}
+                    >
+                      {p}
+                    </button>
+                  )
+                )}
+                <button
+                  onClick={() =>
+                    setHwPage((p) => Math.min(hwTotalPages, p + 1))
+                  }
+                  disabled={hwPage === hwTotalPages}
+                  style={pageBtnStyle(false)}
+                >
+                  <ChevronRight size={13} />
+                </button>
+                <button
+                  onClick={() => setHwPage(hwTotalPages)}
+                  disabled={hwPage === hwTotalPages}
+                  style={pageBtnStyle(false)}
+                >
+                  <ChevronsRight size={13} />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* ════ RIGHT PANEL ════ */}
+          <div
+            className="hw-right"
+            style={{
+              flex: 1,
+              background: "#fff",
+              borderRadius: 16,
+              border: "1.5px solid #f1f5f9",
+              minWidth: 0,
+            }}
+          >
+            {/* Mobile back button */}
+            <div
+              className="mobile-only"
+              style={{
+                padding: "12px 16px",
+                borderBottom: "1px solid #f1f5f9",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
+              <button
+                onClick={() => setMobileView("list")}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  background: "none",
+                  border: "none",
+                  color: "#6366f1",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  padding: 0,
+                }}
+              >
+                <ChevronLeft size={16} />
+                Back to list
+              </button>
+            </div>
+
+            {/* ── Detail Header ── */}
+            <div
+              style={{
+                padding: "20px 20px",
+                borderBottom: "1px solid #f1f5f9",
+                display: "flex",
+                alignItems: "flex-start",
+                justifyContent: "space-between",
+                gap: 12,
+                flexWrap: "wrap",
+              }}
+            >
+              <div
+                style={{ display: "flex", gap: 14, alignItems: "center", minWidth: 0 }}
+              >
+                <div
+                  style={{
+                    width: 46,
+                    height: 46,
+                    borderRadius: 12,
+                    background: colorMap[selected.color].bg,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <FileText size={20} color={colorMap[selected.color].icon} />
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      marginBottom: 4,
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <h2
+                      style={{
+                        margin: 0,
+                        fontSize: 16,
+                        fontWeight: 700,
+                        color: "#1e293b",
+                      }}
+                    >
+                      {selected.title}
+                    </h2>
+                    <StatusBadge status={selected.status} />
+                  </div>
+                  <div style={{ fontSize: 13, color: "#94a3b8" }}>
+                    {selected.class} · {selected.division}
+                  </div>
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                <button
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 5,
+                    padding: "7px 12px",
+                    borderRadius: 8,
+                    border: "1.5px solid #e2e8f0",
+                    background: "#fff",
+                    fontSize: 12,
+                    fontWeight: 500,
+                    color: "#64748b",
+                    cursor: "pointer",
+                  }}
+                >
+                  <Edit size={13} />
+                  Edit
+                </button>
+                <button
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 5,
+                    padding: "7px 12px",
+                    borderRadius: 8,
+                    border: "1.5px solid #fecaca",
+                    background: "#fff",
+                    fontSize: 12,
+                    fontWeight: 500,
+                    color: "#ef4444",
+                    cursor: "pointer",
+                  }}
+                >
+                  <Trash2 size={13} />
+                  Delete
+                </button>
+              </div>
+            </div>
+
+            {/* ── Info Row ── */}
+            <div
+              style={{
+                padding: "16px 20px",
+                borderBottom: "1px solid #f1f5f9",
+              }}
+            >
+              <p
+                style={{
+                  margin: "0 0 12px",
+                  fontSize: 13,
+                  color: "#64748b",
+                  lineHeight: 1.6,
+                }}
+              >
+                {selected.description}
+              </p>
+              {selected.attachment && (
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "6px 12px",
+                    borderRadius: 8,
+                    border: "1.5px solid #e2e8f0",
+                    fontSize: 12,
+                    color: "#6366f1",
+                    cursor: "pointer",
+                    fontWeight: 500,
+                    marginBottom: 14,
+                  }}
+                >
+                  <Paperclip size={13} />
+                  {selected.attachment}
+                </div>
+              )}
+
+              {/* Stats grid */}
+              <div
+                className="info-grid"
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(2, 1fr)",
+                  gap: "10px 24px",
+                  marginTop: selected.attachment ? 0 : 4,
+                }}
+              >
+                {[
+                  {
+                    label: "Due Date",
+                    value: selected.dueDate,
+                    icon: <Clock size={14} color="#94a3b8" />,
+                  },
+                  {
+                    label: "Assigned Date",
+                    value: selected.assignedDate,
+                    icon: <ClipboardList size={14} color="#94a3b8" />,
+                  },
+                  {
+                    label: "Total Students",
+                    value: String(selected.total),
+                    icon: <Users size={14} color="#94a3b8" />,
+                  },
+                  {
+                    label: "Submissions",
+                    value: `${selected.submitted} (${pct}%)`,
+                    icon: <CheckCircle size={14} color="#94a3b8" />,
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    style={{ display: "flex", alignItems: "center", gap: 8 }}
+                  >
+                    {item.icon}
+                    <div>
+                      <div style={{ fontSize: 11, color: "#94a3b8" }}>
+                        {item.label}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 13,
+                          fontWeight: 600,
+                          color: "#1e293b",
+                        }}
+                      >
+                        {item.value}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Progress bar ── */}
+            <div
+              style={{
+                padding: "12px 20px",
+                borderBottom: "1px solid #f1f5f9",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: 6,
+                }}
+              >
+                <span style={{ fontSize: 12, color: "#94a3b8" }}>
+                  Submission Progress
+                </span>
+                <span
+                  style={{ fontSize: 12, fontWeight: 600, color: "#6366f1" }}
+                >
+                  {pct}%
+                </span>
+              </div>
+              <div
+                style={{ height: 6, background: "#f1f5f9", borderRadius: 99 }}
+              >
+                <div
+                  style={{
+                    height: "100%",
+                    width: `${pct}%`,
+                    background: "linear-gradient(90deg,#6366f1,#8b5cf6)",
+                    borderRadius: 99,
+                    transition: "width 0.4s ease",
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* ── Tabs ── */}
+            <div
+              style={{
+                padding: "0 20px",
+                borderBottom: "1px solid #f1f5f9",
+                display: "flex",
+                gap: 0,
+              }}
+            >
+              {[
+                {
+                  key: "submissions" as const,
+                  label: `Submissions (${activeSubs.length})`,
+                },
+                {
+                  key: "pending" as const,
+                  label: `Pending (${pendingSubs.length})`,
+                },
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => {
+                    setActiveTab(tab.key);
+                    setSubPage(1);
+                  }}
+                  style={{
+                    padding: "13px 4px",
+                    marginRight: 20,
+                    border: "none",
+                    background: "transparent",
+                    fontSize: 13,
+                    fontWeight: activeTab === tab.key ? 600 : 400,
+                    color: activeTab === tab.key ? "#6366f1" : "#94a3b8",
+                    borderBottom:
+                      activeTab === tab.key
+                        ? "2.5px solid #6366f1"
+                        : "2.5px solid transparent",
+                    cursor: "pointer",
+                    marginBottom: -1,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* ── Filter Row ── */}
+            <div
+              className="filter-row"
+              style={{
+                padding: "12px 20px",
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+              }}
+            >
+              {/* Search student */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  background: "#f8fafc",
+                  border: "1.5px solid #f1f5f9",
+                  borderRadius: 8,
+                  padding: "0 12px",
+                  height: 36,
+                  flex: 1,
+                  minWidth: 140,
+                }}
+              >
+                <Search size={13} color="#94a3b8" />
+                <input
+                  value={searchStudent}
+                  onChange={(e) => {
+                    setSearchStudent(e.target.value);
+                    setSubPage(1);
+                  }}
+                  placeholder="Search student..."
+                  style={{
+                    flex: 1,
+                    border: "none",
+                    background: "transparent",
+                    fontSize: 13,
+                    outline: "none",
+                    color: "#1e293b",
+                    minWidth: 0,
+                  }}
+                />
+              </div>
+
+              {/* Status filter */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  background: "#f8fafc",
+                  border: "1.5px solid #f1f5f9",
+                  borderRadius: 8,
+                  padding: "0 10px 0 12px",
+                  height: 36,
+                  position: "relative",
+                }}
+              >
+                <select
+                  value={statusFilter}
+                  onChange={(e) => {
+                    setStatusFilter(e.target.value);
+                    setSubPage(1);
+                  }}
+                  style={{
+                    border: "none",
+                    background: "transparent",
+                    fontSize: 13,
+                    outline: "none",
+                    color: "#1e293b",
+                    cursor: "pointer",
+                    appearance: "none",
+                    paddingRight: 18,
+                  }}
+                >
+                  {["All Status", "Submitted", "Late", "Pending"].map((s) => (
+                    <option key={s}>{s}</option>
+                  ))}
+                </select>
+                <ChevronDown
+                  size={13}
+                  color="#94a3b8"
+                  style={{ pointerEvents: "none", flexShrink: 0 }}
+                />
+              </div>
+
+              {/* Export */}
+              <button
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "0 12px",
+                  height: 36,
+                  borderRadius: 8,
+                  border: "1.5px solid #e2e8f0",
+                  background: "#fff",
+                  fontSize: 13,
+                  color: "#64748b",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                  flexShrink: 0,
+                }}
+              >
+                <Download size={14} />
+                Export
+              </button>
+            </div>
+
+            {/* ── Desktop Table ── */}
+            <div className="table-wrap" style={{ overflowX: "auto" }}>
+              <table
+                style={{
+                  width: "100%",
+                  borderCollapse: "collapse",
+                  fontSize: 13,
+                }}
+              >
+                <thead>
+                  <tr style={{ background: "#f8fafc" }}>
+                    {[
+                      "Student",
+                      "Submitted At",
+                      "Status",
+                      "Attachment",
+                      "Marks",
+                      "Action",
+                    ].map((h) => (
+                      <th
+                        key={h}
+                        style={{
+                          padding: "10px 20px",
+                          textAlign: "left",
+                          fontSize: 11,
+                          fontWeight: 600,
+                          color: "#94a3b8",
+                          letterSpacing: "0.05em",
+                          textTransform: "uppercase",
+                          whiteSpace: "nowrap",
+                          borderBottom: "1px solid #f1f5f9",
+                        }}
+                      >
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {pagedSubs.map((sub, i) => (
+                    <tr
+                      key={sub.id}
+                      style={{
+                        borderBottom: "1px solid #f8fafc",
+                        background: i % 2 === 0 ? "#fff" : "#fafbfc",
+                      }}
+                    >
+                      {/* Student */}
+                      <td style={{ padding: "14px 20px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10,
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: 34,
+                              height: 34,
+                              borderRadius: "50%",
+                              background: sub.avatarColor,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: 12,
+                              fontWeight: 700,
+                              color: "#fff",
+                              flexShrink: 0,
+                            }}
+                          >
+                            {sub.initials}
+                          </div>
+                          <span
+                            style={{ fontWeight: 600, color: "#1e293b" }}
+                          >
+                            {sub.name}
+                          </span>
+                        </div>
+                      </td>
+                      {/* Submitted At */}
+                      <td style={{ padding: "14px 20px", color: "#64748b" }}>
+                        {sub.submittedAt ? (
+                          sub.submittedAt.split("\n").map((line, idx) => (
+                            <div
+                              key={idx}
+                              style={{
+                                fontSize: idx === 1 ? 11 : 13,
+                                color: idx === 1 ? "#94a3b8" : "#64748b",
+                              }}
+                            >
+                              {line}
+                            </div>
+                          ))
+                        ) : (
+                          <span style={{ color: "#cbd5e1" }}>—</span>
+                        )}
+                      </td>
+                      {/* Status */}
+                      <td style={{ padding: "14px 20px" }}>
+                        <StatusBadge status={sub.status} />
+                      </td>
+                      {/* Attachment */}
+                      <td style={{ padding: "14px 20px" }}>
+                        {sub.attachment ? (
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 6,
+                              color: "#ef4444",
+                              fontSize: 12,
+                              cursor: "pointer",
+                            }}
+                          >
+                            <FileText size={14} />
+                            <div>
+                              <div>{sub.attachment}</div>
+                              <div style={{ color: "#94a3b8", fontSize: 11 }}>
+                                {sub.attachmentSize}
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <span style={{ color: "#cbd5e1" }}>—</span>
+                        )}
+                      </td>
+                      {/* Marks */}
+                      <td style={{ padding: "14px 20px" }}>
+                        {sub.marks !== null ? (
+                          <span
+                            style={{ fontWeight: 600, color: "#6366f1" }}
+                          >
+                            {sub.marks}/100
+                          </span>
+                        ) : (
+                          <span style={{ color: "#cbd5e1" }}>—</span>
+                        )}
+                      </td>
+                      {/* Action */}
+                      <td style={{ padding: "14px 20px" }}>
+                        {sub.status === "Pending" ? (
+                          <span
+                            style={{
+                              fontSize: 12,
+                              color: "#94a3b8",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 4,
+                            }}
+                          >
+                            <Clock size={13} />
+                            Pending
+                          </span>
+                        ) : (
+                          <div style={{ display: "flex", gap: 8 }}>
+                            <button
+                              style={{
+                                padding: "6px 12px",
+                                borderRadius: 6,
+                                border: "1.5px solid #e2e8f0",
+                                background: "#fff",
+                                fontSize: 12,
+                                fontWeight: 500,
+                                color: "#64748b",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 4,
+                              }}
+                            >
+                              <Eye size={13} />
+                              View
+                            </button>
+                            <button
+                              onClick={() => setMarkModal(sub)}
+                              style={{
+                                padding: "6px 12px",
+                                borderRadius: 6,
+                                border: "none",
+                                background:
+                                  sub.marks !== null ? "#dcfce7" : "#ede9fe",
+                                fontSize: 12,
+                                fontWeight: 600,
+                                color:
+                                  sub.marks !== null ? "#16a34a" : "#6366f1",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 4,
+                              }}
+                            >
+                              {sub.marks !== null ? (
+                                <Check size={13} />
+                              ) : (
+                                <Edit size={13} />
+                              )}
+                              {sub.marks !== null ? "Graded" : "Check"}
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+
+                  {pagedSubs.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        style={{
+                          padding: "40px 20px",
+                          textAlign: "center",
+                          color: "#94a3b8",
+                          fontSize: 13,
+                        }}
+                      >
+                        <AlertCircle
+                          size={20}
+                          style={{ display: "block", margin: "0 auto 8px" }}
+                        />
+                        No students found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* ── Mobile Cards ── */}
+            <div
+              className="mobile-cards"
+              style={{
+                flexDirection: "column",
+                gap: 10,
+                padding: "12px 16px",
+              }}
+            >
+              {pagedSubs.length === 0 ? (
+                <div
+                  style={{
+                    textAlign: "center",
+                    color: "#94a3b8",
+                    fontSize: 13,
+                    padding: "30px 0",
+                  }}
+                >
+                  <AlertCircle
+                    size={20}
+                    style={{ display: "block", margin: "0 auto 8px" }}
+                  />
+                  No students found
+                </div>
+              ) : (
+                pagedSubs.map((sub) => (
+                  <MobileSubmissionCard
+                    key={sub.id}
+                    sub={sub}
+                    onMark={() => setMarkModal(sub)}
+                  />
+                ))
+              )}
+            </div>
+
+            {/* ── Table Pagination ── */}
+            <div
+              style={{
+                padding: "14px 20px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                borderTop: "1px solid #f1f5f9",
+                flexWrap: "wrap",
+                gap: 10,
+              }}
+            >
+              <span style={{ fontSize: 12, color: "#94a3b8" }}>
+                Showing{" "}
+                {tabSubs.length === 0
+                  ? 0
+                  : Math.min((subPage - 1) * subPerPage + 1, tabSubs.length)}
+                –{Math.min(subPage * subPerPage, tabSubs.length)} of{" "}
+                {tabSubs.length} students
+              </span>
+              <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                <button
+                  onClick={() => setSubPage((p) => Math.max(1, p - 1))}
+                  disabled={subPage === 1}
+                  style={pageBtnStyle(false)}
+                >
+                  <ChevronLeft size={14} />
+                </button>
+                {Array.from(
+                  { length: Math.max(1, subTotalPages) },
+                  (_, i) => i + 1
+                ).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setSubPage(p)}
+                    style={pageBtnStyle(p === subPage)}
+                  >
+                    {p}
+                  </button>
+                ))}
+                <button
+                  onClick={() =>
+                    setSubPage((p) => Math.min(subTotalPages, p + 1))
+                  }
+                  disabled={subPage === subTotalPages || subTotalPages === 0}
+                  style={pageBtnStyle(false)}
+                >
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Modals ── */}
+      {markModal && (
+        <MarkModal
+          student={markModal}
+          onClose={() => setMarkModal(null)}
+          onSave={handleSaveMarks}
+        />
+      )}
+      {createModal && (
+        <CreateHomeworkModal onClose={() => setCreateModal(false)} />
+      )}
+    </>
+  );
 }

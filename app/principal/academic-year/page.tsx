@@ -11,7 +11,7 @@ import {
     updateAcademicYearForPrincipal,
     deleteAcademicYearForPrincipal,
     type AcademicYear,
-} from "@/lib/forms";
+} from "@/lib/principal";
 
 // ─── MONTHS ───────────────────────────────────────────────────────────────────
 const MONTHS = [
@@ -76,13 +76,13 @@ function StatCard({
     label: string; value: React.ReactNode; sub?: string; badge?: React.ReactNode;
 }) {
     return (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex items-center gap-4 flex-1 min-w-0">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-md p-5 flex items-center gap-4 flex-1 min-w-0">
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${iconBg}`}>
                 <span className={iconColor}>{icon}</span>
             </div>
             <div className="min-w-0">
-                <p className="text-xs text-gray-400 font-medium mb-0.5">{label}</p>
-                <p className="text-2xl font-black text-gray-900 leading-none">{value}</p>
+                <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1">{label}</p>
+                <p className="text-2xl font-black text-gray-900 leading-tight">{value}</p>
                 {badge && <div className="mt-1">{badge}</div>}
                 {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
             </div>
@@ -100,26 +100,38 @@ function AcademicYearModal({
     onClose: () => void;
     onSaved: () => void;
 }) {
-    const [name, setName] = useState(editing?.name ?? "");
+    const [startYear, setStartYear] = useState(editing?.start_year ?? new Date().getFullYear());
+    const [endYear, setEndYear] = useState(editing?.end_year ?? new Date().getFullYear() + 1);
+    const [openDropdown, setOpenDropdown] = useState<"start" | "end" | null>(null);
+
     const [startMonth, setStartMonth] = useState(editing?.start_month ?? 4);
     const [endMonth, setEndMonth] = useState(editing?.end_month ?? 3);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    useEffect(() => {
+        const close = () => setOpenDropdown(null);
+        document.addEventListener("mousedown", close);
+        return () => document.removeEventListener("mousedown", close);
+    }, []);
+
+
     const handleSave = async () => {
-        if (!name.trim()) { setError("Year name is required."); return; }
+        if (!startYear || !endYear) { setError("Start year and end year are required."); return; }
         setSaving(true);
         setError(null);
         try {
             if (editing) {
                 await updateAcademicYearForPrincipal(editing.id, {
-                    name: name.trim(),
+                    start_year: startYear,
+                    end_year: endYear,
                     start_month: startMonth,
                     end_month: endMonth,
                 });
             } else {
                 await createAcademicYearForPrincipal({
-                    name: name.trim(),
+                    start_year: startYear,
+                    end_year: endYear,
                     start_month: startMonth,
                     end_month: endMonth,
                 });
@@ -127,7 +139,21 @@ function AcademicYearModal({
             onSaved();
             onClose();
         } catch (e: unknown) {
-            setError(e instanceof Error ? e.message : "Failed to save.");
+            if (e instanceof Error) {
+                const msg = e.message;
+                try {
+                    const parsed = JSON.parse(msg);
+                    // Handle array values: { name: ["error"], start_month: ["error"] }
+                    const allValues = Object.values(parsed).flat();
+                    const firstString = allValues.find((v) => typeof v === "string");
+                    setError(typeof firstString === "string" ? firstString : msg);
+                } catch {
+                    // msg is already a plain string
+                    setError(msg);
+                }
+            } else {
+                setError("Failed to save.");
+            }
         } finally {
             setSaving(false);
         }
@@ -153,47 +179,90 @@ function AcademicYearModal({
                 )}
 
                 <div className="space-y-4">
-                    <div>
-                        <label className="block text-xs font-bold text-gray-600 mb-1.5">
-                            Year Name <span className="text-red-400">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            placeholder="e.g. 2026-27"
-                            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-                        />
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="block text-xs font-bold text-gray-600 mb-1.5">
+                                Start Year <span className="text-red-400">*</span>
+                            </label>
+                            <input
+                                type="number"
+                                value={startYear}
+                                onChange={(e) => setStartYear(Number(e.target.value))}
+                                placeholder="2026"
+                                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-gray-600 mb-1.5">
+                                End Year <span className="text-red-400">*</span>
+                            </label>
+                            <input
+                                type="number"
+                                value={endYear}
+                                onChange={(e) => setEndYear(Number(e.target.value))}
+                                placeholder="2027"
+                                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                            />
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
+                        {/* Start Month */}
+                        <div className="relative">
                             <label className="block text-xs font-bold text-gray-600 mb-1.5">Start Month</label>
-                            <select
-                                value={startMonth}
-                                onChange={(e) => setStartMonth(Number(e.target.value))}
-                                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white"
+                            <button
+                                type="button"
+                                onClick={() => setOpenDropdown(openDropdown === "start" ? null : "start")}
+                                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 bg-white flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-indigo-300"
                             >
-                                {MONTHS.map((m) => (
-                                    <option key={m.value} value={m.value}>{m.label}</option>
-                                ))}
-                            </select>
+                                <span>{MONTHS.find(m => m.value === startMonth)?.label}</span>
+                                <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === "start" ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                            </button>
+                            {openDropdown === "start" && (
+                                <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                                    {MONTHS.map(m => (
+                                        <button
+                                            key={m.value}
+                                            type="button"
+                                            onClick={() => { setStartMonth(m.value); setOpenDropdown(null); }}
+                                            className={`w-full text-left px-4 py-2.5 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors ${startMonth === m.value ? "bg-indigo-50 text-indigo-700 font-bold" : "text-gray-700"}`}
+                                        >
+                                            {m.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
-                        <div>
+
+                        {/* End Month */}
+                        <div className="relative">
                             <label className="block text-xs font-bold text-gray-600 mb-1.5">End Month</label>
-                            <select
-                                value={endMonth}
-                                onChange={(e) => setEndMonth(Number(e.target.value))}
-                                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white"
+                            <button
+                                type="button"
+                                onClick={() => setOpenDropdown(openDropdown === "end" ? null : "end")}
+                                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 bg-white flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-indigo-300"
                             >
-                                {MONTHS.map((m) => (
-                                    <option key={m.value} value={m.value}>{m.label}</option>
-                                ))}
-                            </select>
+                                <span>{MONTHS.find(m => m.value === endMonth)?.label}</span>
+                                <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === "end" ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                            </button>
+                            {openDropdown === "end" && (
+                                <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                                    {MONTHS.map(m => (
+                                        <button
+                                            key={m.value}
+                                            type="button"
+                                            onClick={() => { setEndMonth(m.value); setOpenDropdown(null); }}
+                                            className={`w-full text-left px-4 py-2.5 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors ${endMonth === m.value ? "bg-indigo-50 text-indigo-700 font-bold" : "text-gray-700"}`}
+                                        >
+                                            {m.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
 
-                    {name && startMonth && endMonth && (
+                    {startYear && endYear && startMonth && endMonth && (
                         <div className="bg-indigo-50 rounded-xl px-3 py-2 text-xs text-indigo-700 font-medium">
                             Duration: {monthCount(startMonth, endMonth)} months
                             ({monthLabel(startMonth)} → {monthLabel(endMonth)})
@@ -268,7 +337,11 @@ export default function AcademicYearPage() {
         : 0;
 
     const billingPeriods = activeYear
-        ? buildBillingPeriods(activeYear.name, activeYear.start_month, activeYear.end_month)
+        ? buildBillingPeriods(
+            `${activeYear.start_year}-${activeYear.end_year}`,
+            activeYear.start_month,
+            activeYear.end_month
+        )
         : [];
 
     return (
@@ -290,32 +363,16 @@ export default function AcademicYearPage() {
             </div>
 
             {/* ── Stat Cards ── */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                 <StatCard
                     icon={<Calendar size={22} />}
                     iconBg="bg-indigo-50" iconColor="text-indigo-500"
                     label="Total Academic Years" value={years.length} sub="All Years"
                 />
                 <StatCard
-                    icon={<CheckCircle2 size={22} />}
-                    iconBg="bg-emerald-50" iconColor="text-emerald-500"
-                    label="Active Academic Year"
-                    value={activeYear?.name ?? "—"}
-                    badge={activeYear ? (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" /> Active
-                        </span>
-                    ) : undefined}
-                />
-                <StatCard
                     icon={<Clock size={22} />}
                     iconBg="bg-amber-50" iconColor="text-amber-500"
                     label="Upcoming Years" value={upcomingCount} sub="Next in line"
-                />
-                <StatCard
-                    icon={<FileText size={22} />}
-                    iconBg="bg-blue-50" iconColor="text-blue-500"
-                    label="Total Duration" value={`${activePeriod} Months`} sub="Per Academic Year"
                 />
             </div>
 
@@ -337,67 +394,71 @@ export default function AcademicYearPage() {
                     </div>
                 ) : (
                     <div className="min-w-[600px]">
-                    <table className="w-full">
-                        <thead>
-                            <tr className="border-b border-gray-100">
-                                {["Year Name", "Duration", "Period", "Status", "Action"].map((h, i) => (
-                                    <th key={h} className={`text-xs font-bold text-gray-400 uppercase tracking-wide px-6 py-4 ${i === 4 ? "text-right" : "text-left"}`}>
-                                        {h}
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {years.map((year, i) => {
-                                const period = monthCount(year.start_month, year.end_month);
-                                const isActive = !!year.is_active;
-                                return (
-                                    <tr key={year.id} className={`border-b border-gray-50 hover:bg-gray-50/60 transition-colors ${i === years.length - 1 ? "border-b-0" : ""}`}>
-                                        <td className="px-6 py-4 text-sm font-bold text-gray-800">{year.name}</td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-2 text-sm text-gray-500">
-                                                <Calendar size={14} className="text-gray-300 flex-shrink-0" />
-                                                {year.start_month && year.end_month
-                                                    ? `${monthLabel(year.start_month)} – ${monthLabel(year.end_month)}`
-                                                    : <span className="text-gray-300">—</span>}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-gray-600">{period} Month{period !== 1 ? "s" : ""}</td>
-                                        <td className="px-6 py-4">
-                                            {isActive ? (
-                                                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-full">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" /> Active
-                                                </span>
-                                            ) : (
-                                                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-full">
-                                                    <Clock size={10} /> Upcoming
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <button
-                                                    onClick={() => { setEditing(year); setShowModal(true); }}
-                                                    className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
-                                                >
-                                                    <Pencil size={15} />
-                                                </button>
-                                                <button
-                                                    onClick={() => setConfirmDeleteId(year.id)}
-                                                    disabled={deletingId === year.id}
-                                                    className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all disabled:opacity-40"
-                                                >
-                                                    {deletingId === year.id
-                                                        ? <Loader2 size={14} className="animate-spin" />
-                                                        : <Trash2 size={15} />}
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                        <table className="w-full">
+                            <thead>
+                                <tr className="border-b border-gray-100">
+                                    {["Year Name", "Duration", "Period", "Status", "Action"].map((h, i) => (
+                                        <th key={h} className={`text-xs font-bold text-gray-400 uppercase tracking-wide px-6 py-4 ${i === 4 ? "text-right" : "text-left"}`}>
+                                            {h}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {years.map((year, i) => {
+                                    const period = monthCount(year.start_month, year.end_month);
+                                    const isActive = !!year.is_active;
+                                    return (
+                                        <tr key={year.id} className={`border-b border-gray-50 hover:bg-gray-50/60 transition-colors ${i === years.length - 1 ? "border-b-0" : ""}`}>
+                                            <td className="px-6 py-4 text-sm font-bold text-gray-800">
+                                                {year.start_year && year.end_year
+                                                    ? `${year.start_year}-${year.end_year}`
+                                                    : (year as any).name ?? "—"}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-2 text-sm text-gray-500">
+                                                    <Calendar size={14} className="text-gray-300 flex-shrink-0" />
+                                                    {year.start_month && year.end_month
+                                                        ? `${monthLabel(year.start_month)} – ${monthLabel(year.end_month)}`
+                                                        : <span className="text-gray-300">—</span>}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-sm text-gray-600">{period} Month{period !== 1 ? "s" : ""}</td>
+                                            <td className="px-6 py-4">
+                                                {isActive ? (
+                                                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-full">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" /> Active
+                                                    </span>
+                                                ) : (
+                                                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-full">
+                                                        <Clock size={10} /> Upcoming
+                                                    </span>
+                                                )}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <button
+                                                        onClick={() => { setEditing(year); setShowModal(true); }}
+                                                        className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all"
+                                                    >
+                                                        <Pencil size={15} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setConfirmDeleteId(year.id)}
+                                                        disabled={deletingId === year.id}
+                                                        className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all disabled:opacity-40"
+                                                    >
+                                                        {deletingId === year.id
+                                                            ? <Loader2 size={14} className="animate-spin" />
+                                                            : <Trash2 size={15} />}
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
                     </div>
                 )}
             </div>
@@ -408,7 +469,7 @@ export default function AcademicYearPage() {
                     <div className="flex items-center justify-between mb-1">
                         <div>
                             <h2 className="text-base font-black text-gray-900">
-                                Billing Periods – <span className="text-indigo-600">{activeYear.name}</span>
+                                Billing Periods – <span className="text-indigo-600">{activeYear.start_year}-{activeYear.end_year}</span>
                             </h2>
                             <p className="text-xs text-gray-400 mt-0.5">{billingPeriods.length} billing cycles</p>
                         </div>

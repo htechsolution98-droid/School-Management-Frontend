@@ -34,78 +34,18 @@ import {
   createTimetable,
   updateTimetable,
   getAssignedTeachers,
-} from "@/lib/forms";
+} from "@/lib/clerk";
+import type {
+  AssignedTeacher,
+  TimetableDivision as Division,
+  Teacher,
+  TimetableFormData as FormDataType,
+  TimetableFormSlot as Slot,
+  TimetableRecord,
+  TimetableSubject as Subject,
+} from "@/types/clerk";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
-interface Division {
-  id: number;
-  class_name: string;
-  division: string;
-}
-
-interface Subject {
-  id: number;
-  name: string;
-  division?: number;
-  school?: number;
-}
-
-interface Teacher {
-  id: number;
-  name: string;
-}
-
-interface AssignedTeacher {
-  teacher: number | string;
-  subject: number | string;
-  teacher_name?: string;
-  subject_name?: string;
-  is_class_teacher?: boolean;
-  division?: number | string;
-}
-
-interface Slot {
-  id: string;
-  slot_number: number;
-  is_lecture: boolean;
-  is_break: boolean;
-  slot_start_time: string;
-  slot_end_time: string;
-  subject: string | number | null;
-  teacher: string | number | null;
-  subject_name?: string;
-  teacher_name?: string;
-}
-
-interface FormDataType {
-  day: string;
-  class_division: string | number;
-  total_lecture: number;
-  total_breaks: number;
-  start_time: string;
-  end_time: string;
-  academicYear: string;
-  lecture_duration: number;
-  break_duration: number;
-}
-interface TimetableRecord {
-  id: number;
-  day: string;
-  class_division: number;
-  total_lecture: number;
-  start_time: string;
-  end_time: string;
-  slots: {
-    slot_number: number;
-    is_lecture: boolean;
-    is_break: boolean;
-    slot_start_time: string;
-    slot_end_time: string;
-    subject: number | null;
-    teacher: number | null;
-  }[];
-}
-
 interface ToastData {
   msg: string;
   type: "success" | "error" | "info" | "warning";
@@ -390,7 +330,7 @@ function LivePreviewPanel({ slots, day }: { slots: Slot[]; day: string }) {
         </h3>
         {day && (
           <span className="text-xs bg-violet-100 text-violet-700 font-bold px-3 py-1 rounded-full">
-            {DAY_SHORT[day] ?? day}
+            {DAY_SHORT[day as keyof typeof DAY_SHORT] ?? day}
           </span>
         )}
       </div>
@@ -1450,7 +1390,7 @@ function Step3PreviewSave({
 
       <div className="bg-gradient-to-r from-violet-50 to-purple-50 border border-violet-100 rounded-2xl p-4 mb-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {[
-          { label: "Day", value: DAY_FULL[form.day] ?? form.day },
+          { label: "Day", value: DAY_FULL[form.day as keyof typeof DAY_FULL] ?? form.day },
           {
             label: "Class",
             value: divName
@@ -1603,7 +1543,7 @@ function SuccessView({
           </p>
           <p className="text-sm text-emerald-600 mt-0.5">
             {divName ? `${divName.class_name} (${divName.division})` : ""} ·{" "}
-            {DAY_FULL[form.day]} · ID #{savedRecord?.id}
+            {DAY_FULL[form.day as keyof typeof DAY_FULL]} · ID #{savedRecord?.id}
           </p>
         </div>
         <div className="flex gap-2 flex-shrink-0">

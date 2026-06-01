@@ -12,6 +12,7 @@ import {
   RefreshCw,
   UserPlus,
   Users,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -95,19 +96,19 @@ export default function TrusteeDashboard() {
 
   const handleInputChange =
     (field: keyof CreateStaffPayload) =>
-    (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      const value =
-        field === "is_active"
-          ? event.target.value === "true"
-          : field === "category"
-            ? Number(event.target.value)
-            : event.target.value;
+      (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const value =
+          field === "is_active"
+            ? event.target.value === "true"
+            : field === "category"
+              ? Number(event.target.value)
+              : event.target.value;
 
-      setFormData((prev) => ({
-        ...prev,
-        [field]: value,
-      }));
-    };
+        setFormData((prev) => ({
+          ...prev,
+          [field]: value,
+        }));
+      };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -161,8 +162,17 @@ export default function TrusteeDashboard() {
               }}
               className="bg-white text-teal-700 hover:bg-teal-50"
             >
-              <UserPlus className="mr-2 h-4 w-4" />
-              {isAdding ? "Close Form" : "Add Staff"}
+              {isAdding ? (
+                <>
+                  <X className="mr-2 h-4 w-4" />
+                  Close Form
+                </>
+              ) : (
+                <>
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Add Staff
+                </>
+              )}
             </Button>
             <Button
               variant="outline"
@@ -232,7 +242,7 @@ export default function TrusteeDashboard() {
               </h3>
             </div>
 
-            <form onSubmit={handleSubmit} className="grid gap-5 md:grid-cols-2">
+            <form onSubmit={handleSubmit} className="grid gap-5 md:grid-cols-2 items-start">
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
                 <Input
@@ -267,7 +277,7 @@ export default function TrusteeDashboard() {
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 relative z-20">
                 <Label htmlFor="category">Category</Label>
                 <select
                   id="category"
@@ -278,14 +288,20 @@ export default function TrusteeDashboard() {
                 >
                   <option value="">Select Category</option>
 
-                  {staffCategories.map((category: any, index: number) => (
-                    <option
-                      key={`${category.feature_id}-${index}`}
-                      value={category.feature_id}
-                    >
-                      {category.feature_name}
-                    </option>
-                  ))}
+                  {staffCategories.map((category: any, index: number) => {
+                    const match = STAFF_CATEGORIES.find(
+                      (s) => s.value === category.feature_name
+                    )
+                    return (
+                      <option
+                        key={`${category.feature_id}-${index}`}
+                        value={category.feature_id}
+                      >
+                        {match ? match.label : category.feature_name
+                          .charAt(0).toUpperCase() + category.feature_name.slice(1).toLowerCase()}
+                      </option>
+                    )
+                  })}
                 </select>
               </div>
 
@@ -303,10 +319,13 @@ export default function TrusteeDashboard() {
                 <Label htmlFor="date_of_birth">Date of Birth</Label>
                 <Input
                   id="date_of_birth"
-                  type="date"
+                  type="text"
                   value={formData.date_of_birth}
                   onChange={handleInputChange("date_of_birth")}
+                  onFocus={(e) => (e.target.type = "date")}
+                  onBlur={(e) => { if (!e.target.value) e.target.type = "text" }}
                   required
+                  placeholder="YYYY-MM-DD"
                 />
               </div>
 
@@ -323,13 +342,13 @@ export default function TrusteeDashboard() {
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 relative z-10">
                 <Label htmlFor="is_active">Status</Label>
                 <select
                   id="is_active"
                   value={String(formData.is_active)}
                   onChange={handleInputChange("is_active")}
-                  className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none"
+                  className="flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-sm shadow-xs outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                 >
                   <option value="true">Active</option>
                   <option value="false">Inactive</option>
@@ -449,11 +468,10 @@ export default function TrusteeDashboard() {
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
-                          member.is_active
-                            ? "bg-emerald-50 text-emerald-700"
-                            : "bg-red-50 text-red-700"
-                        }`}
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${member.is_active
+                          ? "bg-emerald-50 text-emerald-700"
+                          : "bg-red-50 text-red-700"
+                          }`}
                       >
                         {member.is_active ? "Active" : "Inactive"}
                       </span>

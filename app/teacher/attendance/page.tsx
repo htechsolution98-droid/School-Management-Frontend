@@ -25,7 +25,8 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import { getAttendanceHistory, type AttendanceRecord } from "@/lib/forms";
+import { getAttendanceHistory } from "@/lib/teacher";
+import type { AttendanceRecord } from "@/types/teacher";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

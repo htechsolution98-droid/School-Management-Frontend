@@ -23,43 +23,43 @@ interface DashboardLayoutProps {
 
 const roleConfig: Record<string, { gradient: string; badge: string; badgeText: string }> = {
   "Super Admin": {
-    gradient: "from-[#4F46E5] via-[#7C3AED] to-[#9333EA]",
-    badge: "bg-violet-500",
+    gradient: "from-[#1D496C] via-[#285E89] to-[#429CE4]",
+    badge: "bg-[#1D496C]",
     badgeText: "SA",
   },
   Trustee: {
-    gradient: "from-[#0F766E] via-[#0D9488] to-[#14B8A6]",
-    badge: "bg-teal-500",
+    gradient: "from-[#1D496C] via-[#285E89] to-[#6A7626]",
+    badge: "bg-[#285E89]",
     badgeText: "TR",
   },
   Principal: {
-    gradient: "from-[#1D4ED8] via-[#2563EB] to-[#3B82F6]",
-    badge: "bg-blue-500",
+    gradient: "from-[#1D496C] via-[#6A7626] to-[#E4FF4C]",
+    badge: "bg-[#6A7626]",
     badgeText: "PR",
   },
   Clerk: {
-    gradient: "from-[#0F766E] via-[#0D9488] to-[#14B8A6]",
-    badge: "bg-teal-500",
+    gradient: "from-[#429CE4] via-[#285E89] to-[#1D496C]",
+    badge: "bg-[#429CE4]",
     badgeText: "CL",
   },
   Fees: {
-    gradient: "from-[#B45309] via-[#D97706] to-[#F59E0B]",
-    badge: "bg-amber-500",
+    gradient: "from-[#ED6708] via-[#FFA600] to-[#E4FF4C]",
+    badge: "bg-[#ED6708]",
     badgeText: "FE",
   },
   Librarian: {
-    gradient: "from-[#166534] via-[#15803D] to-[#22C55E]",
-    badge: "bg-green-500",
+    gradient: "from-[#6A7626] via-[#E4FF4C] to-[#429CE4]",
+    badge: "bg-[#6A7626]",
     badgeText: "LB",
   },
   Inventory: {
-    gradient: "from-[#1D4ED8] via-[#2563EB] to-[#06B6D4]",
-    badge: "bg-cyan-500",
+    gradient: "from-[#285E89] via-[#429CE4] to-[#E4FF4C]",
+    badge: "bg-[#429CE4]",
     badgeText: "IN",
   },
   Applicant: {
-    gradient: "from-[#6366F1] via-[#8B5CF6] to-[#D946EF]",
-    badge: "bg-indigo-500",
+    gradient: "from-[#FFA600] via-[#ED6708] to-[#1D496C]",
+    badge: "bg-[#FFA600]",
     badgeText: "AP",
   },
 };
@@ -91,13 +91,13 @@ function SidebarContent({
           <motion.div
             whileHover={{ rotate: 10, scale: 1.1 }}
             transition={{ type: "spring", stiffness: 400, damping: 15 }}
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/15 shadow-lg border border-white/10"
+            className="flex h-14 w-auto items-center justify-center rounded-xl bg-white shadow-lg border border-white/10 p-1.5"
           >
-            <GraduationCap className="h-5 w-5 text-[#34D399]" />
+            <img src="/logo.png" alt="VidyaSanchalan Logo" className="h-11 w-auto max-w-[100px] object-contain" />
           </motion.div>
           <div>
             <span className="font-black text-lg tracking-tight text-white leading-none">
-              Edu<span className="text-[#34D399]">Manage</span>
+              Vidya<span className="text-[#FFA600]">Sanchalan</span>
             </span>
             <p className="text-[10px] text-white/40 font-medium leading-none mt-0.5">School Management</p>
           </div>
@@ -223,12 +223,12 @@ export function DashboardLayout({
     <div className="flex h-svh w-full overflow-hidden bg-[#f1f5f9]">
       {/* Desktop Sidebar */}
       <aside
-        className={`hidden lg:flex w-64 flex-col bg-gradient-to-b from-[#0f0c29] via-[#1a1756] to-[#1e1b4b] text-white relative overflow-hidden shrink-0`}
+        className={`hidden lg:flex w-64 flex-col bg-gradient-to-b from-[#1D496C] via-[#122F45] to-[#0F1E2C] text-white relative overflow-hidden shrink-0`}
       >
         {/* Decorative glow blobs */}
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-20 -left-20 h-64 w-64 rounded-full bg-[#4F46E5]/20 blur-3xl" />
-          <div className="absolute bottom-0 right-0 h-48 w-48 rounded-full bg-[#34D399]/10 blur-3xl" />
+          <div className="absolute -top-20 -left-20 h-64 w-64 rounded-full bg-[#429CE4]/20 blur-3xl" />
+          <div className="absolute bottom-0 right-0 h-48 w-48 rounded-full bg-[#6A7626]/15 blur-3xl" />
         </div>
         <div className="relative z-10 flex flex-col h-full">
           <SidebarContent
@@ -339,12 +339,12 @@ export function DashboardLayout({
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", stiffness: 340, damping: 30 }}
-              className="fixed inset-y-0 left-0 w-72 bg-gradient-to-b from-[#0f0c29] via-[#1a1756] to-[#1e1b4b] text-white flex flex-col z-50 lg:hidden overflow-hidden"
+              className="fixed inset-y-0 left-0 w-72 bg-gradient-to-b from-[#1D496C] via-[#122F45] to-[#0F1E2C] text-white flex flex-col z-50 lg:hidden overflow-hidden"
             >
               {/* Blobs */}
               <div className="pointer-events-none absolute inset-0">
-                <div className="absolute -top-20 -left-20 h-64 w-64 rounded-full bg-[#4F46E5]/20 blur-3xl" />
-                <div className="absolute bottom-0 right-0 h-48 w-48 rounded-full bg-[#34D399]/10 blur-3xl" />
+                <div className="absolute -top-20 -left-20 h-64 w-64 rounded-full bg-[#429CE4]/20 blur-3xl" />
+                <div className="absolute bottom-0 right-0 h-48 w-48 rounded-full bg-[#6A7626]/15 blur-3xl" />
               </div>
 
               {/* Close button */}

@@ -26,7 +26,7 @@ import {
   Building2,
   Download,
 } from "lucide-react";
-import { getSalaryPayments, generateSalary, getStaffList } from "@/lib/forms";
+import { getSalaryPayments, generateSalary, getStaffList } from "@/lib/fees";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -349,11 +349,10 @@ const ReceiptModal = ({
                     </p>
                   </div>
                   <p
-                    className={`text-sm font-bold tabular-nums ${
-                      c.component_type === "earning"
-                        ? "text-emerald-600"
-                        : "text-red-500"
-                    }`}
+                    className={`text-sm font-bold tabular-nums ${c.component_type === "earning"
+                      ? "text-emerald-600"
+                      : "text-red-500"
+                      }`}
                   >
                     {c.component_type === "deduction" ? "−" : "+"}
                     {formatCurrency(c.amount)}
@@ -456,6 +455,17 @@ const GenerateModal = ({
   const [staffOptions, setStaffOptions] = useState<StaffMember[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedStaffId, setSelectedStaffId] = useState<number>(0);
+  const [openDropdown, setOpenDropdown] = useState<"category" | "staff" | null>(null);
+
+  useEffect(() => {
+    const close = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest("[data-dropdown]")) setOpenDropdown(null);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, []);
+
 
   const handleSubmit = async () => {
     if (!selectedCategory) {
@@ -504,7 +514,7 @@ const GenerateModal = ({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const data = await generateSalary(body as any);
       onSuccess(data);
-       } catch (e) {
+    } catch (e) {
       const msg =
         e instanceof Error
           ? e.message
@@ -616,51 +626,74 @@ const GenerateModal = ({
           {/* Payment Mode */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Category */}
-            <div>
+            <div className="relative" data-dropdown>
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">
                 Category *
               </label>
-
-              <select
-                value={selectedCategory}
-                onChange={(e) => {
-                  setSelectedCategory(e.target.value);
-                  setSelectedStaffId(0);
-                }}
-                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition"
+              <button
+                type="button"
+                data-dropdown
+                onClick={() => setOpenDropdown(openDropdown === "category" ? null : "category")}
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-left flex items-center justify-between focus:outline-none focus:border-indigo-400 transition bg-white"
+                style={{ color: selectedCategory ? "#374151" : "#9ca3af" }}
               >
-                <option value="">Select Category</option>
-
-                {categories.map((cat, index) => (
-                  <option key={`${cat}-${index}`} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
+                <span>{selectedCategory || "Select Category"}</span>
+                <ChevronDown className={`h-4 w-4 text-slate-400 shrink-0 transition-transform ${openDropdown === "category" ? "rotate-180" : ""}`} />
+              </button>
+              {openDropdown === "category" && (
+                <div data-dropdown className="absolute z-[200] top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto">
+                  <button type="button" data-dropdown
+                    onClick={() => { setSelectedCategory(""); setSelectedStaffId(0); setOpenDropdown(null); }}
+                    className="w-full text-left px-4 py-2.5 text-sm text-slate-400 hover:bg-slate-50 transition-colors">
+                    Select Category
+                  </button>
+                  {categories.map((cat, index) => (
+                    <button key={`${cat}-${index}`} type="button" data-dropdown
+                      onClick={() => { setSelectedCategory(cat); setSelectedStaffId(0); setOpenDropdown(null); }}
+                      className={`w-full text-left px-4 py-2.5 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors ${selectedCategory === cat ? "bg-indigo-50 text-indigo-700 font-semibold" : "text-slate-700"}`}>
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Staff */}
-            <div>
+            <div className="relative" data-dropdown>
               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">
                 Staff Name *
               </label>
-
-              <select
-                value={selectedStaffId}
-                onChange={(e) => setSelectedStaffId(Number(e.target.value))}
+              <button
+                type="button"
+                data-dropdown
                 disabled={!selectedCategory}
-                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition disabled:bg-slate-50 disabled:text-slate-400"
+                onClick={() => selectedCategory && setOpenDropdown(openDropdown === "staff" ? null : "staff")}
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-left flex items-center justify-between focus:outline-none focus:border-indigo-400 transition bg-white disabled:bg-slate-50"
+                style={{ color: selectedStaffId ? "#374151" : "#9ca3af" }}
               >
-                <option value={0}>Select Staff</option>
-
-                {filteredStaff.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} (
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    {(s as any).category})
-                  </option>
-                ))}
-              </select>
+                <span>
+                  {selectedStaffId
+                    ? (() => { const s = filteredStaff.find(s => s.id === selectedStaffId); return s ? `${s.name} (${(s as any).category})` : "Select Staff"; })()
+                    : "Select Staff"}
+                </span>
+                <ChevronDown className={`h-4 w-4 text-slate-400 shrink-0 transition-transform ${openDropdown === "staff" ? "rotate-180" : ""}`} />
+              </button>
+              {openDropdown === "staff" && (
+                <div data-dropdown className="absolute z-[200] top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto">
+                  <button type="button" data-dropdown
+                    onClick={() => { setSelectedStaffId(0); setOpenDropdown(null); }}
+                    className={`w-full text-left px-4 py-2.5 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors ${!selectedStaffId ? "bg-indigo-50 text-indigo-700 font-semibold" : "text-slate-400"}`}>
+                    Select Staff
+                  </button>
+                  {filteredStaff.map((s) => (
+                    <button key={s.id} type="button" data-dropdown
+                      onClick={() => { setSelectedStaffId(s.id); setOpenDropdown(null); }}
+                      className={`w-full text-left px-4 py-2.5 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors ${selectedStaffId === s.id ? "bg-indigo-50 text-indigo-700 font-semibold" : "text-slate-700"}`}>
+                      {s.name} ({(s as any).category})
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           <div>
@@ -672,11 +705,10 @@ const GenerateModal = ({
                 <button
                   key={m}
                   onClick={() => setPaymentMode(m)}
-                  className={`flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all text-sm font-semibold ${
-                    paymentMode === m
-                      ? "border-indigo-500 bg-indigo-50 text-indigo-700"
-                      : "border-slate-200 text-slate-400 hover:border-slate-300 hover:text-slate-600"
-                  }`}
+                  className={`flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all text-sm font-semibold ${paymentMode === m
+                    ? "border-indigo-500 bg-indigo-50 text-indigo-700"
+                    : "border-slate-200 text-slate-400 hover:border-slate-300 hover:text-slate-600"
+                    }`}
                 >
                   {m === "offline" ? (
                     <Banknote size={15} />
@@ -717,9 +749,8 @@ const GenerateModal = ({
               onChange={(e) => setNote(e.target.value)}
               rows={2}
               className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition resize-none"
-              placeholder={`e.g. ${formatMonth(salaryMonth)} salary paid by ${
-                paymentMode === "online" ? "online transfer" : "cash"
-              }`}
+              placeholder={`e.g. ${formatMonth(salaryMonth)} salary paid by ${paymentMode === "online" ? "online transfer" : "cash"
+                }`}
             />
           </div>
 
@@ -770,6 +801,8 @@ const MonthPicker = ({
   value: string;
   onChange: (v: string) => void;
 }) => {
+  const [open, setOpen] = useState(false);
+
   const months = useMemo(() => {
     const result = [];
     const now = new Date();
@@ -781,27 +814,54 @@ const MonthPicker = ({
     return result;
   }, []);
 
+  useEffect(() => {
+    const close = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest("[data-monthpicker]")) setOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, []);
+
+  const selectedLabel = months.find((m) => m.val === value)?.label ?? value;
+
   return (
-    <div className="relative">
-      <Calendar
-        size={14}
-        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-      />
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="pl-9 pr-8 py-2 border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-indigo-400 bg-white transition appearance-none cursor-pointer"
+    <div className="relative" data-monthpicker>
+      <button
+        type="button"
+        data-monthpicker
+        onClick={() => setOpen((p) => !p)}
+        className="flex items-center gap-2 pl-3 pr-3 py-2 border border-slate-200 rounded-xl text-sm text-slate-700 bg-white hover:border-slate-300 focus:outline-none focus:border-indigo-400 transition cursor-pointer"
       >
-        {months.map((m) => (
-          <option key={m.val} value={m.val}>
-            {m.label}
-          </option>
-        ))}
-      </select>
-      <ChevronDown
-        size={13}
-        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-      />
+        <Calendar size={14} className="text-slate-400 shrink-0" />
+        <span className="font-medium">{selectedLabel}</span>
+        <ChevronDown
+          size={13}
+          className={`text-slate-400 transition-transform ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {open && (
+        <div
+          data-monthpicker
+          className="absolute z-[200] top-full right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-64 overflow-y-auto min-w-[180px]"
+        >
+          {months.map((m) => (
+            <button
+              key={m.val}
+              type="button"
+              data-monthpicker
+              onClick={() => { onChange(m.val); setOpen(false); }}
+              className={`w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-indigo-50 hover:text-indigo-700 ${value === m.val
+                  ? "bg-indigo-50 text-indigo-700 font-semibold"
+                  : "text-slate-700"
+                }`}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -967,15 +1027,15 @@ export default function GenerateSalaryPage() {
             style={
               toast.type === "success"
                 ? {
-                    background: "#052e16",
-                    color: "white",
-                    border: "1px solid #166534",
-                  }
+                  background: "#052e16",
+                  color: "white",
+                  border: "1px solid #166534",
+                }
                 : {
-                    background: "#450a0a",
-                    color: "white",
-                    border: "1px solid #991b1b",
-                  }
+                  background: "#450a0a",
+                  color: "white",
+                  border: "1px solid #991b1b",
+                }
             }
           >
             {toast.type === "success" ? (
@@ -1156,11 +1216,10 @@ export default function GenerateSalaryPage() {
                     <button
                       key={f}
                       onClick={() => setFilterStatus(f)}
-                      className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all capitalize ${
-                        filterStatus === f
-                          ? "bg-indigo-600 text-white shadow-sm"
-                          : "bg-white border border-slate-200 text-slate-500 hover:border-slate-300"
-                      }`}
+                      className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all capitalize ${filterStatus === f
+                        ? "bg-indigo-600 text-white shadow-sm"
+                        : "bg-white border border-slate-200 text-slate-500 hover:border-slate-300"
+                        }`}
                     >
                       {f}
                     </button>
