@@ -18,6 +18,7 @@ const DEFAULT_DATA = {
     heroDescription:
       "Manage the complete school journey — from student admission to leaving certificate — with powerful digital panels for Trustees, Principals, Clerks, Teachers, Students, and Guardians.",
     satisfactionRate: 99.8,
+    heroImage: "/sms hero.jpg",
     stats: [
       { label: "Schools",  target: 500, suffix: "+",   iconName: "GraduationCap" },
       { label: "Students", target: 50,  suffix: "K+",  iconName: "Users" },
@@ -437,6 +438,10 @@ function readStore(): typeof DEFAULT_DATA {
       }
       if (!store.settings.modulesHeroTags) {
         store.settings.modulesHeroTags = DEFAULT_DATA.settings.modulesHeroTags;
+        mutated = true;
+      }
+      if (!store.settings.heroImage) {
+        store.settings.heroImage = DEFAULT_DATA.settings.heroImage;
         mutated = true;
       }
       if (!store.settings.modulesHeroImage) {

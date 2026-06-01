@@ -36,6 +36,7 @@ export async function PUT(request: Request) {
         settings.heroSubtitle = body.heroSubtitle;
         settings.heroDescription = body.heroDescription;
         settings.satisfactionRate = body.satisfactionRate;
+        if (body.heroImage !== undefined) settings.heroImage = body.heroImage;
         if (body.stats) settings.stats = body.stats;
         if (body.whyChooseUs) settings.whyChooseUs = body.whyChooseUs;
         // About Section fields

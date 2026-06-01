@@ -99,6 +99,7 @@ export default function LandingPage() {
   const [heroSubtitle, setHeroSubtitle] = useState("Complete Smart School Management System");
   const [heroDescription, setHeroDescription] = useState("Manage the complete school journey — from student admission to leaving certificate — with powerful digital panels for Trustees, Principals, Clerks, Teachers, Students, and Guardians.");
   const [satisfactionRate, setSatisfactionRate] = useState(99.8);
+  const [heroImage, setHeroImage] = useState("/sms hero.jpg");
   const [stats, setStats] = useState([
     { label: "Schools", target: 500, suffix: "+", iconName: "GraduationCap" },
     { label: "Students", target: 50, suffix: "K+", iconName: "Users" },
@@ -170,6 +171,7 @@ export default function LandingPage() {
           setHeroSubtitle(data.settings.heroSubtitle || "Complete Smart School Management System");
           setHeroDescription(data.settings.heroDescription || "");
           setSatisfactionRate(data.settings.satisfactionRate || 99.8);
+          if (data.settings.heroImage) setHeroImage(data.settings.heroImage);
           if (data.settings.stats && data.settings.stats.length > 0) {
             setStats(data.settings.stats);
           }
@@ -567,7 +569,7 @@ export default function LandingPage() {
                 className="relative overflow-hidden rounded-[2.5rem] border-4 border-white bg-slate-100 shadow-2xl shadow-slate-900/10 hover:shadow-slate-900/20 transition-shadow duration-500 max-w-[480px] w-full aspect-[4/3] flex items-center justify-center group"
               >
                 <img
-                  src="/sms hero.jpg"
+                  src={heroImage}
                   alt="VidhyaSanchalan Smart School Management"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                 />

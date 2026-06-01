@@ -8,6 +8,7 @@ const LandingSettingsSchema = new Schema({
   heroTitle: { type: String, default: "VidhyaSanchalan" },
   heroSubtitle: { type: String, default: "Complete Smart School Management System" },
   heroDescription: { type: String, default: "Manage the complete school journey — from student admission to leaving certificate — with powerful digital panels for Trustees, Principals, Clerks, Teachers, Students, and Guardians." },
+  heroImage: { type: String, default: "/sms hero.jpg" },
   satisfactionRate: { type: Number, default: 99.8 },
   stats: [
     {
