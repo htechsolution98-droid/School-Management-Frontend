@@ -19,12 +19,14 @@ import {
   Hash,
 } from "lucide-react";
 
-import { getSchools, createSchool } from "@/lib/school";
 import {
+  getSchools,
+  createSchool,
   updateFeatureStatus,
   createSchoolFeature,
   fetchFeaturesList,
-} from "@/lib/feature";
+} from "@/lib/superadmin";
+
 import { CreateSchoolPayload, School } from "@/types";
 
 const EMPTY_FORM: CreateSchoolPayload = {

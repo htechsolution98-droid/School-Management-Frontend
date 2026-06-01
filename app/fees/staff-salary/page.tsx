@@ -28,93 +28,19 @@ import {
   getSalaryComponents,
   createStaffSalaryComponent,
   getStaffList,
+  getAllStaffSalaryComponents,
+  deleteStaffSalaryComponent,
+  updateStaffSalaryComponent,
+  type CalcType,
   type SalaryComponent,
+  type StaffSalaryAssignment as Assignment,
   type StaffMember,
-} from "@/lib/forms";
+} from "@/lib/fees";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-type CalcType = "fixed" | "percentage";
-
-interface Assignment {
-  id: number;
-  staffId: number;
-  staffName: string;
-  component: number;
-  componentName: string;
-  componentType: "earning" | "deduction";
-  calculation_type: CalcType;
-  value: string;
-  isActive: boolean;
-}
-
 // ─── API helpers ──────────────────────────────────────────────────────────────
-import { fetchWithAuth } from "@/lib/auth";
-import { API_BASE_URL } from "@/lib/config";
-
-async function getAllStaffSalaryComponents(): Promise<Assignment[]> {
-  const response = await fetchWithAuth(`${API_BASE_URL}/staff-salary-component/`);
-  if (!response.ok) {
-    let message = "Failed to fetch assigned components.";
-    try {
-      const err = await response.json();
-      message = err?.detail || err?.message || message;
-    } catch {}
-    throw new Error(message);
-  }
-  const data = await response.json();
-  const raw: any[] = Array.isArray(data) ? data : (data.results ?? data.data ?? []);
-  return raw.map((item) => ({
-    id: item.id,
-    staffId: item.staff,
-    staffName: item.staff_name ?? `Staff #${item.staff}`,
-    component: item.component,
-    componentName: item.component_name ?? "Unknown",
-    componentType: item.component_type ?? "earning",
-    calculation_type: item.calculation_type,
-    value: item.value,
-    isActive: item.is_active ?? true,
-  }));
-}
-
-async function deleteStaffSalaryComponent(id: number): Promise<void> {
-  const response = await fetchWithAuth(
-    `${API_BASE_URL}/staff-salary-component/${id}/`,
-    { method: "DELETE" }
-  );
-  if (!response.ok && response.status !== 204) {
-    let message = "Failed to delete component.";
-    try {
-      const err = await response.json();
-      message = err?.detail || err?.message || message;
-    } catch {}
-    throw new Error(message);
-  }
-}
-
 // ─── NEW: Update API helper ───────────────────────────────────────────────────
 // PATCH /staff-salary-component/{id}/ with { calculation_type, value }
-async function updateStaffSalaryComponent(
-  id: number,
-  payload: { calculation_type: CalcType; value: string }
-): Promise<void> {
-  const response = await fetchWithAuth(
-    `${API_BASE_URL}/staff-salary-component/${id}/`,
-    {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    }
-  );
-  if (!response.ok) {
-    let message = "Failed to update component.";
-    try {
-      const err = await response.json();
-      message = err?.detail || err?.message || message;
-    } catch {}
-    throw new Error(message);
-  }
-}
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const AVATAR_COLORS = [
   ["#e0e7ff", "#4f46e5"],
@@ -255,6 +181,8 @@ function EditModal({
   const [formErr, setFormErr] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+
+
   // Pre-fill form when assignment changes
   useEffect(() => {
     if (assignment) {
@@ -340,7 +268,7 @@ function EditModal({
                 <button
                   onClick={onClose}
                   className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors"
-                >
+                > 
                   <X className="h-4 w-4 text-slate-500" />
                 </button>
               </div>
@@ -509,13 +437,23 @@ function AssignModal({
   staffList: StaffMember[];
   onAssigned: (a: Assignment) => void;
 }) {
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedStaff, setSelectedStaff] = useState<number | "">("");
   const [selComponent, setSelComponent] = useState<number | "">("");
   const [calcType, setCalcType] = useState<CalcType>("fixed");
   const [value, setValue] = useState("");
   const [formErr, setFormErr] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<"category" | "staff" | "component" | null>(null);
+
+  useEffect(() => {
+    const close = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest("[data-dropdown]")) setOpenDropdown(null);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, []);
 
   useEffect(() => {
     if (open) {
@@ -525,6 +463,7 @@ function AssignModal({
       setCalcType("fixed");
       setValue("");
       setFormErr("");
+      setOpenDropdown(null);
     }
   }, [open]);
 
@@ -616,63 +555,103 @@ function AssignModal({
 
               <div className="px-4 sm:px-7 pb-5 sm:pb-7 space-y-5 max-h-[85vh] overflow-y-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
+                  {/* ── Category ── */}
+                  <div className="relative" data-dropdown>
                     <label className="block text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-2">
                       Category <span className="text-red-400">*</span>
                     </label>
-                    <div className="relative">
-                      <select
-                        value={selectedCategory}
-                        onChange={(e) => { setSelectedCategory(e.target.value); setSelectedStaff(""); }}
-                        className="w-full rounded-xl border-2 border-slate-100 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 appearance-none focus:outline-none focus:border-indigo-400 focus:bg-white focus:ring-4 focus:ring-indigo-50 transition-all cursor-pointer"
-                      >
-                        <option value="">Select Category</option>
-                        {[...new Set(staffList.map((s) => s.designation || s.category))].filter(Boolean).map((cat) => (
-                          <option key={cat} value={cat}>{cat}</option>
+                    <button
+                      type="button"
+                      data-dropdown
+                      onClick={() => setOpenDropdown(openDropdown === "category" ? null : "category")}
+                      className="w-full rounded-xl border-2 border-slate-100 bg-slate-50 px-4 py-3 text-sm font-semibold text-left flex items-center justify-between focus:outline-none focus:border-indigo-400 transition-all"
+                      style={{ color: selectedCategory ? "#1e293b" : "#94a3b8" }}
+                    >
+                      <span>{selectedCategory || "Select Category"}</span>
+                      <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform shrink-0 ${openDropdown === "category" ? "rotate-180" : ""}`} />
+                    </button>
+                    {openDropdown === "category" && (
+                      <div data-dropdown className="absolute z-[200] top-full left-0 right-0 mt-1 bg-white border-2 border-slate-100 rounded-xl shadow-2xl max-h-44 overflow-y-auto">
+                        <button type="button" data-dropdown
+                          onClick={() => { setSelectedCategory(""); setSelectedStaff(""); setOpenDropdown(null); }}
+                          className={`w-full text-left px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-indigo-50 hover:text-indigo-700 ${!selectedCategory ? "bg-indigo-50 text-indigo-700" : "text-slate-400"}`}>
+                          Select Category
+                        </button>
+                        {[...new Set(staffList.map((s) => s.designation ?? s.category ?? ""))].filter(Boolean).map((cat) => (
+                          <button key={cat} type="button" data-dropdown
+                            onClick={() => { setSelectedCategory(cat); setSelectedStaff(""); setOpenDropdown(null); }}
+                            className={`w-full text-left px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-indigo-50 hover:text-indigo-700 ${selectedCategory === cat ? "bg-indigo-50 text-indigo-700" : "text-slate-700"}`}>
+                            {cat}
+                          </button>
                         ))}
-                      </select>
-                      <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
-                    </div>
+                      </div>
+                    )}
                   </div>
 
-                  <div>
+                  {/* ── Staff Name ── */}
+                  <div className="relative" data-dropdown>
                     <label className="block text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-2">
                       Staff Name <span className="text-red-400">*</span>
                     </label>
-                    <div className="relative">
-                      <select
-                        value={selectedStaff}
-                        onChange={(e) => { setSelectedStaff(Number(e.target.value)); setFormErr(""); }}
-                        className="w-full rounded-xl border-2 border-slate-100 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 appearance-none focus:outline-none focus:border-indigo-400 focus:bg-white focus:ring-4 focus:ring-indigo-50 transition-all cursor-pointer"
-                      >
-                        <option value="">Select Staff</option>
-                        {staffList
-                          .filter((s) => (s.designation || s.category) === selectedCategory)
-                          .map((s) => (
-                            <option key={s.id} value={s.id}>{s.name}</option>
-                          ))}
-                      </select>
-                      <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
-                    </div>
+                    <button
+                      type="button"
+                      data-dropdown
+                      onClick={() => setOpenDropdown(openDropdown === "staff" ? null : "staff")}
+                      className="w-full rounded-xl border-2 border-slate-100 bg-slate-50 px-4 py-3 text-sm font-semibold text-left flex items-center justify-between focus:outline-none focus:border-indigo-400 transition-all"
+                      style={{ color: selectedStaff ? "#1e293b" : "#94a3b8" }}
+                    >
+                      <span>{selectedStaff ? staffList.find(s => s.id === selectedStaff)?.name : "Select Staff"}</span>
+                      <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform shrink-0 ${openDropdown === "staff" ? "rotate-180" : ""}`} />
+                    </button>
+                    {openDropdown === "staff" && (
+                      <div data-dropdown className="absolute z-[200] top-full left-0 right-0 mt-1 bg-white border-2 border-slate-100 rounded-xl shadow-2xl max-h-44 overflow-y-auto">
+                        <button type="button" data-dropdown
+                          onClick={() => { setSelectedStaff(""); setOpenDropdown(null); }}
+                          className={`w-full text-left px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-indigo-50 hover:text-indigo-700 ${!selectedStaff ? "bg-indigo-50 text-indigo-700" : "text-slate-400"}`}>
+                          Select Staff
+                        </button>
+                        {staffList.filter(s => (s.designation ?? s.category ?? "") === selectedCategory).map(s => (
+                          <button key={s.id} type="button" data-dropdown
+                            onClick={() => { setSelectedStaff(s.id); setFormErr(""); setOpenDropdown(null); }}
+                            className={`w-full text-left px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-indigo-50 hover:text-indigo-700 ${selectedStaff === s.id ? "bg-indigo-50 text-indigo-700" : "text-slate-700"}`}>
+                            {s.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
-                  <div className="md:col-span-2">
+                  {/* ── Component ── */}
+                  <div className="relative md:col-span-2" data-dropdown>
                     <label className="block text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-2">
                       Component <span className="text-red-400">*</span>
                     </label>
-                    <div className="relative">
-                      <select
-                        value={selComponent}
-                        onChange={(e) => { setSelComponent(Number(e.target.value)); setFormErr(""); }}
-                        className="w-full rounded-xl border-2 border-slate-100 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-800 appearance-none focus:outline-none focus:border-indigo-400 focus:bg-white focus:ring-4 focus:ring-indigo-50 transition-all pr-9 cursor-pointer"
-                      >
-                        <option value="">Select…</option>
-                        {components.map((c) => (
-                          <option key={c.id} value={c.id}>{c.name}</option>
+                    <button
+                      type="button"
+                      data-dropdown
+                      onClick={() => setOpenDropdown(openDropdown === "component" ? null : "component")}
+                      className="w-full rounded-xl border-2 border-slate-100 bg-slate-50 px-4 py-3 text-sm font-semibold text-left flex items-center justify-between focus:outline-none focus:border-indigo-400 transition-all"
+                      style={{ color: selComponent ? "#1e293b" : "#94a3b8" }}
+                    >
+                      <span>{selComponent ? components.find(c => c.id === selComponent)?.name : "Select…"}</span>
+                      <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform shrink-0 ${openDropdown === "component" ? "rotate-180" : ""}`} />
+                    </button>
+                    {openDropdown === "component" && (
+                      <div data-dropdown className="absolute z-[200] top-full left-0 right-0 mt-1 bg-white border-2 border-slate-100 rounded-xl shadow-2xl max-h-44 overflow-y-auto">
+                        <button type="button" data-dropdown
+                          onClick={() => { setSelComponent(""); setOpenDropdown(null); }}
+                          className={`w-full text-left px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-indigo-50 hover:text-indigo-700 ${!selComponent ? "bg-indigo-50 text-indigo-700" : "text-slate-400"}`}>
+                          Select…
+                        </button>
+                        {components.map(c => (
+                          <button key={c.id} type="button" data-dropdown
+                            onClick={() => { setSelComponent(c.id); setFormErr(""); setOpenDropdown(null); }}
+                            className={`w-full text-left px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-indigo-50 hover:text-indigo-700 ${selComponent === c.id ? "bg-indigo-50 text-indigo-700" : "text-slate-700"}`}>
+                            {c.name}
+                          </button>
                         ))}
-                      </select>
-                      <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
-                    </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 

@@ -19,10 +19,8 @@ import {
   getSubjects,
   saveSubject,
   deleteSubject,
-  type SchoolClass,
-  type Division,
-  type Subject,
-} from "@/lib/forms";
+} from "@/lib/clerk";
+import type { Division, SchoolClass, Subject } from "@/types/clerk";
 import { Badge } from "@/components/ui/badge";
 import { SCHOOL_CLASS_OPTIONS } from "@/lib/form-builder-config";
 import { cn } from "@/lib/utils";

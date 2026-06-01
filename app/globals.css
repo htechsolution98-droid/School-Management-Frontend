@@ -1,8 +1,18 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
+
+/* Brand Color Palette */
+:root {
+  --color-light-blue: #429CE4;
+  --color-logo-blue: #285E89;
+  --color-dark-green: #6A7626;
+  --color-light-green: #E4FF4C;
+  --color-light-orange: #FFA600;
+  --color-logo-orange: #FFA600;
+  --color-dark-orange: #ED6708;
+}
 
 @theme inline {
   --color-background: var(--background);
@@ -179,4 +189,23 @@ html {
 
 .pause-on-hover:hover {
   animation-play-state: paused;
+}
+
+/* Custom premium scrollbar styling */
+.premium-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(66, 156, 228, 0.4) transparent;
+}
+.premium-scrollbar::-webkit-scrollbar {
+  height: 8px;
+}
+.premium-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.premium-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(66, 156, 228, 0.4);
+  border-radius: 20px;
+}
+.premium-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(40, 94, 137, 0.6);
 }

@@ -36,7 +36,7 @@ import {
   ChevronRight,
   Quote,
 } from "lucide-react";
-import { getPublishedFormLink } from "@/lib/forms";
+import { getPublishedFormLink } from "@/lib/principal";
 
 function StatCounter({ target, suffix }: { target: number; suffix: string }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -88,6 +88,10 @@ export default function LandingPage() {
   const [formLink, setFormLink] = useState("");
   const [activeFeatureIdx, setActiveFeatureIdx] = useState<number | null>(null);
   const [expandedCardIdxs, setExpandedCardIdxs] = useState<number[]>([]);
+
+  // States restored from Sudhir branch for Interactive Panels
+  const [activePanelIndex, setActivePanelIndex] = useState(0);
+  const [activeChooseIdx, setActiveChooseIdx] = useState<number | null>(0);
 
   // Dynamic MongoDB Landing Page States
   const [heroBadge, setHeroBadge] = useState("★ Smart School ERP Platform");
@@ -251,8 +255,8 @@ export default function LandingPage() {
 
   useEffect(() => {
     getPublishedFormLink()
-      .then((data) => setFormLink(data.form_link))
-      .catch((err) => console.error("Failed to fetch link", err));
+      .then((data: any) => setFormLink(data.form_link))
+      .catch((err: any) => console.error("Failed to fetch link", err));
   }, []);
 
   const handleNextTestimonial = () => {
@@ -635,7 +639,97 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* About Section */}
+      <section id="about" className="py-12 overflow-hidden bg-gradient-to-br from-[#1D496C]/5 via-white to-white border-y border-[#1D496C]/10">
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-12 gap-12 items-center">
+            
+            <motion.div 
+              initial={{ opacity: 0, x: -60 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              className="lg:col-span-5 relative flex justify-center"
+            >
+              <div className="absolute -inset-4 bg-gradient-to-tr from-[#6A7626]/20 to-[#429CE4]/20 rounded-[2.5rem] blur-2xl opacity-75 -z-10 animate-pulse"></div>
+              
+              <motion.div
+                animate={{
+                  y: [0, 10, 0],
+                  rotate: [0, -1, 0]
+                }}
+                transition={{
+                  duration: 6,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                className="relative overflow-hidden rounded-[2.5rem] border-4 border-white bg-slate-100 shadow-2xl shadow-slate-900/10 max-w-[480px] w-full aspect-[4/3] flex items-center justify-center group"
+              >
+                <img 
+                  src="/about sms.jpg" 
+                  alt="One Platform for Complete School Management" 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                />
+                
+                <div className="absolute top-4 left-4 backdrop-blur-md bg-white/80 border border-white/20 px-3 py-1.5 rounded-full shadow-sm">
+                  <span className="text-xs font-bold text-[#1D496C] flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-full bg-[#FFA600]"></span>
+                    ERP System
+                  </span>
+                </div>
+              </motion.div>
+            </motion.div>
 
+            <motion.div 
+              initial={{ opacity: 0, x: 60 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              className="lg:col-span-7 space-y-6 text-left"
+            >
+              <div className="space-y-3">
+                <Badge 
+                  variant="outline" 
+                  className="rounded-full px-4 py-1.5 border-[#6A7626]/30 bg-[#6A7626]/10 text-[#6A7626] shadow-sm font-bold tracking-wider uppercase text-xs"
+                >
+                  ★ About VidhyaSanchalan
+                </Badge>
+                
+                <h2 className="text-3.5xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#1D496C] leading-tight">
+                  One Platform for <span className="bg-gradient-to-r from-[#285E89] to-[#FFA600] bg-clip-text text-transparent">Complete School</span> Management
+                </h2>
+              </div>
+              
+              <div className="space-y-4 text-slate-600 font-medium leading-relaxed text-base sm:text-lg">
+                <p>
+                  VidhyaSanchalan is an advanced school ERP and management system designed to simplify daily school operations. It helps schools manage admissions, fees, staff, attendance, examinations, homework, reports, announcements, and student progress through separate role-based panels.
+                </p>
+                <p className="border-l-4 border-[#FFA600] pl-4 italic text-[#1D496C]/90 bg-[#FFA600]/5 py-2.5 rounded-r-xl">
+                  The system supports both online and offline processes and provides transparency between school staff, students, and parents.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 pt-2">
+                {[
+                  { title: "Transparency", desc: "For staff, students & parents" },
+                  { title: "Role-Based Access", desc: "Private secure panels" }
+                ].map((item, i) => (
+                  <div key={i} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-start gap-3">
+                    <div className="h-8 w-8 rounded-lg bg-[#429CE4]/10 flex items-center justify-center text-[#429CE4] shrink-0">
+                      <Sparkles className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="font-extrabold text-[#1D496C] text-sm">{item.title}</p>
+                      <p className="text-xs text-slate-500 font-medium">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+          </div>
+        </div>
+      </section>
 
       {/* Main Features Section */}
       <section id="features" className="pt-10 pb-4 bg-white overflow-hidden border-b border-[#1D496C]/10" ref={gsapContainerRef}>
@@ -741,6 +835,172 @@ export default function LandingPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Interactive Panels Section */}
+      <section id="modules" className="pt-10 pb-20 bg-gradient-to-b from-[#F8FAFC] via-[#F1F5F9] to-white relative overflow-hidden">
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-[#1D496C]/5 to-[#429CE4]/5 rounded-full blur-3xl -translate-y-1/2 pointer-events-none"></div>
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-gradient-to-tr from-[#6A7626]/5 to-[#FFA600]/5 rounded-full blur-3xl translate-y-1/2 pointer-events-none"></div>
+
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-8 space-y-3">
+            <Badge className="rounded-full px-4 py-1.5 bg-[#1D496C]/10 text-[#1D496C] border-0 font-bold uppercase tracking-wider text-xs">
+              <Users className="mr-2 h-3.5 w-3.5" />
+              Role-Based Portals
+            </Badge>
+            <h2 className="text-3.5xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#1D496C] leading-tight">
+              Tailored Portals for <span className="bg-gradient-to-r from-[#285E89] to-[#6A7626] bg-clip-text text-transparent">Every Stakeholder</span>
+            </h2>
+            <p className="text-slate-500 font-medium text-base sm:text-lg">
+              Explore dynamic, dedicated panels built specifically to optimize administrative workflows, teaching activities, and parent-student engagement.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div className="lg:col-span-4 flex flex-row lg:flex-col gap-3 overflow-x-auto lg:overflow-x-visible pb-4 lg:pb-0 scrollbar-none snap-x shrink-0 min-w-0">
+              {panelsData.map((panel, idx) => {
+                const Icon = panel.icon;
+                const isActive = activePanelIndex === idx;
+                return (
+                  <button
+                    key={panel.id}
+                    onClick={() => setActivePanelIndex(idx)}
+                    className={`flex items-center gap-4 p-4 rounded-2xl text-left border transition-all duration-300 snap-start shrink-0 min-w-[240px] lg:min-w-0 ${
+                      isActive
+                        ? `bg-white border-slate-200 shadow-lg ${panel.glowColor} translate-x-1 lg:translate-x-2`
+                        : "bg-white/60 hover:bg-white border-transparent hover:border-slate-100 hover:shadow-md"
+                    }`}
+                  >
+                    <div
+                      className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 ${
+                        isActive ? `bg-gradient-to-br ${panel.color} text-white scale-110` : "bg-slate-100 text-slate-500"
+                      }`}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </div>
+
+                    <div className="flex-grow">
+                      <span
+                        className={`block font-bold text-sm lg:text-base transition-colors duration-300 ${
+                          isActive ? "text-[#1D496C]" : "text-slate-600 hover:text-[#1D496C]"
+                        }`}
+                      >
+                        {panel.name}
+                      </span>
+                      <span className="block text-xs font-semibold text-slate-400 mt-0.5">
+                        {isActive ? "Active Workspace" : "Click to explore"}
+                      </span>
+                    </div>
+
+                    {isActive && (
+                      <div className={`hidden lg:block w-1.5 h-8 bg-gradient-to-b ${panel.color} rounded-full`}></div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="lg:col-span-8">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activePanelIndex}
+                  initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -20, scale: 0.98 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="bg-white rounded-[32px] border border-slate-100 shadow-xl overflow-hidden flex flex-col p-6 sm:p-8 relative"
+                >
+                  <div className={`absolute top-0 right-0 h-56 w-56 rounded-full blur-3xl pointer-events-none -translate-y-20 translate-x-20 ${panelsData[activePanelIndex].bgColor}`}></div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${panelsData[activePanelIndex].color} text-white flex items-center justify-center`}>
+                        {(() => {
+                          const Icon = panelsData[activePanelIndex].icon;
+                          return <Icon className="h-5 w-5" />;
+                        })()}
+                      </div>
+                      <h3 className="text-2xl sm:text-3xl font-black text-[#1D496C]">
+                        {panelsData[activePanelIndex].name}
+                      </h3>
+                    </div>
+                    <Badge variant="outline" className={`rounded-full px-3 py-1 font-bold text-xs uppercase bg-white border-${panelsData[activePanelIndex].accentColor}/30`}>
+                      ★ Dedicated Portal
+                    </Badge>
+                  </div>
+
+                  <p className="text-slate-600 font-semibold text-sm sm:text-base leading-relaxed mb-8">
+                    {panelsData[activePanelIndex].description}
+                  </p>
+
+                  <div className="mb-8">
+                    <h4 className="text-[#1D496C] font-extrabold text-sm sm:text-base uppercase tracking-wider mb-4 flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-[#FFA600]" />
+                      Core Features & Capabilities
+                    </h4>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {panelsData[activePanelIndex].features.map((feature, idx) => (
+                        <div key={idx} className="flex items-start gap-2.5 p-1">
+                          <div className="h-5 w-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-slate-100">
+                            <CheckCircle2 className="h-3.5 w-3.5 text-[#6A7626]" strokeWidth={3} />
+                          </div>
+                          <span className="text-[#475569] font-bold text-sm leading-snug">
+                            {feature}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="border border-slate-100 rounded-2xl bg-slate-950 p-5 sm:p-6 shadow-inner relative overflow-hidden">
+                    <div className="absolute inset-0 bg-grid-white/[0.02] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
+
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4 text-xs">
+                      <div className="flex items-center gap-2">
+                        <span className="h-3 w-3 rounded-full bg-rose-500/80"></span>
+                        <span className="h-3 w-3 rounded-full bg-amber-500/80"></span>
+                        <span className="h-3 w-3 rounded-full bg-emerald-500/80"></span>
+                        <span className="text-slate-400 font-bold ml-2 hidden sm:inline text-[11px] uppercase tracking-wider">
+                          {panelsData[activePanelIndex].mockup.title}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span className="text-emerald-400 font-bold text-[10px] tracking-wider uppercase">Live Preview</span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4 relative z-10">
+                      {panelsData[activePanelIndex].mockup.metrics.map((metric, mIdx) => (
+                        <div key={mIdx} className="bg-slate-900/80 border border-slate-900/60 p-3.5 rounded-xl flex flex-col justify-between">
+                          <span className="text-slate-500 font-semibold text-[10px] sm:text-xs uppercase tracking-wider block mb-1">
+                            {metric.label}
+                          </span>
+                          <span className="text-white font-extrabold text-sm sm:text-lg block tracking-tight">
+                            {metric.value}
+                          </span>
+                          <span className="text-slate-400 font-bold text-[9px] sm:text-[10px] block mt-1">
+                            {metric.change}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="bg-slate-900/50 border border-slate-900/40 p-3.5 rounded-xl relative z-10">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className={`h-2.5 w-2.5 rounded-full bg-gradient-to-r ${panelsData[activePanelIndex].color}`}></div>
+                        <span className="text-slate-300 font-extrabold text-xs uppercase tracking-wider">System Workspace Logs</span>
+                      </div>
+                      <p className="text-slate-400 text-[11px] sm:text-xs font-semibold leading-relaxed">
+                        {panelsData[activePanelIndex].mockup.previewText}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </div>
         </div>
       </section>
@@ -1447,6 +1707,200 @@ const fallbackTestimonials = [
     content: "The geo-attendance feature made staff management much easier, and the financial audit logs are completely transparent.",
     rating: 5,
     image: "/testimonial-3.jpg"
+  }
+];
+
+const panelsData = [
+  {
+    id: "trustee",
+    name: "Trustee Panel",
+    icon: Shield,
+    color: "from-[#1D496C] to-[#15354F]",
+    bgColor: "bg-[#1D496C]/5",
+    accentColor: "#1D496C",
+    glowColor: "shadow-[#1D496C]/20",
+    description: "Manage overall school operations, monitor administration, and analyze school performance with high-level summaries.",
+    features: [
+      "Create and manage staff",
+      "Add teachers, principals, peons, and office staff",
+      "Monitor school activities",
+      "Access reports and analytics",
+      "Control overall management"
+    ],
+    mockup: {
+      title: "Trustee Analytics Dashboard",
+      metrics: [
+        { label: "Total Schools", value: "1", change: "Active" },
+        { label: "Total Staff Created", value: "48", change: "+4 this month" },
+        { label: "Overall Revenue Analytics", value: "₹24.8 Lakhs", change: "92% collected" },
+        { label: "System Health & Audits", value: "Optimal", change: "No alerts" }
+      ],
+      previewText: "Staff control, active school logs, fee collections graphs, and branch management dashboard."
+    }
+  },
+  {
+    id: "principal",
+    name: "Principal Panel",
+    icon: GraduationCap,
+    color: "from-[#6A7626] to-[#4F581D]",
+    bgColor: "bg-[#6A7626]/5",
+    accentColor: "#6A7626",
+    glowColor: "shadow-[#6A7626]/20",
+    description: "Maintain academic quality, oversee admissions, verify student fee structures, and streamline staff requests.",
+    features: [
+      "Create and publish admission forms",
+      "Verify fees",
+      "Approve or reject staff leave requests",
+      "Manage academic activities",
+      "View school reports"
+    ],
+    mockup: {
+      title: "Principal Portal",
+      metrics: [
+        { label: "Admissions Pending", value: "14", change: "Review required" },
+        { label: "Staff Leave Requests", value: "3", change: "2 pending approval" },
+        { label: "Active Classes", value: "18", change: "All teachers assigned" },
+        { label: "Today's Attendance", value: "96.4%", change: "High attendance" }
+      ],
+      previewText: "Admission portal pipelines, leave approval tables, time-table review grid, and class monitoring widget."
+    }
+  },
+  {
+    id: "clerk",
+    name: "Clerk Panel",
+    icon: BookMarked,
+    color: "from-[#429CE4] to-[#2E85CC]",
+    bgColor: "bg-[#429CE4]/5",
+    accentColor: "#429CE4",
+    glowColor: "shadow-[#429CE4]/20",
+    description: "Handle core student records, assign academic schedules, generate unique GR numbers, and manage location settings.",
+    features: [
+      "Assign class divisions",
+      "Allocate class teachers and subjects",
+      "Generate student GR numbers",
+      "Verify student fees",
+      "Manage records and documents",
+      "Geo attendance management"
+    ],
+    mockup: {
+      title: "Clerk Records Portal",
+      metrics: [
+        { label: "GR Numbers Issued", value: "1,248", change: "+12 today" },
+        { label: "Fee Records Staged", value: "85", change: "Pending verification" },
+        { label: "Geo Attendance Status", value: "Active", change: "9 locations synced" },
+        { label: "Class Assignments", value: "100%", change: "Completed" }
+      ],
+      previewText: "GR register generation tool, document uploader workspace, division allocator, and geo-tracking logs."
+    }
+  },
+  {
+    id: "fee-management",
+    name: "Fee Management Panel",
+    icon: DollarSign,
+    color: "from-[#FFA600] to-[#E09200]",
+    bgColor: "bg-[#FFA600]/5",
+    accentColor: "#FFA600",
+    glowColor: "shadow-[#FFA600]/20",
+    description: "Define custom, highly flexible fee categories, manage automated billing cycles, and track collection modes.",
+    features: [
+      "Create dynamic fee structures",
+      "Manage tuition, library, transport, and activity fees",
+      "Monthly, quarterly, yearly fee setup",
+      "Online and offline payment options",
+      "Track pending fees and receipts"
+    ],
+    mockup: {
+      title: "Fee Collections Desk",
+      metrics: [
+        { label: "Pending Fees", value: "₹4.2 Lakhs", change: "28 accounts overdue" },
+        { label: "Today's Receipts", value: "₹84,000", change: "15 receipts printed" },
+        { label: "Online Payments", value: "65%", change: "Via gateway" },
+        { label: "Offline Collections", value: "35%", change: "Cash/cheque synced" }
+      ],
+      previewText: "Dynamic fee structure creator, automatic reminders control panel, transaction registers, and outstanding fees summary."
+    }
+  },
+  {
+    id: "teacher",
+    name: "Teacher Panel",
+    icon: BookOpen,
+    color: "from-[#ED6708] to-[#CD5804]",
+    bgColor: "bg-[#ED6708]/5",
+    accentColor: "#ED6708",
+    glowColor: "shadow-[#ED6708]/20",
+    description: "Simplify classroom teaching workflows, publish homework and assignments, mark student attendance, and run online quizzes.",
+    features: [
+      "Upload homework and assignments",
+      "Manage attendance",
+      "Conduct online exams",
+      "Update marks and progress",
+      "Share announcements",
+      "Manage class timetable"
+    ],
+    mockup: {
+      title: "Teacher Classroom Center",
+      metrics: [
+        { label: "Assignments Checked", value: "24/28", change: "Grade pending" },
+        { label: "Today's Classes", value: "4 periods", change: "Next: Grade X Science" },
+        { label: "Active Exams", value: "1 Quiz", change: "MCQ Live" },
+        { label: "Announcements Sent", value: "2", change: "To Grade X Parents" }
+      ],
+      previewText: "Attendance calendar marker, mark entries sheet, assignment submission dashboard, and interactive quiz creator."
+    }
+  },
+  {
+    id: "student",
+    name: "Student Panel",
+    icon: Rocket,
+    color: "from-[#285E89] to-[#1D496C]",
+    bgColor: "bg-[#285E89]/5",
+    accentColor: "#285E89",
+    glowColor: "shadow-[#285E89]/20",
+    description: "Access a personalized study environment to track learning progress, submit assignments, take exams, and stay connected.",
+    features: [
+      "View homework and assignments",
+      "Attend online exams",
+      "Access timetable and syllabus",
+      "Login credentials via email",
+      "Track attendance and marks"
+    ],
+    mockup: {
+      title: "Student Portal Home",
+      metrics: [
+        { label: "Homework Pending", value: "2 items", change: "Due tomorrow" },
+        { label: "Your Attendance", value: "98.2%", change: "Excellent" },
+        { label: "Upcoming Exams", value: "1", change: "Friday 10:00 AM" },
+        { label: "Average GPA Score", value: "A+", change: "Top 5% in class" }
+      ],
+      previewText: "Timetable viewer widget, assignment uploader form, exam console panel, and progress report dashboard."
+    }
+  },
+  {
+    id: "parent",
+    name: "Guardian / Parent Panel",
+    icon: Heart,
+    color: "from-[#E11D48] to-[#BE123C]",
+    bgColor: "bg-[#E11D48]/5",
+    accentColor: "#E11D48",
+    glowColor: "shadow-[#E11D48]/20",
+    description: "Stay involved in your child's education. Monitor daily school life, track progress, review marksheets, and see official school news.",
+    features: [
+      "Track student progress",
+      "View attendance and marksheets",
+      "Check exam results",
+      "Monitor homework completion",
+      "Receive school announcements"
+    ],
+    mockup: {
+      title: "Parent Dashboard",
+      metrics: [
+        { label: "Child Progress", value: "Improving", change: "+5% last term" },
+        { label: "Outstanding Fees", value: "₹0", change: "Fully paid" },
+        { label: "School Notifications", value: "3 new", change: "Holiday alert included" },
+        { label: "Homework Verified", value: "100%", change: "All checked" }
+      ],
+      previewText: "Performance progress graphs, report card download console, fee dues tracking, and school announcement logs."
+    }
   }
 ];
 

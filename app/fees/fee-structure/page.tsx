@@ -24,14 +24,11 @@ import {
   GraduationCap,
   FileText,
   ChevronDown,
-  ToggleLeft,
-  ToggleRight,
   Info,
 } from "lucide-react";
 
 import {
   getFeeTypes,
-  getSchoolClasses,
   getFeeWiseClasses,
   createFeeWiseClass,
   updateFeeWiseClass,
@@ -40,7 +37,8 @@ import {
   type FeeWiseClass,
   type FeeWiseClassPayload,
   type LateFeeType,
-} from "@/lib/forms";
+} from "@/lib/fees";
+import { getSchoolClasses } from "@/lib/clerk";
 
 // ─── Zod schema ───────────────────────────────────────────────────────────────
 
@@ -130,11 +128,11 @@ function iconColor(name: string) {
 
 // ─── Billing cycle badge ──────────────────────────────────────────────────────
 const cycleMap: Record<string, { label: string; bg: string; color: string }> = {
-  single:      { label: "One-time",    bg: "#dbeafe", color: "#1d4ed8" },
-  monthly:     { label: "Monthly",     bg: "#f3e8ff", color: "#7c3aed" },
-  quarterly:   { label: "Quarterly",   bg: "#ffedd5", color: "#c2410c" },
+  single: { label: "One-time", bg: "#dbeafe", color: "#1d4ed8" },
+  monthly: { label: "Monthly", bg: "#f3e8ff", color: "#7c3aed" },
+  quarterly: { label: "Quarterly", bg: "#ffedd5", color: "#c2410c" },
   half_yearly: { label: "Half-Yearly", bg: "#d1fae5", color: "#065f46" },
-  yearly:      { label: "Yearly",      bg: "#dcfce7", color: "#15803d" },
+  yearly: { label: "Yearly", bg: "#dcfce7", color: "#15803d" },
 };
 function CycleBadge({ cycle }: { cycle: string }) {
   const c = cycleMap[cycle] ?? { label: cycle, bg: C.subtle, color: C.muted };
@@ -266,13 +264,13 @@ function Toast({ msg, type, onClose }: { msg: string; type: "success" | "error";
 function LateFeePanel({ fee }: { fee: FeeWiseClass }) {
   if (!fee.late_fee_enabled) return null;
   return (
-    <div style={{ margin: "0 24px 20px", background: "#fafbff", border: `1px solid ${C.border}`, borderRadius: 12, padding: 20 }}>
+    <div style={{ margin: "0 16px 16px", background: "#fafbff", border: `1px solid ${C.border}`, borderRadius: 12, padding: 16 }}>
       <h4 style={{ margin: "0 0 16px", fontSize: 13, fontWeight: 700, color: C.text }}>
         Late Fee Settings — {fee.feetype_name}
       </h4>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 12 }}>
         {[
-          { label: "Late Fee Enabled", value: <Toggle checked={true} onChange={() => {}} /> },
+          { label: "Late Fee Enabled", value: <Toggle checked={true} onChange={() => { }} /> },
           { label: "Grace Days", value: <div style={{ ...inp(), padding: "8px 12px", display: "inline-block" }}>{fee.grace_days}</div> },
           { label: "Late Fee Type", value: <div style={{ ...inp(), padding: "8px 12px", display: "inline-block" }}>{fee.late_fee_type === "per_day" ? "Per Day" : "Flat"}</div> },
           { label: "Late Fee Amount (₹)", value: <div style={{ ...inp(), padding: "8px 12px", display: "inline-block" }}>{fee.late_fee_amount}</div> },
@@ -298,7 +296,7 @@ function FeeModal({
   onClose: () => void;
   onSave: (data: FeeWiseClassPayload) => Promise<void>;
 }) {
-  const { register, handleSubmit, watch, setValue, formState: { errors }, reset } = useForm<FeeFormValues>({
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FeeFormValues>({
     resolver: zodResolver(feeFormSchema),
     defaultValues: {
       feetype: editing ? feeTypes.find(ft => ft.name === editing.feetype_name)?.id ?? 0 : 0,
@@ -352,18 +350,13 @@ function FeeModal({
         {/* Fee Type */}
         <div>
           <Label required>Fee Type</Label>
-          <div style={{ position: "relative" }}>
-            <select
-              {...register("feetype", { valueAsNumber: true })}
-              style={{ ...inp(!!errors.feetype), appearance: "none", paddingRight: 36, cursor: "pointer" }}
-            >
-              <option value={0}>Select fee type…</option>
-              {feeTypes.map(ft => (
-                <option key={ft.id} value={ft.id}>{ft.name}</option>
-              ))}
-            </select>
-            <ChevronDown size={14} color={C.muted} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-          </div>
+          <CustomSelect
+            value={watch("feetype")}
+            onChange={(v) => setValue("feetype", Number(v), { shouldValidate: true })}
+            options={[{ value: 0, label: "Select fee type…" }, ...feeTypes.map(ft => ({ value: ft.id, label: ft.name }))]}
+            placeholder="Select fee type…"
+            error={!!errors.feetype}
+          />
           <ErrMsg msg={errors.feetype?.message} />
         </div>
 
@@ -400,13 +393,15 @@ function FeeModal({
               </div>
               <div>
                 <Label required>Late Fee Type</Label>
-                <div style={{ position: "relative" }}>
-                  <select {...register("late_fee_type")} style={{ ...inp(!!errors.late_fee_type), appearance: "none", paddingRight: 36, cursor: "pointer" }}>
-                    <option value="per_day">Per Day</option>
-                    <option value="flat">Flat</option>
-                  </select>
-                  <ChevronDown size={14} color={C.muted} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-                </div>
+                <CustomSelect
+                  value={watch("late_fee_type") ?? "per_day"}
+                  onChange={(v) => setValue("late_fee_type", v as "per_day" | "flat", { shouldValidate: true })}
+                  options={[
+                    { value: "per_day", label: "Per Day" },
+                    { value: "flat", label: "Flat" },
+                  ]}
+                  error={!!errors.late_fee_type}
+                />
                 <ErrMsg msg={errors.late_fee_type?.message} />
               </div>
               <div>
@@ -438,6 +433,86 @@ function FeeModal({
   );
 }
 
+// ─── Custom Select Dropdown (generic) ────────────────────────────────────────
+function CustomSelect({
+  value,
+  onChange,
+  options,
+  placeholder = "Select…",
+  error,
+}: {
+  value: string | number;
+  onChange: (v: string) => void;
+  options: { value: string | number; label: string }[];
+  placeholder?: string;
+  error?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const selected = options.find((o) => String(o.value) === String(value));
+
+  useEffect(() => {
+    const close = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, []);
+
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <button
+        type="button"
+        onClick={() => setOpen((p) => !p)}
+        style={{
+          ...inp(error),
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          cursor: "pointer",
+          textAlign: "left",
+        }}
+      >
+        <span style={{ color: selected ? C.text : C.muted }}>
+          {selected ? selected.label : placeholder}
+        </span>
+        <ChevronDown
+          size={14}
+          color={C.muted}
+          style={{ flexShrink: 0, transition: "transform 0.2s", transform: open ? "rotate(180deg)" : "rotate(0deg)" }}
+        />
+      </button>
+      {open && (
+        <div style={{
+          position: "absolute", zIndex: 300, top: "calc(100% + 4px)",
+          left: 0, right: 0,
+          background: C.card, border: `1.5px solid ${C.border}`,
+          borderRadius: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+          maxHeight: 200, overflowY: "auto",
+        }}>
+          {options.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => { onChange(String(opt.value)); setOpen(false); }}
+              style={{
+                width: "100%", textAlign: "left",
+                padding: "10px 14px", border: "none", cursor: "pointer",
+                fontSize: 13, fontFamily: "inherit",
+                background: String(value) === String(opt.value) ? C.accentSoft : C.card,
+                color: String(value) === String(opt.value) ? C.accent : C.text,
+                fontWeight: String(value) === String(opt.value) ? 600 : 400,
+              }}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Delete Confirm Modal ─────────────────────────────────────────────────────
 function DeleteModal({ name, onConfirm, onCancel, deleting }: {
   name: string; onConfirm: () => void; onCancel: () => void; deleting: boolean;
@@ -452,6 +527,70 @@ function DeleteModal({ name, onConfirm, onCancel, deleting }: {
         </button>
       </div>
     </Modal>
+  );
+}
+
+// ─── Fee Row Card (mobile) ────────────────────────────────────────────────────
+// On mobile, each fee row becomes a card with all info stacked
+function FeeRowCard({ fee, expandedLateFee, setExpandedLateFee, openEdit, setDeleteTarget }: {
+  fee: FeeWiseClass;
+  expandedLateFee: number | null;
+  setExpandedLateFee: (id: number | null) => void;
+  openEdit: (fee: FeeWiseClass) => void;
+  setDeleteTarget: (fee: FeeWiseClass) => void;
+}) {
+  const isExpanded = expandedLateFee === fee.id;
+  return (
+    <div style={{ border: `1px solid ${C.border}`, borderRadius: 12, overflow: "hidden", background: isExpanded ? "#fafbff" : C.card }}>
+      <div style={{ padding: "14px 16px" }}>
+        {/* Top row: icon + name + actions */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ width: 36, height: 36, borderRadius: 9, background: iconBg(fee.feetype_name), display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: iconColor(fee.feetype_name) }}>
+            <FeeIcon name={fee.feetype_name} size={16} />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{fee.feetype_name}</p>
+            <p style={{ margin: "2px 0 0", fontSize: 13, fontWeight: 600, color: C.accent }}>
+              ₹{Number(fee.amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+            </p>
+          </div>
+          <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+            <button
+              onClick={() => openEdit(fee)}
+              style={{ width: 30, height: 30, borderRadius: 7, border: `1.5px solid ${C.border}`, background: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: C.muted }}
+              title="Edit"
+            >
+              <Edit2 size={12} />
+            </button>
+            <button
+              onClick={() => setDeleteTarget(fee)}
+              style={{ width: 30, height: 30, borderRadius: 7, border: `1.5px solid #fecaca`, background: "#fff8f8", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: C.danger }}
+              title="Delete"
+            >
+              <Trash2 size={12} />
+            </button>
+          </div>
+        </div>
+
+        {/* Bottom row: badges */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
+          <CycleBadge cycle={fee.billing_cycle} />
+          <LateBadge enabled={fee.late_fee_enabled} />
+          {fee.late_fee_enabled && (
+            <button
+              onClick={() => setExpandedLateFee(isExpanded ? null : fee.id)}
+              style={{ background: "none", border: "none", cursor: "pointer", padding: 0, fontSize: 11, color: C.accent, fontWeight: 500, display: "flex", alignItems: "center", gap: 3 }}
+            >
+              <Settings2 size={10} />
+              {isExpanded ? "Hide" : "View"} late fee
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Late fee panel */}
+      {isExpanded && <LateFeePanel fee={fee} />}
+    </div>
   );
 }
 
@@ -555,19 +694,89 @@ export default function FeeStructurePage() {
   }
 
   return (
-    <div style={{ background: C.bg, minHeight: "100vh", padding: 24 }}>
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}} * { box-sizing: border-box; }`}</style>
+    <div style={{ background: C.bg, minHeight: "100vh", padding: 16 }}>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg) } }
+        * { box-sizing: border-box; }
+
+        /* ── Responsive layout ── */
+        .fee-layout {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+          align-items: flex-start;
+        }
+        /* Class selector: horizontal scrollable pill row on mobile */
+        .fee-class-panel {
+          width: 100%;
+        }
+        .fee-class-scroll {
+          display: flex;
+          flex-direction: row;
+          overflow-x: auto;
+          gap: 8px;
+          padding: 8px;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+        }
+        .fee-class-scroll::-webkit-scrollbar { display: none; }
+        .fee-class-btn-mobile {
+          flex-shrink: 0;
+          padding: 7px 14px;
+          border-radius: 20px;
+          border: 1.5px solid transparent;
+          cursor: pointer;
+          font-size: 13px;
+          font-weight: 500;
+          white-space: nowrap;
+          transition: background 0.15s, border-color 0.15s;
+        }
+        /* Fee table: card list on mobile */
+        .fee-table-panel {
+          width: 100%;
+        }
+        .fee-desktop-header { display: none; }
+        .fee-desktop-row { display: none; }
+        .fee-mobile-cards { display: flex; flex-direction: column; gap: 10px; padding: 12px; }
+
+        /* ── Desktop (≥ 640px): restore original side-by-side layout ── */
+        @media (min-width: 640px) {
+          .fee-layout {
+            flex-direction: row;
+            gap: 20px;
+          }
+          .fee-class-panel {
+            width: 200px;
+            flex-shrink: 0;
+          }
+          .fee-class-scroll {
+            flex-direction: column;
+            overflow-x: visible;
+            gap: 0;
+          }
+          .fee-class-btn-mobile {
+            width: 100%;
+            border-radius: 9px;
+            border: none !important;
+            padding: 10px 12px;
+          }
+          .fee-table-panel { flex: 1; }
+          .fee-desktop-header { display: grid; }
+          .fee-desktop-row { display: grid; }
+          .fee-mobile-cards { display: none; }
+        }
+      `}</style>
 
       {toast && <Toast msg={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
 
       {/* Page header */}
-      <div style={{ marginBottom: 24 }}>
+      <div style={{ marginBottom: 20 }}>
         <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: C.text }}>Fee Structure</h1>
         <p style={{ margin: "4px 0 0", fontSize: 13, color: C.muted }}>Configure class-wise fees and late fee policies</p>
       </div>
 
       {error && (
-        <div style={{ background: C.dangerSoft, color: C.danger, borderRadius: 10, padding: "12px 16px", marginBottom: 20, fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ background: C.dangerSoft, color: C.danger, borderRadius: 10, padding: "12px 16px", marginBottom: 16, fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
           <AlertCircle size={15} /> {error}
           <button onClick={() => selectedClass && loadFees(selectedClass.id)} style={{ marginLeft: "auto", background: "none", border: "none", color: C.danger, cursor: "pointer", fontWeight: 600, fontSize: 13, display: "flex", alignItems: "center", gap: 5 }}>
             <RefreshCw size={13} /> Retry
@@ -575,33 +784,34 @@ export default function FeeStructurePage() {
         </div>
       )}
 
-      <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
+      <div className="fee-layout">
 
-        {/* ── Left: Class list ── */}
-        <div style={{ width: 200, flexShrink: 0 }}>
+        {/* ── Class selector panel ── */}
+        <div className="fee-class-panel">
           <div style={{ background: C.card, borderRadius: 14, border: `1.5px solid ${C.border}`, overflow: "hidden" }}>
-            <div style={{ padding: "14px 16px", borderBottom: `1px solid ${C.border}` }}>
+            <div style={{ padding: "12px 16px", borderBottom: `1px solid ${C.border}` }}>
               <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: "0.06em", textTransform: "uppercase" }}>Select Class</p>
             </div>
-            <div style={{ padding: 8 }}>
+            {/* Scrollable pill row (mobile) / vertical list (desktop) */}
+            <div className="fee-class-scroll">
               {classes.map(cls => {
                 const isSelected = selectedClass?.id === cls.id;
                 return (
                   <button
                     key={cls.id}
                     onClick={() => setSelectedClass(cls)}
+                    className="fee-class-btn-mobile"
                     style={{
-                      width: "100%", textAlign: "left", padding: "10px 12px",
-                      border: "none", borderRadius: 9, cursor: "pointer",
+                      textAlign: "left",
                       background: isSelected ? C.accentSoft : "transparent",
                       color: isSelected ? C.accent : C.text,
-                      fontSize: 13, fontWeight: isSelected ? 600 : 400,
+                      fontWeight: isSelected ? 600 : 400,
+                      borderColor: isSelected ? C.accent : C.border,
                       display: "flex", alignItems: "center", justifyContent: "space-between",
-                      transition: "background 0.15s",
                     }}
                   >
                     {cls.school_class}
-                    {isSelected && <Settings2 size={13} color={C.accent} />}
+                    {isSelected && <Settings2 size={13} color={C.accent} style={{ marginLeft: 6 }} />}
                   </button>
                 );
               })}
@@ -612,13 +822,13 @@ export default function FeeStructurePage() {
           </div>
         </div>
 
-        {/* ── Right: Fee table ── */}
-        <div style={{ flex: 1, background: C.card, borderRadius: 14, border: `1.5px solid ${C.border}`, overflow: "hidden" }}>
+        {/* ── Fee table / card panel ── */}
+        <div className="fee-table-panel" style={{ background: C.card, borderRadius: 14, border: `1.5px solid ${C.border}`, overflow: "hidden" }}>
 
-          {/* Table header */}
-          <div style={{ padding: "18px 24px", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div>
-              <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: C.text }}>
+          {/* Panel header */}
+          <div style={{ padding: "16px 20px", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+            <div style={{ minWidth: 0 }}>
+              <h2 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {selectedClass ? `${selectedClass.school_class} Fee Structure` : "Fee Structure"}
               </h2>
               <p style={{ margin: "3px 0 0", fontSize: 12, color: C.muted }}>
@@ -628,15 +838,15 @@ export default function FeeStructurePage() {
             {selectedClass && (
               <button
                 onClick={openAdd}
-                style={{ display: "flex", alignItems: "center", gap: 8, padding: "9px 18px", borderRadius: 9, border: "none", background: C.accent, color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer", boxShadow: "0 4px 14px rgba(99,102,241,0.28)" }}
+                style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 9, border: "none", background: C.accent, color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer", flexShrink: 0, boxShadow: "0 4px 14px rgba(99,102,241,0.28)" }}
               >
-                <Plus size={15} />
-                Add New Fee
+                <Plus size={14} />
+                Add Fee
               </button>
             )}
           </div>
 
-          {/* Table content */}
+          {/* Content */}
           {!selectedClass ? (
             <div style={{ padding: "48px 24px", textAlign: "center", color: C.muted }}>
               <ChevronRight size={28} style={{ display: "block", margin: "0 auto 10px", opacity: 0.3 }} />
@@ -656,19 +866,22 @@ export default function FeeStructurePage() {
             </div>
           ) : (
             <>
-              {/* Column headers */}
-              <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr auto", gap: "0 8px", padding: "10px 24px", background: C.bg, borderBottom: `1px solid ${C.border}` }}>
+              {/* ── Desktop: column headers + grid rows ── */}
+              <div
+                className="fee-desktop-header"
+                style={{ gridTemplateColumns: "2fr 1fr 1fr 1fr auto", gap: "0 8px", padding: "10px 24px", background: C.bg, borderBottom: `1px solid ${C.border}` }}
+              >
                 {["Fee Type", "Amount (₹)", "Billing Cycle", "Late Fee", "Action"].map(h => (
                   <span key={h} style={{ fontSize: 11, fontWeight: 700, color: C.muted, letterSpacing: "0.05em", textTransform: "uppercase" }}>{h}</span>
                 ))}
               </div>
 
-              {/* Rows */}
               {fees.map((fee, i) => (
                 <React.Fragment key={fee.id}>
+                  {/* Desktop row */}
                   <div
+                    className="fee-desktop-row"
                     style={{
-                      display: "grid",
                       gridTemplateColumns: "2fr 1fr 1fr 1fr auto",
                       gap: "0 8px",
                       padding: "16px 24px",
@@ -678,7 +891,6 @@ export default function FeeStructurePage() {
                       transition: "background 0.15s",
                     }}
                   >
-                    {/* Fee Type */}
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                       <div style={{ width: 38, height: 38, borderRadius: 10, background: iconBg(fee.feetype_name), display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: iconColor(fee.feetype_name) }}>
                         <FeeIcon name={fee.feetype_name} size={17} />
@@ -696,41 +908,41 @@ export default function FeeStructurePage() {
                         )}
                       </div>
                     </div>
-
-                    {/* Amount */}
                     <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: C.text }}>
                       {Number(fee.amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                     </p>
-
-                    {/* Billing Cycle */}
                     <CycleBadge cycle={fee.billing_cycle} />
-
-                    {/* Late Fee */}
                     <LateBadge enabled={fee.late_fee_enabled} />
-
-                    {/* Actions */}
                     <div style={{ display: "flex", gap: 6 }}>
-                      <button
-                        onClick={() => openEdit(fee)}
-                        style={{ width: 32, height: 32, borderRadius: 7, border: `1.5px solid ${C.border}`, background: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: C.muted }}
-                        title="Edit"
-                      >
+                      <button onClick={() => openEdit(fee)} style={{ width: 32, height: 32, borderRadius: 7, border: `1.5px solid ${C.border}`, background: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: C.muted }} title="Edit">
                         <Edit2 size={13} />
                       </button>
-                      <button
-                        onClick={() => setDeleteTarget(fee)}
-                        style={{ width: 32, height: 32, borderRadius: 7, border: `1.5px solid #fecaca`, background: "#fff8f8", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: C.danger }}
-                        title="Delete"
-                      >
+                      <button onClick={() => setDeleteTarget(fee)} style={{ width: 32, height: 32, borderRadius: 7, border: `1.5px solid #fecaca`, background: "#fff8f8", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: C.danger }} title="Delete">
                         <Trash2 size={13} />
                       </button>
                     </div>
                   </div>
-
-                  {/* Late fee expanded panel */}
-                  {expandedLateFee === fee.id && <LateFeePanel fee={fee} />}
+                  {expandedLateFee === fee.id && (
+                    <div className="fee-desktop-row" style={{ gridTemplateColumns: "1fr" }}>
+                      <LateFeePanel fee={fee} />
+                    </div>
+                  )}
                 </React.Fragment>
               ))}
+
+              {/* ── Mobile: card list ── */}
+              <div className="fee-mobile-cards">
+                {fees.map(fee => (
+                  <FeeRowCard
+                    key={fee.id}
+                    fee={fee}
+                    expandedLateFee={expandedLateFee}
+                    setExpandedLateFee={setExpandedLateFee}
+                    openEdit={openEdit}
+                    setDeleteTarget={setDeleteTarget}
+                  />
+                ))}
+              </div>
             </>
           )}
         </div>

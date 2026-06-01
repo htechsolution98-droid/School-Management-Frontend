@@ -17,7 +17,6 @@ import {
   AlertCircle,
   Loader2,
 } from "lucide-react";
-import { fetchWithAuth } from "@/lib/auth";
 import {
   getMyFees,
   getPaymentHistory,
@@ -25,152 +24,12 @@ import {
   formatINR,
   billingPeriodToLabel,
   feeStatusLabel,
-  type StudentFee,
+  initiateRazorpayPayment,
   type MyStudentFee,
   type Payment,
   type FeeStatus,
   type PaymentMode,
-} from "@/lib/forms";
-
-// ─── Razorpay Script Loader ───────────────────────────────────────────────────
-
-function loadRazorpayScript(): Promise<boolean> {
-  return new Promise((resolve) => {
-    if (typeof window === "undefined") {
-      resolve(false);
-      return;
-    }
-
-    if ((window as any).Razorpay) {
-      resolve(true);
-      return;
-    }
-
-    const existingScript = document.getElementById("razorpay-script");
-    if (existingScript) {
-      // Script tag exists but may still be loading — wait for it
-      existingScript.addEventListener("load", () => resolve(true));
-      existingScript.addEventListener("error", () => resolve(false));
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.id = "razorpay-script";
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.async = true;
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.body.appendChild(script);
-  });
-}
-
-// ─── Razorpay Payment Initiator ───────────────────────────────────────────────
-
-interface InitiatePaymentOptions {
-  studentFeeId: number;
-  partialAmount?: string;
-  onSuccess: () => void;
-  onFailure: (msg: string) => void;
-}
-
-async function initiateRazorpayPayment(options: InitiatePaymentOptions) {
-  const { studentFeeId, partialAmount, onSuccess, onFailure } = options;
-
-  // Step 1: Load script
-  const loaded = await loadRazorpayScript();
-  if (!loaded || !(window as any).Razorpay) {
-    onFailure(
-      "Failed to load Razorpay. Please check your internet connection.",
-    );
-    return;
-  }
-
-  // Step 2: Create order from your backend
-  let orderData: any;
-  try {
-    const res = await fetchWithAuth(
-      `${process.env.NEXT_PUBLIC_API_URL}/student-fee/razor/order/`,
-
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          student_fee: studentFeeId,
-          ...(partialAmount ? { amount: partialAmount } : {}),
-        }),
-      },
-    );
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      onFailure(err?.message ?? `Order creation failed (${res.status})`);
-      return;
-    }
-
-    orderData = await res.json();
-  } catch (err) {
-    onFailure("Network error while creating order. Please try again.");
-    return;
-  }
-
-  // Step 3: Open Razorpay Checkout
-  const rzpOptions = {
-    key: orderData.key ?? process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ?? "",
-    amount: orderData.amount,
-    currency: orderData.currency ?? "INR",
-    name: orderData.name ?? "School Fees",
-    description: orderData.description ?? "Fee Payment",
-    order_id: orderData.order_id ?? orderData.id,
-    handler: async function (response: any) {
-      // Step 4: Verify payment on backend
-      try {
-        const verifyRes = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL}/student-fee/razor/verify/`,
-
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              student_fee_id: studentFeeId,
-            }),
-          },
-        );
-
-        if (verifyRes.ok) {
-          onSuccess();
-        } else {
-          onFailure("Payment verification failed. Contact support.");
-        }
-      } catch {
-        onFailure("Payment verification error. Contact support.");
-      }
-    },
-    prefill: orderData.prefill ?? {},
-    theme: { color: "#7c3aed" },
-    modal: {
-      ondismiss: () => {
-        // User closed checkout — not an error, just do nothing
-      },
-    },
-  };
-
-  try {
-    const rzp = new (window as any).Razorpay(rzpOptions);
-    rzp.on("payment.failed", function (response: any) {
-      onFailure(
-        response?.error?.description ?? "Payment failed. Please try again.",
-      );
-    });
-    rzp.open();
-  } catch (err: any) {
-    onFailure(err?.message ?? "Unable to open payment window.");
-  }
-}
-
-// ─── Status Badge ─────────────────────────────────────────────────────────────
+} from "@/lib/student";
 
 const statusStyles: Record<FeeStatus, string> = {
   pending: "bg-orange-100 text-orange-600 border border-orange-300",
@@ -663,10 +522,6 @@ export default function PayFeesPage() {
   const [historyPage, setHistoryPage] = useState(1);
 
   // ── Preload Razorpay script on mount ──
-  useEffect(() => {
-    loadRazorpayScript();
-  }, []);
-
   // ── Data Fetch ──
   const fetchFees = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
