@@ -25,6 +25,72 @@ const LandingSettingsSchema = new Schema({
       color: { type: String, default: "text-[#5D3FD3]" } // text/border color config
     }
   ],
+  aboutBadge: { type: String, default: "★ About VidhyaSanchalan" },
+  aboutTitle: { type: String, default: "One Platform for Complete School Management" },
+  aboutTitleHighlight: { type: String, default: "Complete School" },
+  aboutDescription: { type: String, default: "VidhyaSanchalan is an advanced school ERP and management system designed to simplify daily school operations. It helps schools manage admissions, fees, staff, attendance, examinations, homework, reports, announcements, and student progress through separate role-based panels." },
+  aboutQuote: { type: String, default: "The system supports both online and offline processes and provides transparency between school staff, students, and parents." },
+  aboutImage: { type: String, default: "/about sms.jpg" },
+  aboutHighlights: [
+    {
+      title: { type: String, required: true },
+      desc: { type: String, required: true }
+    }
+  ],
+  whyBadge: { type: String, default: "Why Choose Us?" },
+  whyTitle: { type: String, default: "VidyaSanchalan is a revolution in education management" },
+  whyTitleHighlight: { type: String, default: "revolution" },
+  whyPills: { type: [String], default: ["100% Free Forever", "Instant Insights", "Limitless Scale"] },
+  whyImageMain: { type: String, default: "/why chooseus.jpeg" },
+  whyImageLeft: { type: String, default: "/why choose us.jpg" },
+  whyImageBottomLeft: { type: String, default: "/progress report.jpeg" },
+  whyImageBottomRight: { type: String, default: "/admission (1).jpg" },
+  mobileScreens: [
+    {
+      title: { type: String, required: true },
+      image: { type: String, required: true }, // Base64 string from device
+      description: { type: String, required: true }
+    }
+  ],
+  mobileStudent: {
+    badge: { type: String, default: "Student Application" },
+    title: { type: String, default: "Learn Smarter, Grow Faster" },
+    desc: { type: String, default: "Designed to keep students organized, motivated, and engaged." },
+    points: { type: [String], default: ["Homework Tracker", "Online Examination", "Student Timetable", "Academic Analytics"] }
+  },
+  mobileParent: {
+    badge: { type: String, default: "Parent Companion App" },
+    title: { type: String, default: "Your Child's Progress, In Your Pocket" },
+    desc: { type: String, default: "Stay intimately connected with your child's educational journey." },
+    points: { type: [String], default: ["Real-Time Geo-Attendance", "Digital Fee Desk", "Direct Parent-Teacher Chats", "Comprehensive Report Cards"] }
+  },
+  mobileTeacher: {
+    badge: { type: String, default: "Teacher Dashboard" },
+    title: { type: String, default: "Focus on Teaching, Automate the Rest" },
+    desc: { type: String, default: "Powerful admin tools in the palm of your hand." },
+    points: { type: [String], default: ["Geo-Fenced Biometric Attendance", "Mobile Grading Engine", "Broadcaster Bulletin", "Substitution Alerts"] }
+  },
+  mobileCapabilities: [
+    {
+      title: { type: String, required: true },
+      desc: { type: String, required: true },
+      iconName: { type: String, required: true }
+    }
+  ],
+  moduleHeroBadge: { type: String, default: "SMART SCHOOL ERP MODULES" },
+  moduleHeroTitle: { type: String, default: "Powerful Modules for Complete School Management" },
+  moduleHeroDesc: { type: String, default: "VidhyaSanchalan provides all essential school management modules in one powerful platform — from admissions and fees to attendance, examinations, homework, reports, and parent communication." },
+  modulePoints: { type: [String], default: ["Admission Management", "Fee Management", "Attendance & Geo Tracking", "Homework & Assignments", "Timetable Management", "Online Examination", "Progress Reports", "Parent & Student Panels"] },
+  moduleScreens: { type: [String], default: ["/moduleg.jpeg"] },
+  gridModules: [
+    {
+      title: { type: String, required: true },
+      emoji: { type: String, default: "💡" },
+      iconName: { type: String, default: "Sparkles" },
+      desc: { type: String, required: true },
+      points: { type: [String], default: [] }
+    }
+  ],
   isSeeded: { type: Boolean, default: false }
 }, { timestamps: true });
 

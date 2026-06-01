@@ -36,7 +36,10 @@ import {
   Fingerprint,
   MessageSquare,
   Activity,
-  FileText
+  FileText,
+  Cpu,
+  Network,
+  HardDrive
 } from "lucide-react";
 
 export default function FeaturesPage() {
@@ -74,8 +77,8 @@ export default function FeaturesPage() {
     };
   }, [mouseX, mouseY]);
 
-  // Mobile App screenshots
-  const appScreens = [
+  // Mobile App screenshots fallback defaults
+  const staticScreens = [
     {
       id: 0,
       title: "Student Portal UI",
@@ -96,15 +99,7 @@ export default function FeaturesPage() {
     },
   ];
 
-  const handleNextSlide = () => {
-    setSliderIndex((prev) => (prev + 1) % appScreens.length);
-  };
-
-  const handlePrevSlide = () => {
-    setSliderIndex((prev) => (prev - 1 + appScreens.length) % appScreens.length);
-  };
-
-  const tabsContent = {
+  const staticTabs = {
     student: {
       badge: "Student Application",
       title: "Learn Smarter, Grow Faster",
@@ -144,6 +139,98 @@ export default function FeaturesPage() {
       color: "from-[#6A7626] to-[#4F581D]",
       accent: "text-[#E4FF4C] bg-white/10 border-white/20",
     },
+  };
+
+  const staticCapabilities = [
+    {
+      title: "Bank-Grade Encryption",
+      desc: "All financial data and API transactions are locked under high-strength TLS protocols ensuring completely secure fees transactions.",
+      iconName: "Lock",
+    },
+    {
+      title: "Offline Operations Mode",
+      desc: "Never lose school data inside poor networks. The application synchronizes critical homework and logs directly from local cashiers.",
+      iconName: "Wifi",
+    },
+    {
+      title: "Instant Broadcaster Alerts",
+      desc: "Integrated micro-sockets delivery engine providing notifications the exact millisecond announcements go active.",
+      iconName: "Bell",
+    },
+    {
+      title: "Biometric & Geo-location",
+      desc: "Security tracking logs for teacher roll-call ensuring verifiable attendance entries using mobile GPS services.",
+      iconName: "Fingerprint",
+    },
+  ];
+
+  const getIcon = (name: string, className?: string) => {
+    switch (name) {
+      case "Lock": return <Lock className={className} />;
+      case "Wifi": return <Wifi className={className} />;
+      case "Bell": return <Bell className={className} />;
+      case "Fingerprint": return <Fingerprint className={className} />;
+      case "Shield": return <Shield className={className} />;
+      case "Activity": return <Activity className={className} />;
+      case "Cpu": return <Cpu className={className} />;
+      case "Network": return <Network className={className} />;
+      case "HardDrive": return <HardDrive className={className} />;
+      default: return <Sparkles className={className} />;
+    }
+  };
+
+  const [appScreens, setAppScreens] = useState<any[]>(staticScreens);
+  const [tabsContent, setTabsContent] = useState<any>(staticTabs);
+  const [capabilities, setCapabilities] = useState<any[]>(staticCapabilities);
+
+  useEffect(() => {
+    fetch("/api/landing/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.settings) {
+          if (data.settings.mobileScreens && data.settings.mobileScreens.length > 0) {
+            const mapped = data.settings.mobileScreens.map((s: any, idx: number) => ({
+              id: idx,
+              title: s.title,
+              image: s.image,
+              description: s.description
+            }));
+            setAppScreens(mapped);
+          }
+          if (data.settings.mobileCapabilities && data.settings.mobileCapabilities.length > 0) {
+            setCapabilities(data.settings.mobileCapabilities);
+          }
+          const dynTabs: any = {};
+          dynTabs.student = data.settings.mobileStudent ? {
+            ...data.settings.mobileStudent,
+            color: "from-[#429CE4] to-[#1D496C]",
+            accent: "text-[#429CE4] bg-white/10 border-[#429CE4]/20"
+          } : staticTabs.student;
+
+          dynTabs.parent = data.settings.mobileParent ? {
+            ...data.settings.mobileParent,
+            color: "from-[#FFA600] to-[#ED6708]",
+            accent: "text-[#FFA600] bg-white/10 border-[#FFA600]/20"
+          } : staticTabs.parent;
+
+          dynTabs.teacher = data.settings.mobileTeacher ? {
+            ...data.settings.mobileTeacher,
+            color: "from-[#6A7626] to-[#4F581D]",
+            accent: "text-[#E4FF4C] bg-white/10 border-white/20"
+          } : staticTabs.teacher;
+
+          setTabsContent(dynTabs);
+        }
+      })
+      .catch((err) => console.log("Failed to load dynamic ecosystem settings", err));
+  }, []);
+
+  const handleNextSlide = () => {
+    setSliderIndex((prev) => (prev + 1) % appScreens.length);
+  };
+
+  const handlePrevSlide = () => {
+    setSliderIndex((prev) => (prev - 1 + appScreens.length) % appScreens.length);
   };
 
   return (
@@ -316,7 +403,7 @@ export default function FeaturesPage() {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg">
-                    {tabsContent[activeTab].points.map((point, index) => (
+                    {tabsContent[activeTab].points.map((point: string, index: number) => (
                       <motion.div
                         key={index}
                         initial={{ opacity: 0, x: -10 }}
@@ -493,43 +580,27 @@ export default function FeaturesPage() {
 
           {/* Hover cards with brand-specific hover background color changes */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              {
-                title: "Bank-Grade Encryption",
-                desc: "All financial data and API transactions are locked under high-strength TLS protocols ensuring completely secure fees transactions.",
-                icon: <Lock className="h-6 w-6 text-[#1D496C] group-hover:text-white transition-colors" />,
-                hoverBg: "hover:bg-[#429CE4] hover:border-[#429CE4] hover:shadow-xl hover:shadow-[#429CE4]/20",
-              },
-              {
-                title: "Offline Operations Mode",
-                desc: "Never lose school data inside poor networks. The application synchronizes critical homework and logs directly from local cashiers.",
-                icon: <Wifi className="h-6 w-6 text-[#1D496C] group-hover:text-white transition-colors" />,
-                hoverBg: "hover:bg-[#6A7626] hover:border-[#6A7626] hover:shadow-xl hover:shadow-[#6A7626]/20",
-              },
-              {
-                title: "Instant Broadcaster Alerts",
-                desc: "Integrated micro-sockets delivery engine providing notifications the exact millisecond announcements go active.",
-                icon: <Bell className="h-6 w-6 text-[#1D496C] group-hover:text-white transition-colors" />,
-                hoverBg: "hover:bg-[#ED6708] hover:border-[#ED6708] hover:shadow-xl hover:shadow-[#ED6708]/20",
-              },
-              {
-                title: "Biometric & Geo-location",
-                desc: "Security tracking logs for teacher roll-call ensuring verifiable attendance entries using mobile GPS services.",
-                icon: <Fingerprint className="h-6 w-6 text-[#1D496C] group-hover:text-white transition-colors" />,
-                hoverBg: "hover:bg-[#FFA600] hover:border-[#FFA600] hover:shadow-xl hover:shadow-[#FFA600]/20",
-              },
-            ].map((card, i) => (
-              <Card
-                key={i}
-                className={`border border-slate-100 bg-white shadow-md rounded-[2rem] p-5 transition-all duration-500 hover:-translate-y-2 group cursor-pointer ${card.hoverBg}`}
-              >
-                <div className="h-12 w-12 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100 group-hover:bg-white/20 group-hover:border-transparent transition-all shadow-sm">
-                  {card.icon}
-                </div>
-                <h3 className="text-base font-extrabold text-[#1D496C] mt-4 group-hover:text-white transition-colors">{card.title}</h3>
-                <p className="text-xs font-semibold text-slate-500 group-hover:text-white/90 leading-relaxed mt-2 transition-colors">{card.desc}</p>
-              </Card>
-            ))}
+            {capabilities.map((card, i) => {
+              const hoverBgs = [
+                "hover:bg-[#429CE4] hover:border-[#429CE4] hover:shadow-xl hover:shadow-[#429CE4]/20",
+                "hover:bg-[#6A7626] hover:border-[#6A7626] hover:shadow-xl hover:shadow-[#6A7626]/20",
+                "hover:bg-[#ED6708] hover:border-[#ED6708] hover:shadow-xl hover:shadow-[#ED6708]/20",
+                "hover:bg-[#FFA600] hover:border-[#FFA600] hover:shadow-xl hover:shadow-[#FFA600]/20"
+              ];
+              const hoverBg = hoverBgs[i % hoverBgs.length];
+              return (
+                <Card
+                  key={i}
+                  className={`border border-slate-100 bg-white shadow-md rounded-[2rem] p-5 transition-all duration-500 hover:-translate-y-2 group cursor-pointer ${hoverBg}`}
+                >
+                  <div className="h-12 w-12 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100 group-hover:bg-white/20 group-hover:border-transparent transition-all shadow-sm">
+                    {getIcon(card.iconName, "h-6 w-6 text-[#1D496C] group-hover:text-white transition-colors")}
+                  </div>
+                  <h3 className="text-base font-extrabold text-[#1D496C] mt-4 group-hover:text-white transition-colors">{card.title}</h3>
+                  <p className="text-xs font-semibold text-slate-500 group-hover:text-white/90 leading-relaxed mt-2 transition-colors">{card.desc}</p>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </section>

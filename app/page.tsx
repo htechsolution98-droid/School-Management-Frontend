@@ -126,6 +126,28 @@ export default function LandingPage() {
     }
   ]);
 
+  const [whyBadge, setWhyBadge] = useState("Why Choose Us?");
+  const [whyTitle, setWhyTitle] = useState("VidyaSanchalan is a revolution in education management");
+  const [whyTitleHighlight, setWhyTitleHighlight] = useState("revolution");
+  const [whyPills, setWhyPills] = useState<string[]>(["100% Free Forever", "Instant Insights", "Limitless Scale"]);
+
+  const [whyImageMain, setWhyImageMain] = useState("/why chooseus.jpeg");
+  const [whyImageLeft, setWhyImageLeft] = useState("/why choose us.jpg");
+  const [whyImageBottomLeft, setWhyImageBottomLeft] = useState("/progress report.jpeg");
+  const [whyImageBottomRight, setWhyImageBottomRight] = useState("/admission (1).jpg");
+
+  // About Section States
+  const [aboutBadge, setAboutBadge] = useState("★ About VidhyaSanchalan");
+  const [aboutTitle, setAboutTitle] = useState("One Platform for Complete School Management");
+  const [aboutTitleHighlight, setAboutTitleHighlight] = useState("Complete School");
+  const [aboutDescription, setAboutDescription] = useState("VidhyaSanchalan is an advanced school ERP and management system designed to simplify daily school operations. It helps schools manage admissions, fees, staff, attendance, examinations, homework, reports, announcements, and student progress through separate role-based panels.");
+  const [aboutQuote, setAboutQuote] = useState("The system supports both online and offline processes and provides transparency between school staff, students, and parents.");
+  const [aboutImage, setAboutImage] = useState("/about sms.jpg");
+  const [aboutHighlights, setAboutHighlights] = useState<any[]>([
+    { title: "Transparency", desc: "For staff, students & parents" },
+    { title: "Role-Based Access", desc: "Private secure panels" }
+  ]);
+
   const [features, setFeatures] = useState<any[]>([]);
   const [modules, setModules] = useState<any[]>([]);
   const [badges, setBadges] = useState<any[]>([]);
@@ -153,6 +175,25 @@ export default function LandingPage() {
           }
           if (data.settings.whyChooseUs && data.settings.whyChooseUs.length > 0) {
             setWhyChooseUs(data.settings.whyChooseUs);
+          }
+          if (data.settings.whyBadge) setWhyBadge(data.settings.whyBadge);
+          if (data.settings.whyTitle) setWhyTitle(data.settings.whyTitle);
+          if (data.settings.whyTitleHighlight) setWhyTitleHighlight(data.settings.whyTitleHighlight);
+          if (data.settings.whyPills && data.settings.whyPills.length > 0) {
+            setWhyPills(data.settings.whyPills);
+          }
+          if (data.settings.whyImageMain) setWhyImageMain(data.settings.whyImageMain);
+          if (data.settings.whyImageLeft) setWhyImageLeft(data.settings.whyImageLeft);
+          if (data.settings.whyImageBottomLeft) setWhyImageBottomLeft(data.settings.whyImageBottomLeft);
+          if (data.settings.whyImageBottomRight) setWhyImageBottomRight(data.settings.whyImageBottomRight);
+          if (data.settings.aboutBadge) setAboutBadge(data.settings.aboutBadge);
+          if (data.settings.aboutTitle) setAboutTitle(data.settings.aboutTitle);
+          if (data.settings.aboutTitleHighlight) setAboutTitleHighlight(data.settings.aboutTitleHighlight);
+          if (data.settings.aboutDescription) setAboutDescription(data.settings.aboutDescription);
+          if (data.settings.aboutQuote) setAboutQuote(data.settings.aboutQuote);
+          if (data.settings.aboutImage) setAboutImage(data.settings.aboutImage);
+          if (data.settings.aboutHighlights && data.settings.aboutHighlights.length > 0) {
+            setAboutHighlights(data.settings.aboutHighlights);
           }
         }
       })
@@ -666,8 +707,8 @@ export default function LandingPage() {
                 className="relative overflow-hidden rounded-[2.5rem] border-4 border-white bg-slate-100 shadow-2xl shadow-slate-900/10 max-w-[480px] w-full aspect-[4/3] flex items-center justify-center group"
               >
                 <img 
-                  src="/about sms.jpg" 
-                  alt="One Platform for Complete School Management" 
+                  src={aboutImage} 
+                  alt={aboutTitle} 
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
                 
@@ -692,28 +733,35 @@ export default function LandingPage() {
                   variant="outline" 
                   className="rounded-full px-4 py-1.5 border-[#6A7626]/30 bg-[#6A7626]/10 text-[#6A7626] shadow-sm font-bold tracking-wider uppercase text-xs"
                 >
-                  ★ About VidhyaSanchalan
+                  {aboutBadge}
                 </Badge>
                 
                 <h2 className="text-3.5xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#1D496C] leading-tight">
-                  One Platform for <span className="bg-gradient-to-r from-[#285E89] to-[#FFA600] bg-clip-text text-transparent">Complete School</span> Management
+                  {aboutTitle.includes(aboutTitleHighlight) ? (
+                    <>
+                      {aboutTitle.split(aboutTitleHighlight)[0]}
+                      <span className="bg-gradient-to-r from-[#285E89] to-[#FFA600] bg-clip-text text-transparent">
+                        {aboutTitleHighlight}
+                      </span>
+                      {aboutTitle.split(aboutTitleHighlight)[1]}
+                    </>
+                  ) : (
+                    aboutTitle
+                  )}
                 </h2>
               </div>
               
               <div className="space-y-4 text-slate-600 font-medium leading-relaxed text-base sm:text-lg">
                 <p>
-                  VidhyaSanchalan is an advanced school ERP and management system designed to simplify daily school operations. It helps schools manage admissions, fees, staff, attendance, examinations, homework, reports, announcements, and student progress through separate role-based panels.
+                  {aboutDescription}
                 </p>
                 <p className="border-l-4 border-[#FFA600] pl-4 italic text-[#1D496C]/90 bg-[#FFA600]/5 py-2.5 rounded-r-xl">
-                  The system supports both online and offline processes and provides transparency between school staff, students, and parents.
+                  {aboutQuote}
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4 pt-2">
-                {[
-                  { title: "Transparency", desc: "For staff, students & parents" },
-                  { title: "Role-Based Access", desc: "Private secure panels" }
-                ].map((item, i) => (
+                {aboutHighlights.map((item, i) => (
                   <div key={i} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-start gap-3">
                     <div className="h-8 w-8 rounded-lg bg-[#429CE4]/10 flex items-center justify-center text-[#429CE4] shrink-0">
                       <Sparkles className="h-4 w-4" />
@@ -839,171 +887,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Interactive Panels Section */}
-      <section id="modules" className="pt-10 pb-20 bg-gradient-to-b from-[#F8FAFC] via-[#F1F5F9] to-white relative overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-[#1D496C]/5 to-[#429CE4]/5 rounded-full blur-3xl -translate-y-1/2 pointer-events-none"></div>
-        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-gradient-to-tr from-[#6A7626]/5 to-[#FFA600]/5 rounded-full blur-3xl translate-y-1/2 pointer-events-none"></div>
-
-        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center max-w-3xl mx-auto mb-8 space-y-3">
-            <Badge className="rounded-full px-4 py-1.5 bg-[#1D496C]/10 text-[#1D496C] border-0 font-bold uppercase tracking-wider text-xs">
-              <Users className="mr-2 h-3.5 w-3.5" />
-              Role-Based Portals
-            </Badge>
-            <h2 className="text-3.5xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#1D496C] leading-tight">
-              Tailored Portals for <span className="bg-gradient-to-r from-[#285E89] to-[#6A7626] bg-clip-text text-transparent">Every Stakeholder</span>
-            </h2>
-            <p className="text-slate-500 font-medium text-base sm:text-lg">
-              Explore dynamic, dedicated panels built specifically to optimize administrative workflows, teaching activities, and parent-student engagement.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            <div className="lg:col-span-4 flex flex-row lg:flex-col gap-3 overflow-x-auto lg:overflow-x-visible pb-4 lg:pb-0 scrollbar-none snap-x shrink-0 min-w-0">
-              {panelsData.map((panel, idx) => {
-                const Icon = panel.icon;
-                const isActive = activePanelIndex === idx;
-                return (
-                  <button
-                    key={panel.id}
-                    onClick={() => setActivePanelIndex(idx)}
-                    className={`flex items-center gap-4 p-4 rounded-2xl text-left border transition-all duration-300 snap-start shrink-0 min-w-[240px] lg:min-w-0 ${
-                      isActive
-                        ? `bg-white border-slate-200 shadow-lg ${panel.glowColor} translate-x-1 lg:translate-x-2`
-                        : "bg-white/60 hover:bg-white border-transparent hover:border-slate-100 hover:shadow-md"
-                    }`}
-                  >
-                    <div
-                      className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 ${
-                        isActive ? `bg-gradient-to-br ${panel.color} text-white scale-110` : "bg-slate-100 text-slate-500"
-                      }`}
-                    >
-                      <Icon className="h-5 w-5" />
-                    </div>
-
-                    <div className="flex-grow">
-                      <span
-                        className={`block font-bold text-sm lg:text-base transition-colors duration-300 ${
-                          isActive ? "text-[#1D496C]" : "text-slate-600 hover:text-[#1D496C]"
-                        }`}
-                      >
-                        {panel.name}
-                      </span>
-                      <span className="block text-xs font-semibold text-slate-400 mt-0.5">
-                        {isActive ? "Active Workspace" : "Click to explore"}
-                      </span>
-                    </div>
-
-                    {isActive && (
-                      <div className={`hidden lg:block w-1.5 h-8 bg-gradient-to-b ${panel.color} rounded-full`}></div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="lg:col-span-8">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activePanelIndex}
-                  initial={{ opacity: 0, y: 20, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -20, scale: 0.98 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="bg-white rounded-[32px] border border-slate-100 shadow-xl overflow-hidden flex flex-col p-6 sm:p-8 relative"
-                >
-                  <div className={`absolute top-0 right-0 h-56 w-56 rounded-full blur-3xl pointer-events-none -translate-y-20 translate-x-20 ${panelsData[activePanelIndex].bgColor}`}></div>
-
-                  <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-                    <div className="flex items-center gap-3">
-                      <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${panelsData[activePanelIndex].color} text-white flex items-center justify-center`}>
-                        {(() => {
-                          const Icon = panelsData[activePanelIndex].icon;
-                          return <Icon className="h-5 w-5" />;
-                        })()}
-                      </div>
-                      <h3 className="text-2xl sm:text-3xl font-black text-[#1D496C]">
-                        {panelsData[activePanelIndex].name}
-                      </h3>
-                    </div>
-                    <Badge variant="outline" className={`rounded-full px-3 py-1 font-bold text-xs uppercase bg-white border-${panelsData[activePanelIndex].accentColor}/30`}>
-                      ★ Dedicated Portal
-                    </Badge>
-                  </div>
-
-                  <p className="text-slate-600 font-semibold text-sm sm:text-base leading-relaxed mb-8">
-                    {panelsData[activePanelIndex].description}
-                  </p>
-
-                  <div className="mb-8">
-                    <h4 className="text-[#1D496C] font-extrabold text-sm sm:text-base uppercase tracking-wider mb-4 flex items-center gap-2">
-                      <Sparkles className="h-4 w-4 text-[#FFA600]" />
-                      Core Features & Capabilities
-                    </h4>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      {panelsData[activePanelIndex].features.map((feature, idx) => (
-                        <div key={idx} className="flex items-start gap-2.5 p-1">
-                          <div className="h-5 w-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-slate-100">
-                            <CheckCircle2 className="h-3.5 w-3.5 text-[#6A7626]" strokeWidth={3} />
-                          </div>
-                          <span className="text-[#475569] font-bold text-sm leading-snug">
-                            {feature}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="border border-slate-100 rounded-2xl bg-slate-950 p-5 sm:p-6 shadow-inner relative overflow-hidden">
-                    <div className="absolute inset-0 bg-grid-white/[0.02] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
-
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4 text-xs">
-                      <div className="flex items-center gap-2">
-                        <span className="h-3 w-3 rounded-full bg-rose-500/80"></span>
-                        <span className="h-3 w-3 rounded-full bg-amber-500/80"></span>
-                        <span className="h-3 w-3 rounded-full bg-emerald-500/80"></span>
-                        <span className="text-slate-400 font-bold ml-2 hidden sm:inline text-[11px] uppercase tracking-wider">
-                          {panelsData[activePanelIndex].mockup.title}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span className="text-emerald-400 font-bold text-[10px] tracking-wider uppercase">Live Preview</span>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4 relative z-10">
-                      {panelsData[activePanelIndex].mockup.metrics.map((metric, mIdx) => (
-                        <div key={mIdx} className="bg-slate-900/80 border border-slate-900/60 p-3.5 rounded-xl flex flex-col justify-between">
-                          <span className="text-slate-500 font-semibold text-[10px] sm:text-xs uppercase tracking-wider block mb-1">
-                            {metric.label}
-                          </span>
-                          <span className="text-white font-extrabold text-sm sm:text-lg block tracking-tight">
-                            {metric.value}
-                          </span>
-                          <span className="text-slate-400 font-bold text-[9px] sm:text-[10px] block mt-1">
-                            {metric.change}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="bg-slate-900/50 border border-slate-900/40 p-3.5 rounded-xl relative z-10">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className={`h-2.5 w-2.5 rounded-full bg-gradient-to-r ${panelsData[activePanelIndex].color}`}></div>
-                        <span className="text-slate-300 font-extrabold text-xs uppercase tracking-wider">System Workspace Logs</span>
-                      </div>
-                      <p className="text-slate-400 text-[11px] sm:text-xs font-semibold leading-relaxed">
-                        {panelsData[activePanelIndex].mockup.previewText}
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          </div>
-        </div>
-      </section>
 
       <section
         id="why-choose-us"
@@ -1030,7 +913,7 @@ export default function LandingPage() {
                 >
                   <div className="relative overflow-hidden rounded-2xl aspect-[4/3] bg-slate-100">
                     <img 
-                      src="/why choose us.jpg" 
+                      src={whyImageLeft} 
                       alt="Modern Classroom" 
                       className="w-full h-full object-cover" 
                     />
@@ -1049,7 +932,7 @@ export default function LandingPage() {
                 >
                   <div className="w-full h-full rounded-[2rem] overflow-hidden">
                     <img
-                      src="/why chooseus.jpeg"
+                      src={whyImageMain}
                       alt="Laptop and Mobile Dashboard Mockup"
                       className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700 ease-out"
                     />
@@ -1081,7 +964,7 @@ export default function LandingPage() {
                 >
                   <div className="relative overflow-hidden rounded-2xl aspect-[4/3] bg-slate-100">
                     <img 
-                      src="/progress report.jpeg" 
+                      src={whyImageBottomLeft} 
                       alt="Student Analytics" 
                       className="w-full h-full object-cover" 
                     />
@@ -1101,7 +984,7 @@ export default function LandingPage() {
                 >
                   <div className="relative overflow-hidden rounded-2xl aspect-[4/3] bg-slate-100">
                     <img 
-                      src="/admission (1).jpg" 
+                      src={whyImageBottomRight} 
                       alt="Admission Desk" 
                       className="w-full h-full object-cover" 
                     />
@@ -1113,15 +996,15 @@ export default function LandingPage() {
 
                 {/* Floating Capsule Pills underneath */}
                 <div className="absolute bottom-[-4.5rem] left-[1rem] sm:left-[3rem] md:left-0 flex flex-wrap gap-2 z-40 max-w-[340px]">
-                  <span className="inline-flex items-center px-4 py-2 rounded-full bg-[#5D3FD3] text-white text-[10px] font-black tracking-wide shadow-lg shadow-[#5D3FD3]/20 border-0 hover:scale-105 transition-transform cursor-pointer">
-                    100% Free Forever
-                  </span>
-                  <span className="inline-flex items-center px-4 py-2 rounded-full bg-[#1C1C1E] text-white text-[10px] font-black tracking-wide border border-white/10 hover:scale-105 transition-transform cursor-pointer">
-                    Instant Insights
-                  </span>
-                  <span className="inline-flex items-center px-4 py-2 rounded-full bg-[#285E89] text-white text-[10px] font-black tracking-wide shadow-lg shadow-[#285E89]/20 border-0 hover:scale-105 transition-transform cursor-pointer">
-                    Limitless Scale
-                  </span>
+                  {whyPills.map((pill, idx) => {
+                    const pillBgClasses = ["bg-[#5D3FD3] shadow-[#5D3FD3]/20", "bg-[#1C1C1E] border border-white/10", "bg-[#285E89] shadow-[#285E89]/20"];
+                    const activeBg = pillBgClasses[idx % pillBgClasses.length];
+                    return (
+                      <span key={idx} className={`inline-flex items-center px-4 py-2 rounded-full text-white text-[10px] font-black tracking-wide shadow-lg hover:scale-105 transition-transform cursor-pointer border-0 ${activeBg}`}>
+                        {pill}
+                      </span>
+                    );
+                  })}
                 </div>
 
               </div>
@@ -1142,20 +1025,24 @@ export default function LandingPage() {
                 {/* Purple pill badge */}
                 <div>
                   <span className="inline-flex items-center px-3 py-1 rounded-full bg-[#5D3FD3]/10 text-[#5D3FD3] text-[11px] font-black tracking-wide uppercase">
-                    Why Choose Us?
+                    {whyBadge}
                   </span>
                 </div>
 
                 {/* Main Styled Heading */}
                 <h2 className="text-2xl sm:text-3xl lg:text-[2.1rem] font-extrabold tracking-tight text-slate-900 leading-[1.2]">
-                  <span className="font-extrabold text-slate-900">VidyaSanchalan</span>{" "}
-                  <span className="font-medium text-slate-400">is a</span>{" "}
-                  <span className="font-black text-[#5D3FD3] relative inline-block">
-                    revolution
-                    <span className="absolute -bottom-1 left-0 w-full h-[3px] bg-[#5D3FD3]/20 rounded-full"></span>
-                  </span>{" "}
-                  <span className="font-medium text-slate-400">in education</span>{" "}
-                  <span className="font-black text-slate-900">management</span>
+                  {whyTitle.includes(whyTitleHighlight) ? (
+                    <>
+                      {whyTitle.split(whyTitleHighlight)[0]}
+                      <span className="font-black text-[#5D3FD3] relative inline-block">
+                        {whyTitleHighlight}
+                        <span className="absolute -bottom-1 left-0 w-full h-[3px] bg-[#5D3FD3]/20 rounded-full"></span>
+                      </span>
+                      {whyTitle.split(whyTitleHighlight)[1]}
+                    </>
+                  ) : (
+                    whyTitle
+                  )}
                 </h2>
 
                 {/* Structured Points list */}

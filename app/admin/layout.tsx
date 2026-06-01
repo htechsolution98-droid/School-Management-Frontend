@@ -16,6 +16,9 @@ import {
   MessageSquare,
   ChevronRight,
   TrendingUp,
+  HelpCircle,
+  Smartphone,
+  ListCollapse,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -109,6 +112,31 @@ export default function AdminLayout({
       name: "Testimonials Manager",
       href: "/admin/testimonials",
       icon: <Users className="h-5 w-5" />,
+    },
+    {
+      name: "About Manager",
+      href: "/admin/about",
+      icon: <Sparkles className="h-5 w-5" />,
+    },
+    {
+      name: "Why Choose Us",
+      href: "/admin/why-choose",
+      icon: <HelpCircle className="h-5 w-5" />,
+    },
+    {
+      name: "Counters Manager",
+      href: "/admin/stats",
+      icon: <TrendingUp className="h-5 w-5" />,
+    },
+    {
+      name: "Mobile Ecosystem",
+      href: "/admin/mobile",
+      icon: <Smartphone className="h-5 w-5" />,
+    },
+    {
+      name: "Capabilities Manager",
+      href: "/admin/capabilities",
+      icon: <ListCollapse className="h-5 w-5" />,
     },
     {
       name: "Contact Inquiries",

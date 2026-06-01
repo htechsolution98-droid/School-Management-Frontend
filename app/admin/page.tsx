@@ -17,6 +17,7 @@ import {
   Save,
   RefreshCw,
   Sparkles,
+  ListCollapse,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,8 @@ export default function AdminDashboard() {
     modules: 0,
     testimonials: 0,
     inquiries: 0,
+    aboutHighlights: 0,
+    capabilities: 0,
   });
 
   // Settings state
@@ -59,6 +62,8 @@ export default function AdminDashboard() {
       const settingsRes = await fetch("/api/landing/settings");
       const settingsData = await settingsRes.json();
       
+      let aboutHighlightsCount = 2;
+      let capabilitiesCount = 4;
       if (settingsRes.ok && settingsData.success) {
         setIsDbConnected(true);
         setIsSeeded(settingsData.isSeeded);
@@ -68,6 +73,12 @@ export default function AdminDashboard() {
           setHeroSubtitle(settingsData.settings.heroSubtitle || "");
           setHeroDescription(settingsData.settings.heroDescription || "");
           setSatisfactionRate(settingsData.settings.satisfactionRate || 99.8);
+          if (settingsData.settings.aboutHighlights) {
+            aboutHighlightsCount = settingsData.settings.aboutHighlights.length;
+          }
+          if (settingsData.settings.mobileCapabilities) {
+            capabilitiesCount = settingsData.settings.mobileCapabilities.length;
+          }
         }
       } else {
         setIsDbConnected(false);
@@ -93,6 +104,8 @@ export default function AdminDashboard() {
         modules: modulesCount,
         testimonials: testimonialsCount,
         inquiries: 0, // Fallback placeholder
+        aboutHighlights: aboutHighlightsCount,
+        capabilities: capabilitiesCount,
       });
     } catch (err) {
       console.error("Dashboard Load Error:", err);
@@ -103,6 +116,8 @@ export default function AdminDashboard() {
         modules: 16,
         testimonials: 3,
         inquiries: 0,
+        aboutHighlights: 2,
+        capabilities: 4,
       });
     } finally {
       setIsLoading(false);
@@ -200,6 +215,16 @@ export default function AdminDashboard() {
       href: "/admin/testimonials",
     },
     {
+      title: "About Highlights",
+      value: stats.aboutHighlights,
+      description: "Dynamic highlights cards",
+      icon: <Sparkles className="h-6 w-6" />,
+      color: "border-l-4 border-l-[#E4FF4C]",
+      iconColor: "text-[#1D496C]",
+      bg: "bg-[#E4FF4C]/10",
+      href: "/admin/about",
+    },
+    {
       title: "Contact Inquiries",
       value: stats.inquiries,
       description: "Messages submitted via contact form",
@@ -208,6 +233,16 @@ export default function AdminDashboard() {
       iconColor: "text-[#FFA600]",
       bg: "bg-[#FFA600]/5",
       href: "/admin/inquiries",
+    },
+    {
+      title: "Grid Capabilities",
+      value: stats.capabilities,
+      description: "Active technical capability cards",
+      icon: <ListCollapse className="h-6 w-6" />,
+      color: "border-l-4 border-l-[#429CE4]",
+      iconColor: "text-[#429CE4]",
+      bg: "bg-[#429CE4]/5",
+      href: "/admin/capabilities",
     },
   ];
 
@@ -291,7 +326,7 @@ export default function AdminDashboard() {
       </Card>
 
       {/* Statistics Cards */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
         {statCards.map((card, index) => (
           <motion.div
             key={card.title}

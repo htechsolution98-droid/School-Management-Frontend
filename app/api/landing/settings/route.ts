@@ -36,6 +36,40 @@ export async function PUT(request: Request) {
         settings.satisfactionRate = body.satisfactionRate;
         if (body.stats) settings.stats = body.stats;
         if (body.whyChooseUs) settings.whyChooseUs = body.whyChooseUs;
+        
+        // About Section fields
+        if (body.aboutBadge !== undefined) settings.aboutBadge = body.aboutBadge;
+        if (body.aboutTitle !== undefined) settings.aboutTitle = body.aboutTitle;
+        if (body.aboutTitleHighlight !== undefined) settings.aboutTitleHighlight = body.aboutTitleHighlight;
+        if (body.aboutDescription !== undefined) settings.aboutDescription = body.aboutDescription;
+        if (body.aboutQuote !== undefined) settings.aboutQuote = body.aboutQuote;
+        if (body.aboutImage !== undefined) settings.aboutImage = body.aboutImage;
+        if (body.aboutHighlights !== undefined) settings.aboutHighlights = body.aboutHighlights;
+
+        // Why Choose Us fields
+        if (body.whyBadge !== undefined) settings.whyBadge = body.whyBadge;
+        if (body.whyTitle !== undefined) settings.whyTitle = body.whyTitle;
+        if (body.whyTitleHighlight !== undefined) settings.whyTitleHighlight = body.whyTitleHighlight;
+        if (body.whyPills !== undefined) settings.whyPills = body.whyPills;
+        if (body.whyImageMain !== undefined) settings.whyImageMain = body.whyImageMain;
+        if (body.whyImageLeft !== undefined) settings.whyImageLeft = body.whyImageLeft;
+        if (body.whyImageBottomLeft !== undefined) settings.whyImageBottomLeft = body.whyImageBottomLeft;
+        if (body.whyImageBottomRight !== undefined) settings.whyImageBottomRight = body.whyImageBottomRight;
+
+        // Mobile Ecosystem fields
+        if (body.mobileScreens !== undefined) settings.mobileScreens = body.mobileScreens;
+        if (body.mobileStudent !== undefined) settings.mobileStudent = body.mobileStudent;
+        if (body.mobileParent !== undefined) settings.mobileParent = body.mobileParent;
+        if (body.mobileTeacher !== undefined) settings.mobileTeacher = body.mobileTeacher;
+        if (body.mobileCapabilities !== undefined) settings.mobileCapabilities = body.mobileCapabilities;
+
+        // Modules Ecosystem fields
+        if (body.moduleHeroBadge !== undefined) settings.moduleHeroBadge = body.moduleHeroBadge;
+        if (body.moduleHeroTitle !== undefined) settings.moduleHeroTitle = body.moduleHeroTitle;
+        if (body.moduleHeroDesc !== undefined) settings.moduleHeroDesc = body.moduleHeroDesc;
+        if (body.modulePoints !== undefined) settings.modulePoints = body.modulePoints;
+        if (body.moduleScreens !== undefined) settings.moduleScreens = body.moduleScreens;
+        if (body.gridModules !== undefined) settings.gridModules = body.gridModules;
       }
       await settings.save();
       return NextResponse.json({ success: true, settings, message: "Settings updated successfully!" });
