@@ -157,7 +157,7 @@ export default function ClassesPage() {
       {/* ── Header ── */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-2 sm:gap-3">
+          <h2 className="text-2xl sm:text-3xl font-bold mapping-tight text-slate-900 flex items-center gap-2 sm:gap-3">
             <School className="h-6 w-6 sm:h-8 sm:w-8 text-primary flex-shrink-0" />
             Class Management
           </h2>

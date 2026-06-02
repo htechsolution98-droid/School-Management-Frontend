@@ -47,7 +47,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <div className="flex h-11 w-auto items-center justify-center rounded-xl bg-white p-1.5 shadow-md border border-white/10 group-hover:scale-105 transition-all duration-300">
             <img src="/logo.png" alt="VidyaSanchalan Logo" className="h-8 w-auto max-w-[140px] object-contain" />
           </div>
-          <span className="text-xl font-black tracking-tight text-white">
+          <span className="text-xl font-black mapping-tight text-white">
             Vidya<span className="text-[#FFA600]">Sanchalan</span>
           </span>
         </Link>
@@ -101,7 +101,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               transition={{ duration: 0.4, delay: 0.7 + i * 0.1 }}
             >
               <p className="text-2xl font-bold text-white">{s.value}</p>
-              <p className="text-xs text-white/50 uppercase tracking-wider">{s.label}</p>
+              <p className="text-xs text-white/50 uppercase mapping-wider">{s.label}</p>
             </motion.div>
           ))}
         </div>
@@ -121,7 +121,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             <div className="flex h-10 w-auto items-center justify-center rounded-lg bg-white p-1 shadow-sm border border-slate-100">
               <img src="/logo.png" alt="VidyaSanchalan Logo" className="h-6 w-auto max-w-[100px] object-contain" />
             </div>
-            <span className="text-base font-black tracking-tight">
+            <span className="text-base font-black mapping-tight">
               <span className="text-[#285E89]">Vidya</span><span className="text-[#FFA600]">Sanchalan</span>
             </span>
           </Link>

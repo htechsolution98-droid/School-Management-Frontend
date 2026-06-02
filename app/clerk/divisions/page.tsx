@@ -92,13 +92,13 @@ export default function DivisionsPage() {
 
         const indexA = classA
           ? SCHOOL_CLASS_OPTIONS.findIndex(
-              (opt) => opt.value === classA.school_class,
-            )
+            (opt) => opt.value === classA.school_class,
+          )
           : 999;
         const indexB = classB
           ? SCHOOL_CLASS_OPTIONS.findIndex(
-              (opt) => opt.value === classB.school_class,
-            )
+            (opt) => opt.value === classB.school_class,
+          )
           : 999;
 
         if (indexA !== indexB) return indexA - indexB;
@@ -210,7 +210,7 @@ export default function DivisionsPage() {
     <div className="flex-1 space-y-4 sm:space-y-6 px-3 sm:px-6 lg:px-8 py-4 sm:py-6 bg-white min-h-screen overflow-x-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 leading-tight">
+          <h2 className="text-2xl sm:text-3xl font-bold mapping-tight text-slate-900 leading-tight">
             Division Management
           </h2>
           <p className="text-muted-foreground mt-1">

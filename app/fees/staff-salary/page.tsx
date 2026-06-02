@@ -268,7 +268,7 @@ function EditModal({
                 <button
                   onClick={onClose}
                   className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors"
-                > 
+                >
                   <X className="h-4 w-4 text-slate-500" />
                 </button>
               </div>
@@ -305,7 +305,7 @@ function EditModal({
 
                 {/* Calculation type toggle */}
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-2">
+                  <label className="block text-[11px] font-bold uppercase mapping-widest text-slate-500 mb-2">
                     Calculation Type
                   </label>
                   <div className="flex rounded-xl border-2 border-slate-100 bg-slate-50 p-1 gap-1">
@@ -330,7 +330,7 @@ function EditModal({
 
                 {/* Value input */}
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-2">
+                  <label className="block text-[11px] font-bold uppercase mapping-widest text-slate-500 mb-2">
                     Value <span className="text-red-400">*</span>
                   </label>
                   <div className="relative">
@@ -557,7 +557,7 @@ function AssignModal({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* ── Category ── */}
                   <div className="relative" data-dropdown>
-                    <label className="block text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-2">
+                    <label className="block text-[11px] font-bold uppercase mapping-widest text-slate-500 mb-2">
                       Category <span className="text-red-400">*</span>
                     </label>
                     <button
@@ -590,7 +590,7 @@ function AssignModal({
 
                   {/* ── Staff Name ── */}
                   <div className="relative" data-dropdown>
-                    <label className="block text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-2">
+                    <label className="block text-[11px] font-bold uppercase mapping-widest text-slate-500 mb-2">
                       Staff Name <span className="text-red-400">*</span>
                     </label>
                     <button
@@ -623,7 +623,7 @@ function AssignModal({
 
                   {/* ── Component ── */}
                   <div className="relative md:col-span-2" data-dropdown>
-                    <label className="block text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-2">
+                    <label className="block text-[11px] font-bold uppercase mapping-widest text-slate-500 mb-2">
                       Component <span className="text-red-400">*</span>
                     </label>
                     <button
@@ -657,7 +657,7 @@ function AssignModal({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-2">Calculation</label>
+                    <label className="block text-[11px] font-bold uppercase mapping-widest text-slate-500 mb-2">Calculation</label>
                     <div className="flex rounded-xl border-2 border-slate-100 bg-slate-50 p-1 gap-1">
                       {(["fixed", "percentage"] as const).map((t) => (
                         <button
@@ -677,7 +677,7 @@ function AssignModal({
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-widest text-slate-500 mb-2">
+                    <label className="block text-[11px] font-bold uppercase mapping-widest text-slate-500 mb-2">
                       Value <span className="text-red-400">*</span>
                     </label>
                     <div className="relative">
@@ -1031,9 +1031,9 @@ export default function StaffSalaryPage() {
               >
                 <Shield className="w-3.5 h-3.5 text-white" />
               </div>
-              <span className="text-xs font-bold text-indigo-500 uppercase tracking-widest">Payroll</span>
+              <span className="text-xs font-bold text-indigo-500 uppercase mapping-widest">Payroll</span>
             </div>
-            <h1 className="text-2xl font-extrabold text-slate-900 leading-tight tracking-tight">Staff Salary</h1>
+            <h1 className="text-2xl font-extrabold text-slate-900 leading-tight mapping-tight">Staff Salary</h1>
             <p className="text-sm text-slate-400 mt-1 font-medium">Manage salary component assignments for all staff</p>
           </div>
 
@@ -1107,7 +1107,7 @@ export default function StaffSalaryPage() {
                   </div>
                   <div>
                     <p className="text-2xl font-black" style={{ color, fontFamily: "'DM Mono', monospace" }}>{value}</p>
-                    <p className="text-[11px] font-bold uppercase tracking-wider mt-0.5" style={{ color: `${color}88` }}>{label}</p>
+                    <p className="text-[11px] font-bold uppercase mapping-wider mt-0.5" style={{ color: `${color}88` }}>{label}</p>
                   </div>
                 </motion.div>
               ))}

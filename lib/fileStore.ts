@@ -21,10 +21,10 @@ const DEFAULT_DATA = {
     heroImage: "/sms hero.jpg",
     heroImages: ["/sms hero.jpg"],
     stats: [
-      { label: "Schools",  target: 500, suffix: "+",   iconName: "GraduationCap" },
-      { label: "Students", target: 50,  suffix: "K+",  iconName: "Users" },
-      { label: "Teachers", target: 5,   suffix: "K+",  iconName: "BookOpen" },
-      { label: "Parents",  target: 100, suffix: "K+",  iconName: "Heart" },
+      { label: "Schools", target: 500, suffix: "+", iconName: "GraduationCap" },
+      { label: "Students", target: 50, suffix: "K+", iconName: "Users" },
+      { label: "Teachers", target: 5, suffix: "K+", iconName: "BookOpen" },
+      { label: "Parents", target: 100, suffix: "K+", iconName: "Heart" },
     ],
     whyChooseUs: [
       {
@@ -139,7 +139,7 @@ const DEFAULT_DATA = {
       },
       {
         title: "Biometric & Geo-location",
-        desc: "Security tracking logs for teacher roll-call ensuring verifiable attendance entries using mobile GPS services.",
+        desc: "Security mapping logs for teacher roll-call ensuring verifiable attendance entries using mobile GPS services.",
         iconName: "Fingerprint"
       }
     ],
@@ -149,7 +149,7 @@ const DEFAULT_DATA = {
     modulePoints: [
       "Admission Management",
       "Fee Management",
-      "Attendance & Geo Tracking",
+      "Attendance & Geo mapping",
       "Homework & Assignments",
       "Timetable Management",
       "Online Examination",
@@ -174,7 +174,7 @@ const DEFAULT_DATA = {
         title: "Parent Portal",
         emoji: "👨‍👩‍👧",
         iconName: "Users",
-        desc: "Instant tracking companion providing real-time data sync, fee alerts, and direct chats.",
+        desc: "Instant mapping companion providing real-time data sync, fee alerts, and direct chats.",
         points: [
           "Real-time student updates",
           "Fee payment alerts",
@@ -312,7 +312,7 @@ const DEFAULT_DATA = {
       },
       {
         title: "Biometric & Geo-location",
-        desc: "Security tracking logs for teacher roll-call ensuring verifiable attendance entries using mobile GPS services.",
+        desc: "Security mapping logs for teacher roll-call ensuring verifiable attendance entries using mobile GPS services.",
         iconName: "Fingerprint",
         hoverBg: "hover:bg-[#FFA600] hover:border-[#FFA600] hover:shadow-xl hover:shadow-[#FFA600]/20"
       }
@@ -320,7 +320,7 @@ const DEFAULT_DATA = {
     modulesHeroTags: [
       "Admission Management",
       "Fee Management",
-      "Attendance & Geo Tracking",
+      "Attendance & Geo mapping",
       "Homework & Assignments",
       "Timetable Management",
       "Online Examination",
@@ -341,7 +341,7 @@ const DEFAULT_DATA = {
         title: "Parent Portal",
         emoji: "\ud83d\udc68\u200d\ud83d\udc69\u200d\ud83d\udc67",
         iconName: "Users",
-        desc: "Instant tracking companion providing real-time data sync, fee alerts, and direct chats.",
+        desc: "Instant mapping companion providing real-time data sync, fee alerts, and direct chats.",
         points: ["Real-time student updates", "Fee payment alerts", "Direct communication with teachers", "Daily activity reports"],
         hoverFrom: "#6A7626", hoverTo: "#4F581D", accentColor: "#6A7626", order: 1
       },
@@ -388,39 +388,39 @@ const DEFAULT_DATA = {
     ]
   },
   features: [
-    { _id: "f1", title: "Admission Management",   iconName: "GraduationCap", color: "from-[#1D496C] to-[#1A3F5C]",   points: ["Online admission forms", "Offline admission entries", "Public admission form sharing", "Student document management", "Admission approval system"],            order: 0 },
-    { _id: "f2", title: "Fee Management",          iconName: "CreditCard",    color: "from-[#6A7626] to-[#596420]",   points: ["Online & offline fee collection", "Dynamic fee structure creation", "Monthly / Quarterly / Custom fee setup", "Fee receipt generation"],                     order: 1 },
-    { _id: "f3", title: "Timetable Management",    iconName: "Calendar",      color: "from-[#429CE4] to-[#2E85CC]",   points: ["Class-wise timetable creation", "Subject assignment", "Teacher allocation", "Editable schedules"],                                                            order: 2 },
-    { _id: "f4", title: "Homework & Assignment",   iconName: "BookOpen",      color: "from-[#ED6708] to-[#CD5804]",   points: ["Online and offline homework", "Assignment uploads", "Subject-wise homework tracking", "Teacher to student communication"],                                    order: 3 },
-    { _id: "f5", title: "Progress Reports",        iconName: "TrendingUp",    color: "from-[#FFA600] to-[#E09200]",   points: ["Report cards", "Marksheets", "Attendance tracking", "Student performance analytics", "Guardian visibility panel"],                                          order: 4 },
-    { _id: "f6", title: "Announcement System",     iconName: "Bell",          color: "from-[#1D496C] to-[#6A7626]",   points: ["School announcements", "Holiday notices", "Emergency alerts", "Event updates for students and parents"],                                                     order: 5 },
-    { _id: "f7", title: "Geo Attendance Feature",  iconName: "Shield",        color: "from-[#6A7626] to-[#1D496C]",   points: ["Staff attendance with geo-location", "Secure attendance monitoring", "Real-time attendance records"],                                                         order: 6 },
-    { _id: "f8", title: "Online Examination",      iconName: "Award",         color: "from-[#429CE4] to-[#ED6708]",   points: ["Conduct online exams", "MCQ and written tests", "Result generation", "Student performance reports"],                                                         order: 7 },
+    { _id: "f1", title: "Admission Management", iconName: "GraduationCap", color: "from-[#1D496C] to-[#1A3F5C]", points: ["Online admission forms", "Offline admission entries", "Public admission form sharing", "Student document management", "Admission approval system"], order: 0 },
+    { _id: "f2", title: "Fee Management", iconName: "CreditCard", color: "from-[#6A7626] to-[#596420]", points: ["Online & offline fee collection", "Dynamic fee structure creation", "Monthly / Quarterly / Custom fee setup", "Fee receipt generation"], order: 1 },
+    { _id: "f3", title: "Timetable Management", iconName: "Calendar", color: "from-[#429CE4] to-[#2E85CC]", points: ["Class-wise timetable creation", "Subject assignment", "Teacher allocation", "Editable schedules"], order: 2 },
+    { _id: "f4", title: "Homework & Assignment", iconName: "BookOpen", color: "from-[#ED6708] to-[#CD5804]", points: ["Online and offline homework", "Assignment uploads", "Subject-wise homework mapping", "Teacher to student communication"], order: 3 },
+    { _id: "f5", title: "Progress Reports", iconName: "TrendingUp", color: "from-[#FFA600] to-[#E09200]", points: ["Report cards", "Marksheets", "Attendance mapping", "Student performance analytics", "Guardian visibility panel"], order: 4 },
+    { _id: "f6", title: "Announcement System", iconName: "Bell", color: "from-[#1D496C] to-[#6A7626]", points: ["School announcements", "Holiday notices", "Emergency alerts", "Event updates for students and parents"], order: 5 },
+    { _id: "f7", title: "Geo Attendance Feature", iconName: "Shield", color: "from-[#6A7626] to-[#1D496C]", points: ["Staff attendance with geo-location", "Secure attendance monitoring", "Real-time attendance records"], order: 6 },
+    { _id: "f8", title: "Online Examination", iconName: "Award", color: "from-[#429CE4] to-[#ED6708]", points: ["Conduct online exams", "MCQ and written tests", "Result generation", "Student performance reports"], order: 7 },
   ],
   testimonials: [
-    { _id: "t1", name: "Rajesh Sharma",   role: "Principal, Apex International School", content: "VidyaSanchalan simplified our complete admission and fee management process, saving our staff hundreds of hours.", rating: 5, image: "", order: 0 },
-    { _id: "t2", name: "Sunita Deshmukh", role: "Parent of Class IX Student",            content: "Parents can now easily track student performance and attendance. The mobile app experience is absolutely seamless.", rating: 5, image: "", order: 1 },
-    { _id: "t3", name: "Devendra Patel",  role: "Administration Trustee",                content: "The geo-attendance feature made staff management much easier, and the financial audit logs are completely transparent.", rating: 5, image: "", order: 2 },
+    { _id: "t1", name: "Rajesh Sharma", role: "Principal, Apex International School", content: "VidyaSanchalan simplified our complete admission and fee management process, saving our staff hundreds of hours.", rating: 5, image: "", order: 0 },
+    { _id: "t2", name: "Sunita Deshmukh", role: "Parent of Class IX Student", content: "Parents can now easily track student performance and attendance. The mobile app experience is absolutely seamless.", rating: 5, image: "", order: 1 },
+    { _id: "t3", name: "Devendra Patel", role: "Administration Trustee", content: "The geo-attendance feature made staff management much easier, and the financial audit logs are completely transparent.", rating: 5, image: "", order: 2 },
   ],
   modules: [
-    { _id: "m1", label: "Online & Offline Admissions",    iconName: "GraduationCap", order: 0 },
-    { _id: "m2", label: "Smart Fee Collection",           iconName: "DollarSign",    order: 1 },
-    { _id: "m3", label: "Dynamic Timetable Planner",      iconName: "Calendar",      order: 2 },
-    { _id: "m4", label: "Classroom Homework",             iconName: "BookOpen",      order: 3 },
-    { _id: "m5", label: "Online Examination Desk",        iconName: "Award",         order: 4 },
-    { _id: "m6", label: "Real-time Progress Reports",     iconName: "TrendingUp",    order: 5 },
-    { _id: "m7", label: "GPS Attendance Tracking",        iconName: "Shield",        order: 6 },
-    { _id: "m8", label: "Instant Announcement System",    iconName: "Bell",          order: 7 },
+    { _id: "m1", label: "Online & Offline Admissions", iconName: "GraduationCap", order: 0 },
+    { _id: "m2", label: "Smart Fee Collection", iconName: "DollarSign", order: 1 },
+    { _id: "m3", label: "Dynamic Timetable Planner", iconName: "Calendar", order: 2 },
+    { _id: "m4", label: "Classroom Homework", iconName: "BookOpen", order: 3 },
+    { _id: "m5", label: "Online Examination Desk", iconName: "Award", order: 4 },
+    { _id: "m6", label: "Real-time Progress Reports", iconName: "TrendingUp", order: 5 },
+    { _id: "m7", label: "GPS Attendance mapping", iconName: "Shield", order: 6 },
+    { _id: "m8", label: "Instant Announcement System", iconName: "Bell", order: 7 },
   ],
   badges: [
-    { _id: "b1", label: "Trusted by 500+ Schools",    iconName: "Star",         order: 0 },
-    { _id: "b2", label: "ISO 27001 Secure Data",       iconName: "CheckCircle2", order: 1 },
-    { _id: "b3", label: "99.9% Cloud Uptime",          iconName: "Rocket",       order: 2 },
-    { _id: "b4", label: "Dedicated Guardian App",      iconName: "Users",        order: 3 },
-    { _id: "b5", label: "Encrypted Database Logs",     iconName: "Shield",       order: 4 },
-    { _id: "b6", label: "24/7 Priority Support Desk",  iconName: "Heart",        order: 5 },
-    { _id: "b7", label: "AI Powered Report Cards",     iconName: "Sparkles",     order: 6 },
-    { _id: "b8", label: "SRS Compliance Approved",     iconName: "BookMarked",   order: 7 },
+    { _id: "b1", label: "Trusted by 500+ Schools", iconName: "Star", order: 0 },
+    { _id: "b2", label: "ISO 27001 Secure Data", iconName: "CheckCircle2", order: 1 },
+    { _id: "b3", label: "99.9% Cloud Uptime", iconName: "Rocket", order: 2 },
+    { _id: "b4", label: "Dedicated Guardian App", iconName: "Users", order: 3 },
+    { _id: "b5", label: "Encrypted Database Logs", iconName: "Shield", order: 4 },
+    { _id: "b6", label: "24/7 Priority Support Desk", iconName: "Heart", order: 5 },
+    { _id: "b7", label: "AI Powered Report Cards", iconName: "Sparkles", order: 6 },
+    { _id: "b8", label: "SRS Compliance Approved", iconName: "BookMarked", order: 7 },
   ]
 };
 

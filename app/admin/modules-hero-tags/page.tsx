@@ -31,7 +31,7 @@ import { toast } from "sonner";
 const DEFAULT_TAGS = [
   "Admission Management",
   "Fee Management",
-  "Attendance & Geo Tracking",
+  "Attendance & Geo mapping",
   "Homework & Assignments",
   "Timetable Management",
   "Online Examination",
@@ -86,7 +86,7 @@ export default function ModulesHeroTagsPage() {
         setIsDbConnected(true);
         const loaded = data.settings?.modulesHeroTags;
         setTags(Array.isArray(loaded) && loaded.length > 0 ? loaded : DEFAULT_TAGS);
-        
+
         const img = data.settings?.modulesHeroImage || DEFAULT_IMAGE;
         setHeroImage(img);
 
@@ -307,7 +307,7 @@ export default function ModulesHeroTagsPage() {
       {/* ── HERO SLIDER IMAGES UPLOAD ───────────────────────────────────────── */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
         <div className="bg-gradient-to-r from-[#8B5CF6]/5 to-[#429CE4]/5 border-b border-slate-100 px-6 py-4">
-          <h3 className="text-sm font-black text-slate-700 uppercase tracking-wider flex items-center gap-2">
+          <h3 className="text-sm font-black text-slate-700 uppercase mapping-wider flex items-center gap-2">
             <ImageIcon className="h-4 w-4 text-[#8B5CF6]" />
             Hero Mockup Slider Images
           </h3>
@@ -354,11 +354,10 @@ export default function ModulesHeroTagsPage() {
                           key={idx}
                           type="button"
                           onClick={() => setCurrentSlideIndex(idx)}
-                          className={`h-1.5 rounded-full transition-all duration-300 ${
-                            idx === currentSlideIndex 
-                              ? "bg-[#FFA600] w-3" 
+                          className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentSlideIndex
+                              ? "bg-[#FFA600] w-3"
                               : "bg-white/40 hover:bg-white w-1.5"
-                          }`}
+                            }`}
                           aria-label={`Go to slide ${idx + 1}`}
                         />
                       ))}
@@ -413,7 +412,7 @@ export default function ModulesHeroTagsPage() {
 
               {/* Slider Images Grid */}
               <div className="space-y-3">
-                <h4 className="text-xs font-black text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                <h4 className="text-xs font-black text-slate-500 uppercase mapping-wider flex items-center gap-1.5">
                   <ImageIcon className="h-3.5 w-3.5 text-slate-400" />
                   Slider Images ({moduleScreens.length})
                 </h4>
@@ -431,7 +430,7 @@ export default function ModulesHeroTagsPage() {
                           Slide {index + 1}
                         </div>
                       </div>
-                      
+
                       {/* Controls row */}
                       <div className="flex items-center justify-between mt-2 pt-1 border-t border-slate-100/60">
                         <div className="flex gap-0.5">
@@ -454,7 +453,7 @@ export default function ModulesHeroTagsPage() {
                             <ChevronRight className="h-3.5 w-3.5" />
                           </button>
                         </div>
-                        
+
                         <button
                           type="button"
                           onClick={(e) => { e.stopPropagation(); handleRemoveImageIndex(index); }}
@@ -515,7 +514,7 @@ export default function ModulesHeroTagsPage() {
         <div className="space-y-6">
           {/* Add new tag */}
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-            <h3 className="text-sm font-black text-slate-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <h3 className="text-sm font-black text-slate-700 uppercase mapping-wider mb-4 flex items-center gap-2">
               <Plus className="h-4 w-4 text-[#8B5CF6]" />
               Add New Tag
             </h3>
@@ -541,7 +540,7 @@ export default function ModulesHeroTagsPage() {
           {/* Tag List */}
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-black text-slate-700 uppercase tracking-wider flex items-center gap-2">
+              <h3 className="text-sm font-black text-slate-700 uppercase mapping-wider flex items-center gap-2">
                 <GripVertical className="h-4 w-4 text-slate-400" />
                 Tag List
                 <span className="ml-1 inline-flex items-center justify-center h-5 w-5 rounded-full bg-[#8B5CF6]/10 text-[#8B5CF6] text-[10px] font-black">
@@ -663,7 +662,7 @@ export default function ModulesHeroTagsPage() {
               <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-5">
                 {/* Left: checklist */}
                 <div className="space-y-3">
-                  <span className="inline-flex items-center rounded-full border border-[#FFA600]/30 bg-[#FFA600]/10 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-[#FFA600]">
+                  <span className="inline-flex items-center rounded-full border border-[#FFA600]/30 bg-[#FFA600]/10 px-2.5 py-0.5 text-[9px] font-bold uppercase mapping-widest text-[#FFA600]">
                     SMART SCHOOL ERP MODULES
                   </span>
                   <p className="text-sm font-black text-white leading-tight">
@@ -708,9 +707,9 @@ export default function ModulesHeroTagsPage() {
                     <div className="aspect-[16/10] overflow-hidden bg-slate-900 relative flex items-center justify-center">
                       <AnimatePresence mode="wait">
                         {moduleScreens.length > 0 && moduleScreens[currentSlideIndex] ? (
-                          <motion.img 
+                          <motion.img
                             key={currentSlideIndex}
-                            src={moduleScreens[currentSlideIndex]} 
+                            src={moduleScreens[currentSlideIndex]}
                             alt="Mockup preview"
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
@@ -720,8 +719,8 @@ export default function ModulesHeroTagsPage() {
                             className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
                           />
                         ) : (
-                          <img 
-                            src={DEFAULT_IMAGE} 
+                          <img
+                            src={DEFAULT_IMAGE}
                             alt="Mockup fallback"
                             className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
                           />
@@ -736,11 +735,10 @@ export default function ModulesHeroTagsPage() {
                               key={idx}
                               type="button"
                               onClick={() => setCurrentSlideIndex(idx)}
-                              className={`h-1.5 rounded-full transition-all duration-300 ${
-                                idx === currentSlideIndex 
-                                  ? "bg-[#FFA600] w-3.5 animate-pulse" 
+                              className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentSlideIndex
+                                  ? "bg-[#FFA600] w-3.5 animate-pulse"
                                   : "bg-white/40 hover:bg-white w-1.5"
-                              }`}
+                                }`}
                               aria-label={`Go to slide ${idx + 1}`}
                             />
                           ))}
@@ -770,7 +768,7 @@ export default function ModulesHeroTagsPage() {
 
           {/* How this works */}
           <div className="rounded-2xl border border-[#8B5CF6]/20 bg-[#8B5CF6]/5 p-5">
-            <h4 className="text-xs font-black text-[#8B5CF6] uppercase tracking-wider mb-3 flex items-center gap-2">
+            <h4 className="text-xs font-black text-[#8B5CF6] uppercase mapping-wider mb-3 flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4" />
               How This Works
             </h4>

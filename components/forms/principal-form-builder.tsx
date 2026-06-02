@@ -381,7 +381,7 @@ function FieldCard({
               <div className="mx-2.5 mb-2.5 mt-1 rounded-lg border border-slate-100 bg-slate-50/80 p-3">
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Label</Label>
+                    <Label className="text-xs font-semibold text-slate-500 uppercase mapping-wide">Label</Label>
                     <Input
                       value={field.label}
                       onChange={(e) => onChange({ ...field, label: e.target.value })}
@@ -392,7 +392,7 @@ function FieldCard({
 
                   {!isDocumentField && (
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Type</Label>
+                      <Label className="text-xs font-semibold text-slate-500 uppercase mapping-wide">Type</Label>
                       <select
                         className="flex h-9 w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm shadow-none outline-none focus:ring-2 focus:ring-violet-400 disabled:opacity-50"
                         value={field.key === "applying_for_class" ? "text" : field.type}
@@ -436,7 +436,7 @@ function FieldCard({
                 {field.type === "select" && field.key !== "applying_for_class" && (
                   <div className="mt-3 space-y-2">
                     <div className="flex items-center justify-between">
-                      <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Options</Label>
+                      <Label className="text-xs font-semibold text-slate-500 uppercase mapping-wide">Options</Label>
                       <Button type="button" variant="ghost" size="sm" onClick={addOption} className="h-7 text-xs text-violet-600 hover:bg-violet-50">
                         <Plus className="mr-1 h-3 w-3" /> Add
                       </Button>
@@ -679,7 +679,7 @@ export default function PrincipalFormBuilder({
             </div>
 
             <div className="flex items-center gap-2 w-full sm:w-auto">
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">
+              <span className="text-xs font-semibold text-slate-500 uppercase mapping-wide whitespace-nowrap">
                 Academic Year
               </span>
               <select
@@ -785,7 +785,7 @@ export default function PrincipalFormBuilder({
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Form Title</Label>
+                      <Label className="text-xs font-semibold text-slate-500 uppercase mapping-wide">Form Title</Label>
                       <Input
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
@@ -800,7 +800,7 @@ export default function PrincipalFormBuilder({
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Section Title</Label>
+                      <Label className="text-xs font-semibold text-slate-500 uppercase mapping-wide">Section Title</Label>
                       <Input
                         value={sections[0]?.title || ""}
                         onChange={(e) => {
@@ -814,7 +814,7 @@ export default function PrincipalFormBuilder({
                     </div>
 
                     <div className="space-y-1.5 sm:col-span-2">
-                      <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Description <span className="normal-case font-normal text-slate-400">(optional)</span></Label>
+                      <Label className="text-xs font-semibold text-slate-500 uppercase mapping-wide">Description <span className="normal-case font-normal text-slate-400">(optional)</span></Label>
                       <Textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
@@ -975,7 +975,7 @@ export default function PrincipalFormBuilder({
                   <div className="p-3">
                     <div className="mb-3 flex items-center gap-3">
                       <div className="space-y-1 flex-1 max-w-xs">
-                        <Label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">Section Title</Label>
+                        <Label className="text-[11px] font-semibold text-slate-400 uppercase mapping-wide">Section Title</Label>
                         <Input
                           value={documentSectionTitle}
                           onChange={(e) => setDocumentSectionTitle(e.target.value)}
@@ -1076,7 +1076,7 @@ export default function PrincipalFormBuilder({
 
                             {feeType === "general" ? (
                               <div className="space-y-1.5">
-                                <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Amount (INR)</Label>
+                                <Label className="text-xs font-semibold text-slate-500 uppercase mapping-wide">Amount (INR)</Label>
                                 <div className="relative">
                                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-semibold">₹</span>
                                   <Input
@@ -1097,7 +1097,7 @@ export default function PrincipalFormBuilder({
                             ) : (
                               <div className="space-y-2">
                                 <div className="flex items-center justify-between">
-                                  <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Class-wise Fees</Label>
+                                  <Label className="text-xs font-semibold text-slate-500 uppercase mapping-wide">Class-wise Fees</Label>
                                   <button
                                     type="button"
                                     onClick={() => {
@@ -1198,7 +1198,7 @@ export default function PrincipalFormBuilder({
                     </div>
 
                     <div className="mt-5 rounded-xl bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-100 p-4">
-                      <p className="text-[11px] font-semibold text-violet-700 uppercase tracking-wide mb-1">Form Link</p>
+                      <p className="text-[11px] font-semibold text-violet-700 uppercase mapping-wide mb-1">Form Link</p>
                       <p className="text-xs text-violet-500 font-mono break-all">
                         {slugify(`${title} ${shortYear(academicYear)}`) || "student-admission-form"}
                       </p>

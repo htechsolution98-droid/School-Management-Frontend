@@ -59,7 +59,7 @@ function FormDetailsModal({
 
       <motion.div
         key="details-modal"
-        initial={{ opacity  : 0, scale: 0.96, y: 16 }}
+        initial={{ opacity: 0, scale: 0.96, y: 16 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.96, y: 16 }}
         transition={{ type: "spring", stiffness: 400, damping: 32 }}
@@ -361,7 +361,7 @@ function FormTableRow({
 function PublishedLinkCard({ link }: { link: string }) {
   const uniqueLink = link.split("/").filter(Boolean).pop();
 
-    const [origin, setOrigin] = useState("");
+  const [origin, setOrigin] = useState("");
   useEffect(() => {
     setOrigin(window.location.origin);
   }, []);
@@ -379,9 +379,9 @@ function PublishedLinkCard({ link }: { link: string }) {
 
   // add this function
   const handlePreviewForm = () => {
-  if (!frontendLink) return;
-  window.open(frontendLink, "_blank");
-};
+    if (!frontendLink) return;
+    window.open(frontendLink, "_blank");
+  };
 
   if (!link) return null;
 
@@ -529,7 +529,7 @@ export default function AdmissionFormPage() {
             <h1 className="text-2xl font-bold text-slate-900">
               Admission Forms
             </h1>
-            <p className="text-sm text-slate-500 mt-1"> 
+            <p className="text-sm text-slate-500 mt-1">
               Manage and distribute admission forms for incoming students.
             </p>
           </div>
@@ -671,7 +671,7 @@ export default function AdmissionFormPage() {
                     ].map((h) => (
                       <th
                         key={h}
-                        className={`px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-400 ${h === "Actions" ? "text-right" : ""}`}
+                        className={`px-6 py-3.5 text-xs font-bold uppercase mapping-wider text-slate-400 ${h === "Actions" ? "text-right" : ""}`}
                       >
                         {h}
                       </th>
@@ -687,7 +687,7 @@ export default function AdmissionFormPage() {
                     ].map((h) => (
                       <th
                         key={h}
-                        className={`px-6 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-400 ${h === "Actions" ? "text-right" : ""}`}
+                        className={`px-6 py-3.5 text-xs font-bold uppercase mapping-wider text-slate-400 ${h === "Actions" ? "text-right" : ""}`}
                       >
                         {h}
                       </th>

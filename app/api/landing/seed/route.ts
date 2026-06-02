@@ -186,7 +186,7 @@ export async function POST() {
         },
         {
           title: "Biometric & Geo-location",
-          desc: "Security tracking logs for teacher roll-call ensuring verifiable attendance entries using mobile GPS services.",
+          desc: "Security mapping logs for teacher roll-call ensuring verifiable attendance entries using mobile GPS services.",
           iconName: "Fingerprint"
         }
       ],
@@ -196,7 +196,7 @@ export async function POST() {
       modulePoints: [
         "Admission Management",
         "Fee Management",
-        "Attendance & Geo Tracking",
+        "Attendance & Geo mapping",
         "Homework & Assignments",
         "Timetable Management",
         "Online Examination",
@@ -221,7 +221,7 @@ export async function POST() {
           title: "Parent Portal",
           emoji: "👨‍👩‍👧",
           iconName: "Users",
-          desc: "Instant tracking companion providing real-time data sync, fee alerts, and direct chats.",
+          desc: "Instant mapping companion providing real-time data sync, fee alerts, and direct chats.",
           points: [
             "Real-time student updates",
             "Fee payment alerts",
@@ -341,7 +341,7 @@ export async function POST() {
         points: [
           "Online and offline homework",
           "Assignment uploads",
-          "Subject-wise homework tracking",
+          "Subject-wise homework mapping",
           "Teacher to student communication"
         ],
         order: 3
@@ -353,7 +353,7 @@ export async function POST() {
         points: [
           "Report cards",
           "Marksheets",
-          "Attendance tracking",
+          "Attendance mapping",
           "Student performance analytics",
           "Guardian visibility panel"
         ],
@@ -376,7 +376,7 @@ export async function POST() {
         iconName: "Shield",
         color: "from-[#6A7626] to-[#1D496C]",
         points: [
-          "Staff attendance with geo-location tracking",
+          "Staff attendance with geo-location mapping",
           "Secure attendance monitoring",
           "Real-time attendance records"
         ],
@@ -405,7 +405,7 @@ export async function POST() {
       { label: "Classroom Homework", iconName: "BookOpen", order: 3 },
       { label: "Online Examination Desk", iconName: "Award", order: 4 },
       { label: "Real-time Progress Reports", iconName: "TrendingUp", order: 5 },
-      { label: "GPS Attendance Tracking", iconName: "Shield", order: 6 },
+      { label: "GPS Attendance mapping", iconName: "Shield", order: 6 },
       { label: "Instant Announcement System", iconName: "Bell", order: 7 }
     ];
     await SliderModule.create(defaultModules);

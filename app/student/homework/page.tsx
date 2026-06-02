@@ -55,7 +55,7 @@ function formatDueDate(dateStr: string): string {
   if (isPastDue(dateStr)) return "Overdue";
   const diff = Math.ceil(
     (new Date(dateStr).getTime() - new Date().setHours(0, 0, 0, 0)) /
-      (1000 * 60 * 60 * 24)
+    (1000 * 60 * 60 * 24)
   );
   if (diff === 1) return "Due Tomorrow";
   return `Due in ${diff} days`;
@@ -88,10 +88,10 @@ function getDueBadgeStyle(dateStr: string): { bg: string; text: string } {
 
 function getStatusConfig(status: HomeworkSubmission["status"]) {
   return {
-    pending:   { label: "Pending",   bg: "#fef9c3", text: "#854d0e", dot: "#f59e0b" },
+    pending: { label: "Pending", bg: "#fef9c3", text: "#854d0e", dot: "#f59e0b" },
     submitted: { label: "Submitted", bg: "#dbeafe", text: "#1e40af", dot: "#3b82f6" },
-    late:      { label: "Late",      bg: "#fee2e2", text: "#991b1b", dot: "#ef4444" },
-    checked:   { label: "Checked",   bg: "#d1fae5", text: "#065f46", dot: "#10b981" },
+    late: { label: "Late", bg: "#fee2e2", text: "#991b1b", dot: "#ef4444" },
+    checked: { label: "Checked", bg: "#d1fae5", text: "#065f46", dot: "#10b981" },
   }[status];
 }
 
@@ -249,10 +249,10 @@ function StatsBar({
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
       {[
-        { label: "Total",     value: total,     bg: "bg-indigo-50",  text: "text-indigo-700",  border: "border-indigo-100" },
-        { label: "Pending",   value: pending,   bg: "bg-amber-50",   text: "text-amber-700",   border: "border-amber-100"  },
-        { label: "Submitted", value: submitted, bg: "bg-blue-50",    text: "text-blue-700",    border: "border-blue-100"   },
-        { label: "Checked",   value: checked,   bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-100"},
+        { label: "Total", value: total, bg: "bg-indigo-50", text: "text-indigo-700", border: "border-indigo-100" },
+        { label: "Pending", value: pending, bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-100" },
+        { label: "Submitted", value: submitted, bg: "bg-blue-50", text: "text-blue-700", border: "border-blue-100" },
+        { label: "Checked", value: checked, bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-100" },
       ].map((s) => (
         <div
           key={s.label}
@@ -291,13 +291,13 @@ function HomeworkListView({
   }, [submissions]);
 
   const todayList = homeworkList.filter((hw) => isToday(hw.due_date));
-  const allList   = homeworkList;
+  const allList = homeworkList;
   const displayList = activeTab === "today" ? todayList : allList;
 
   const stats = useMemo(() => {
     const submitted = submissions.filter((s) => s.status !== "pending").length;
-    const checked   = submissions.filter((s) => s.status === "checked").length;
-    const pending   = homeworkList.length - submitted;
+    const checked = submissions.filter((s) => s.status === "checked").length;
+    const pending = homeworkList.length - submitted;
     return { total: homeworkList.length, submitted, pending, checked };
   }, [homeworkList, submissions]);
 
@@ -346,16 +346,14 @@ function HomeworkListView({
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-4 text-sm font-semibold relative transition-colors ${
-                activeTab === tab ? "text-indigo-600" : "text-gray-400 hover:text-gray-600"
-              }`}
+              className={`flex-1 py-4 text-sm font-semibold relative transition-colors ${activeTab === tab ? "text-indigo-600" : "text-gray-400 hover:text-gray-600"
+                }`}
             >
               {tab === "today" ? "Today's Homework" : "All Homework"}
               {/* Count badge */}
               <span
-                className={`ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                  activeTab === tab ? "bg-indigo-100 text-indigo-600" : "bg-gray-100 text-gray-400"
-                }`}
+                className={`ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${activeTab === tab ? "bg-indigo-100 text-indigo-600" : "bg-gray-100 text-gray-400"
+                  }`}
               >
                 {tab === "today" ? todayList.length : allList.length}
               </span>
@@ -368,7 +366,7 @@ function HomeworkListView({
 
         {/* Tab sub-header */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-50 bg-gray-50/50">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
+          <p className="text-xs font-bold text-gray-500 uppercase mapping-wide">
             {activeTab === "today" ? "Due Today" : "All Assignments"}
           </p>
           <div className="flex items-center gap-1.5 text-indigo-500 text-xs font-semibold">
@@ -470,13 +468,13 @@ function HomeworkDetailView({
   onBack: () => void;
   onSubmitted: (sub: HomeworkSubmission) => void;
 }) {
-  const fileInputRef  = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [submitting, setSubmitting]     = useState(false);
-  const [submitError, setSubmitError]   = useState<string | null>(null);
-  const [showSuccess, setShowSuccess]   = useState(false);
-  const [viewDesc, setViewDesc]         = useState(false);
-  const [submission, setSubmission]     = useState<HomeworkSubmission | undefined>(existingSubmission);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [viewDesc, setViewDesc] = useState(false);
+  const [submission, setSubmission] = useState<HomeworkSubmission | undefined>(existingSubmission);
 
   const dueLabel = formatDueDate(hw.due_date);
   const dueBadge = getDueBadgeStyle(hw.due_date);
@@ -583,7 +581,7 @@ function HomeworkDetailView({
             {/* Due date row */}
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100">
               <div>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">
+                <p className="text-[10px] font-bold text-gray-400 uppercase mapping-wider mb-0.5">
                   Due Date
                 </p>
                 <p className="text-sm font-bold text-gray-800">
@@ -591,7 +589,7 @@ function HomeworkDetailView({
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">
+                <p className="text-[10px] font-bold text-gray-400 uppercase mapping-wider mb-0.5">
                   Assigned
                 </p>
                 <p className="text-sm font-bold text-gray-800">
@@ -809,11 +807,10 @@ function HomeworkDetailView({
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className={`w-full py-3.5 rounded-xl text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 ${
-                  submitting
+                className={`w-full py-3.5 rounded-xl text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 ${submitting
                     ? "bg-indigo-400 cursor-wait text-white"
                     : "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-200 hover:shadow-indigo-300 active:scale-95"
-                }`}
+                  }`}
               >
                 {submitting ? (
                   <>
@@ -838,15 +835,15 @@ function HomeworkDetailView({
 
           {/* Info Card */}
           <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-            <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">
+            <h4 className="text-xs font-bold text-gray-500 uppercase mapping-wide mb-3">
               Assignment Info
             </h4>
             <div className="space-y-2.5">
               {[
-                { label: "Teacher",  value: hw.teacher_name },
-                { label: "Class",    value: `${hw.school_class_name} – ${hw.division_name}` },
+                { label: "Teacher", value: hw.teacher_name },
+                { label: "Class", value: `${hw.school_class_name} – ${hw.division_name}` },
                 { label: "Assigned", value: formatDisplayDate(hw.assigned_date) },
-                { label: "Due",      value: formatDisplayDate(hw.due_date) },
+                { label: "Due", value: formatDisplayDate(hw.due_date) },
               ].map(({ label, value }) => (
                 <div key={label} className="flex items-start justify-between gap-2">
                   <span className="text-xs text-gray-400 font-medium flex-shrink-0">{label}</span>
@@ -863,12 +860,12 @@ function HomeworkDetailView({
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function HomeworkPage() {
-  const [homeworkList, setHomeworkList]   = useState<HomeworkItem[]>([]);
-  const [submissions, setSubmissions]     = useState<HomeworkSubmission[]>([]);
-  const [loading, setLoading]             = useState(true);
-  const [error, setError]                 = useState<string | null>(null);
-  const [selectedHw, setSelectedHw]       = useState<HomeworkItem | null>(null);
-  const [selectedIdx, setSelectedIdx]     = useState<number>(0);
+  const [homeworkList, setHomeworkList] = useState<HomeworkItem[]>([]);
+  const [submissions, setSubmissions] = useState<HomeworkSubmission[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedHw, setSelectedHw] = useState<HomeworkItem | null>(null);
+  const [selectedIdx, setSelectedIdx] = useState<number>(0);
 
   const loadAll = useCallback(async () => {
     setLoading(true);

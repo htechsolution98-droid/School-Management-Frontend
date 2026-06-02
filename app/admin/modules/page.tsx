@@ -114,7 +114,7 @@ const defaultEcosystemCards = [
     title: "Parent Portal",
     emoji: "👨‍👩‍👧",
     iconName: "Users",
-    desc: "Instant tracking companion providing real-time data sync, fee alerts, and direct chats.",
+    desc: "Instant mapping companion providing real-time data sync, fee alerts, and direct chats.",
     points: [
       "Real-time student updates",
       "Fee payment alerts",
@@ -208,7 +208,7 @@ export default function ModulesManager() {
   const [moduleHeroDesc, setModuleHeroDesc] = useState("VidhyaSanchalan provides all essential school management modules in one powerful platform — from admissions and fees to attendance, examinations, homework, reports, and parent communication.");
   const [modulePoints, setModulePoints] = useState<string[]>([]);
   const [moduleScreens, setModuleScreens] = useState<string[]>([]);
-  
+
   // Dynamic gridModules Cards state
   const [gridModules, setGridModules] = useState<any[]>([]);
 
@@ -246,7 +246,7 @@ export default function ModulesManager() {
         setModulePoints(data.settings.modulePoints || [
           "Admission Management",
           "Fee Management",
-          "Attendance & Geo Tracking",
+          "Attendance & Geo mapping",
           "Homework & Assignments",
           "Timetable Management",
           "Online Examination",
@@ -553,7 +553,7 @@ export default function ModulesManager() {
     <div className="space-y-8">
       {/* Header bar */}
       <div>
-        <h2 className="text-2xl font-black text-slate-800 tracking-tight">Modules Manager</h2>
+        <h2 className="text-2xl font-black text-slate-800 mapping-tight">Modules Manager</h2>
         <p className="text-xs sm:text-sm text-slate-400 mt-1">
           Configure dynamic sliding elements, edit hero copy tags, and perform CRUD actions on modular points checklist or base64 uploader sliders.
         </p>
@@ -581,7 +581,7 @@ export default function ModulesManager() {
         </div>
       ) : (
         <div className="space-y-8 animate-fadeIn">
-          
+
           {/* Section 1: Dynamic Ecosystem Portal Copy & Hero Slider Uploader */}
           <form onSubmit={handleSaveEcosystemPortal} className="space-y-6">
             <Card className="shadow-md bg-white border border-slate-100 rounded-[2rem] overflow-hidden">
@@ -592,17 +592,17 @@ export default function ModulesManager() {
                 <CardDescription className="text-xs mt-1">Configure copy text, checklists points grid, and upload device mockup slideshow images for the modules header page.</CardDescription>
               </CardHeader>
               <CardContent className="pt-6 space-y-8">
-                
+
                 <div className="grid gap-8 lg:grid-cols-12">
-                  
+
                   {/* Left Column: Hero copy and checklists grid */}
                   <div className="lg:col-span-7 space-y-6">
-                    
+
                     {/* Badge & Title */}
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div className="space-y-1.5">
                         <Label htmlFor="portalBadge" className="text-xs font-black text-slate-600">Hero Section Badge</Label>
-                        <Input 
+                        <Input
                           id="portalBadge"
                           value={moduleHeroBadge}
                           onChange={(e) => setModuleHeroBadge(e.target.value)}
@@ -612,7 +612,7 @@ export default function ModulesManager() {
                       </div>
                       <div className="space-y-1.5">
                         <Label htmlFor="portalTitle" className="text-xs font-black text-slate-600">Hero Main Title</Label>
-                        <Input 
+                        <Input
                           id="portalTitle"
                           value={moduleHeroTitle}
                           onChange={(e) => setModuleHeroTitle(e.target.value)}
@@ -625,7 +625,7 @@ export default function ModulesManager() {
                     {/* Hero Description */}
                     <div className="space-y-1.5">
                       <Label htmlFor="portalDesc" className="text-xs font-black text-slate-600">Hero Section Description Copywriting</Label>
-                      <Textarea 
+                      <Textarea
                         id="portalDesc"
                         value={moduleHeroDesc}
                         onChange={(e) => setModuleHeroDesc(e.target.value)}
@@ -643,7 +643,7 @@ export default function ModulesManager() {
                           <p className="text-[10px] text-slate-400">Add or edit individual bullet points showing inside the left columns</p>
                         </div>
                         <div className="flex gap-2 shrink-0">
-                          <Input 
+                          <Input
                             value={newPointInput}
                             onChange={(e) => setNewPointInput(e.target.value)}
                             placeholder="Add feature bullet..."
@@ -668,14 +668,14 @@ export default function ModulesManager() {
 
                       <div className="grid gap-3 sm:grid-cols-2 max-h-[220px] overflow-y-auto pr-1">
                         {modulePoints.map((pt, index) => (
-                          <div 
+                          <div
                             key={index}
                             className="flex items-center gap-2 border border-slate-100 p-2 rounded-xl bg-white shadow-sm hover:shadow hover:bg-slate-50/50 transition-colors"
                           >
                             <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#E4FF4C]/10 text-emerald-600 font-black">
                               <CheckCircle2 className="h-3.5 w-3.5 stroke-[2.5]" />
                             </div>
-                            <Input 
+                            <Input
                               value={pt}
                               onChange={(e) => handleChecklistPointChange(index, e.target.value)}
                               className="border-transparent bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-xs font-bold leading-none p-0 h-auto flex-1 shadow-none rounded-none"
@@ -698,7 +698,7 @@ export default function ModulesManager() {
 
                   {/* Right Column: Multiple Screenshots slide upload deck & laptop slider preview */}
                   <div className="lg:col-span-5 space-y-6 lg:border-l lg:border-slate-100 lg:pl-8">
-                    
+
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <div>
@@ -706,11 +706,11 @@ export default function ModulesManager() {
                           <p className="text-[10px] text-slate-400">Upload multiple dashboard screenshot layouts for the autoplay slider</p>
                         </div>
                         <div>
-                          <input 
-                            type="file" 
+                          <input
+                            type="file"
                             accept="image/*"
                             multiple
-                            className="hidden" 
+                            className="hidden"
                             ref={fileInputRef}
                             onChange={handleMultipleImagesUpload}
                           />
@@ -734,11 +734,10 @@ export default function ModulesManager() {
                       ) : (
                         <div className="grid grid-cols-4 gap-2 max-h-[110px] overflow-y-auto pr-1">
                           {moduleScreens.map((screen, idx) => (
-                            <div 
+                            <div
                               key={idx}
-                              className={`relative aspect-[16/10] rounded-lg border overflow-hidden group shadow-inner cursor-pointer ${
-                                idx === previewSlideIdx ? "border-[#429CE4] ring-2 ring-[#429CE4]/20" : "border-slate-100"
-                              }`}
+                              className={`relative aspect-[16/10] rounded-lg border overflow-hidden group shadow-inner cursor-pointer ${idx === previewSlideIdx ? "border-[#429CE4] ring-2 ring-[#429CE4]/20" : "border-slate-100"
+                                }`}
                               onClick={() => setPreviewSlideIdx(idx)}
                             >
                               <img src={screen} alt={`Slide ${idx + 1}`} className="w-full h-full object-cover" />
@@ -764,16 +763,16 @@ export default function ModulesManager() {
                         <div className="absolute inset-0 bg-grid-white/[0.03] pointer-events-none"></div>
                         <div className="flex items-center gap-1.5 mb-2.5 text-[9px]">
                           <span className="h-1.5 w-1.5 rounded-full bg-[#E4FF4C] animate-ping"></span>
-                          <span className="text-slate-400 font-black tracking-wider uppercase text-[8px]">Laptop Frame Mockup Preview</span>
+                          <span className="text-slate-400 font-black mapping-wider uppercase text-[8px]">Laptop Frame Mockup Preview</span>
                         </div>
 
                         <div className="flex flex-col items-center justify-center space-y-3">
                           {/* Laptop outer */}
                           <div className="w-full max-w-[210px] aspect-[16/10] rounded-xl bg-slate-950 p-1 border border-slate-800 shadow-xl overflow-hidden shrink-0 flex items-center justify-center relative">
                             {moduleScreens[previewSlideIdx] && (
-                              <img 
-                                src={moduleScreens[previewSlideIdx]} 
-                                alt="preview" 
+                              <img
+                                src={moduleScreens[previewSlideIdx]}
+                                alt="preview"
                                 className="w-full h-full object-cover rounded"
                               />
                             )}
@@ -796,7 +795,7 @@ export default function ModulesManager() {
                             >
                               <ChevronLeft className="h-3.5 w-3.5" />
                             </Button>
-                            <span className="text-[9px] font-black text-slate-400 tracking-wider">
+                            <span className="text-[9px] font-black text-slate-400 mapping-wider">
                               Slide {previewSlideIdx + 1} / {moduleScreens.length}
                             </span>
                             <Button
@@ -873,7 +872,7 @@ export default function ModulesManager() {
                               </p>
                               {card.points && card.points.length > 0 && (
                                 <div className="mt-2 flex flex-wrap gap-1">
-                                  <span className="text-[8px] bg-slate-100 px-2 py-0.5 rounded font-black text-slate-500 uppercase tracking-wider">
+                                  <span className="text-[8px] bg-slate-100 px-2 py-0.5 rounded font-black text-slate-500 uppercase mapping-wider">
                                     {card.points.length} Checklist points
                                   </span>
                                 </div>

@@ -181,12 +181,12 @@ function ReceiptModal({
     const fmt = (d: string) =>
       d
         ? new Date(d).toLocaleString("en-IN", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
         : "N/A";
 
     // ── Header ──
@@ -444,12 +444,12 @@ function ReceiptModal({
             <span className="font-semibold text-gray-800">
               {(fee as any).paid_at
                 ? new Date((fee as any).paid_at).toLocaleString("en-IN", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
                 : "N/A"}
             </span>
           </div>
@@ -1003,11 +1003,10 @@ export default function PayFeesPage() {
                     </td>
                     <td className="py-3 pr-4">
                       <span
-                        className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                          payment.is_verified
+                        className={`text-xs font-semibold px-3 py-1 rounded-full ${payment.is_verified
                             ? "bg-green-100 text-green-700"
                             : "bg-yellow-100 text-yellow-700"
-                        }`}
+                          }`}
                       >
                         {payment.is_verified ? "Verified" : "Pending"}
                       </span>
@@ -1044,11 +1043,10 @@ export default function PayFeesPage() {
               <button
                 key={p}
                 onClick={() => setHistoryPage(p)}
-                className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-semibold transition-colors ${
-                  p === historyPage
+                className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-semibold transition-colors ${p === historyPage
                     ? "bg-purple-600 text-white"
                     : "border border-gray-200 text-gray-500 hover:bg-gray-50"
-                }`}
+                  }`}
               >
                 {p}
               </button>
@@ -1069,7 +1067,7 @@ export default function PayFeesPage() {
         <div className="flex flex-wrap items-center gap-6">
           <p className="text-sm font-semibold text-gray-600">We Accept</p>
           <div className="flex items-center gap-1">
-            <span className="text-blue-600 font-bold text-lg tracking-tight">
+            <span className="text-blue-600 font-bold text-lg mapping-tight">
               UPI
             </span>
             <span className="text-orange-500 font-bold text-sm">●</span>

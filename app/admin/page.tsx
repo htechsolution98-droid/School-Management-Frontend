@@ -77,7 +77,7 @@ export default function AdminDashboard() {
       // 1. Fetch settings and connection status
       const settingsRes = await fetch("/api/landing/settings");
       const settingsData = await settingsRes.json();
-      
+
       let aboutHighlightsCount = 2;
       let capabilitiesCount = 4;
       let whyChooseUsCount = 3;
@@ -262,11 +262,11 @@ export default function AdminDashboard() {
     if (isSeeding) return;
     setIsSeeding(true);
     const loadingToast = toast.loading("Seeding MongoDB collections with default copy...");
-    
+
     try {
       const res = await fetch("/api/landing/seed", { method: "POST" });
       const data = await res.json();
-      
+
       toast.dismiss(loadingToast);
       if (data.success) {
         toast.success("Database seeded! Default page layout populated successfully.");
@@ -475,7 +475,7 @@ export default function AdminDashboard() {
           >
             <Card className={`overflow-hidden shadow-sm hover:shadow-md transition-all ${card.color} bg-white`}>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-bold text-slate-500 uppercase tracking-wider">
+                <CardTitle className="text-sm font-bold text-slate-500 uppercase mapping-wider">
                   {card.title}
                 </CardTitle>
                 <div className={`rounded-xl p-2 ${card.bg} ${card.iconColor}`}>
@@ -483,7 +483,7 @@ export default function AdminDashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-black tracking-tight">{card.value}</div>
+                <div className="text-3xl font-black mapping-tight">{card.value}</div>
                 <p className="text-xs text-slate-400 mt-1">{card.description}</p>
                 <Link href={card.href} className="inline-flex items-center gap-1.5 text-xs font-bold mt-4 text-[#429CE4] hover:text-[#1D496C] transition-colors">
                   Manage section <ArrowRight className="h-3 w-3" />

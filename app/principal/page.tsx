@@ -54,7 +54,7 @@ export default function PrincipalDashboard() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+        <h2 className="text-2xl font-bold text-gray-900 mapping-tight">
           Principal Dashboard
         </h2>
         <p className="text-sm text-gray-500 mt-1">

@@ -81,7 +81,7 @@ function LoginFormInner() {
     try {
       const response = await loginUser(payload);
       // roles might be top-level or in user.roles depending on backend
-      console.log("response : ",response,"response.user?.roles : ",response.roles, response.user?.roles);
+      console.log("response : ", response, "response.user?.roles : ", response.roles, response.user?.roles);
       const roles = response.roles || response.user?.roles || [];
       const route = getDashboardRoute(roles);
       router.push(route);
@@ -134,9 +134,8 @@ function LoginFormInner() {
           </Label>
           <div className="relative">
             <User
-              className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors duration-200 ${
-                focused === "username" ? "text-[#FFA600]" : "text-[#94A3B8]"
-              }`}
+              className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors duration-200 ${focused === "username" ? "text-[#FFA600]" : "text-[#94A3B8]"
+                }`}
             />
             <Input
               id="username"
@@ -176,9 +175,8 @@ function LoginFormInner() {
           </div>
           <div className="relative">
             <Lock
-              className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors duration-200 ${
-                focused === "password" ? "text-[#FFA600]" : "text-[#94A3B8]"
-              }`}
+              className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors duration-200 ${focused === "password" ? "text-[#FFA600]" : "text-[#94A3B8]"
+                }`}
             />
             <Input
               id="password"
@@ -280,7 +278,7 @@ function LoginFormInner() {
         {["256-bit SSL", "GDPR Compliant", "99.9% uptime"].map((badge) => (
           <span
             key={badge}
-            className="flex items-center gap-1 text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider"
+            className="flex items-center gap-1 text-[10px] font-bold text-[#94A3B8] uppercase mapping-wider"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-[#6A7626] inline-block" />
             {badge}

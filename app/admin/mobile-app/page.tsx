@@ -188,11 +188,11 @@ export default function MobileAppRolesManager() {
     setDesc(tab.desc);
     setPoints(tab.points?.length ? tab.points : [""]);
     setImage(tab.image || "");
-    
+
     // Attempt to match existing theme
     const themeIdx = PRESET_THEMES.findIndex(t => t.color === tab.color);
     setSelectedThemeIndex(themeIdx >= 0 ? themeIdx : 0);
-    
+
     setIsOpen(true);
   };
 
@@ -363,7 +363,7 @@ export default function MobileAppRolesManager() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-800 tracking-tight">Mobile Ecosystem Roles Manager</h2>
+          <h2 className="text-2xl font-black text-slate-800 mapping-tight">Mobile Ecosystem Roles Manager</h2>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
             Manage interactive mobile tabs, application mockups, themes, and descriptions on the features page
           </p>
@@ -450,11 +450,10 @@ export default function MobileAppRolesManager() {
                       <div
                         key={tab.tabId}
                         onClick={() => setActivePreviewTab(tab.tabId)}
-                        className={`flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl border transition-all cursor-pointer ${
-                          activePreviewTab === tab.tabId
+                        className={`flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-xl border transition-all cursor-pointer ${activePreviewTab === tab.tabId
                             ? "border-[#429CE4] bg-[#429CE4]/5 shadow-sm"
                             : "border-slate-100 hover:border-slate-200 hover:bg-slate-50/50 bg-white"
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center gap-3">
                           {tab.image ? (
@@ -543,7 +542,7 @@ export default function MobileAppRolesManager() {
 
             {/* Hint Box */}
             <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 text-xs font-semibold text-slate-500 space-y-1.5">
-              <span className="text-[#FFA600] font-black flex items-center gap-1.5 text-xs uppercase tracking-wider">
+              <span className="text-[#FFA600] font-black flex items-center gap-1.5 text-xs uppercase mapping-wider">
                 <Sparkles className="h-3.5 w-3.5 shrink-0" /> Dynamic Integration
               </span>
               <p>
@@ -557,7 +556,7 @@ export default function MobileAppRolesManager() {
 
           {/* Right panel: Phone simulator preview */}
           <div className="lg:col-span-5 flex flex-col items-center justify-center">
-            <span className="text-xs font-black uppercase text-slate-400 tracking-widest mb-3">
+            <span className="text-xs font-black uppercase text-slate-400 mapping-widest mb-3">
               Real-time Mobile preview
             </span>
 
@@ -602,7 +601,7 @@ export default function MobileAppRolesManager() {
                       <>
                         {/* App badge & main details */}
                         <div className="mt-8 space-y-4">
-                          <span className={`inline-block px-2.5 py-0.5 rounded-full border text-[9px] font-black tracking-wider uppercase ${activePreviewData.accent}`}>
+                          <span className={`inline-block px-2.5 py-0.5 rounded-full border text-[9px] font-black mapping-wider uppercase ${activePreviewData.accent}`}>
                             {activePreviewData.badge || "System App"}
                           </span>
                           <div>

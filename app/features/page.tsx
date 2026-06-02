@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { AnimatePresence, motion, useMotionValue, useSpring } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -131,7 +131,7 @@ export default function FeaturesPage() {
     },
     {
       title: "Biometric & Geo-location",
-      desc: "Security tracking logs for teacher roll-call ensuring verifiable attendance entries using mobile GPS services.",
+      desc: "Security mapping logs for teacher roll-call ensuring verifiable attendance entries using mobile GPS services.",
       iconName: "Fingerprint",
       hoverBg: "hover:bg-[#FFA600] hover:border-[#FFA600] hover:shadow-xl hover:shadow-[#FFA600]/20",
     },
@@ -139,35 +139,9 @@ export default function FeaturesPage() {
 
   const [capabilities, setCapabilities] = useState<any[]>([]);
 
-  // Custom lagging cursor follower spring physics
-  const [isTouchDevice, setIsTouchDevice] = useState(true);
-  const mouseX = useMotionValue(-100);
-  const mouseY = useMotionValue(-100);
 
-  const springConfig = { damping: 30, stiffness: 220, mass: 0.6 };
-  const cursorX = useSpring(mouseX, springConfig);
-  const cursorY = useSpring(mouseY, springConfig);
 
-  useEffect(() => {
-    const touchQuery = window.matchMedia("(pointer: coarse)");
-    setIsTouchDevice(touchQuery.matches);
 
-    const listener = (e: MediaQueryListEvent) => {
-      setIsTouchDevice(e.matches);
-    };
-    touchQuery.addEventListener("change", listener);
-
-    const handleMouseMove = (e: MouseEvent) => {
-      mouseX.set(e.clientX - 16);
-      mouseY.set(e.clientY - 16);
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => {
-      touchQuery.removeEventListener("change", listener);
-      window.removeEventListener("mousemove", handleMouseMove);
-    };
-  }, [mouseX, mouseY]);
 
   useEffect(() => {
     async function loadDynamicMobileTabs() {
@@ -179,7 +153,7 @@ export default function FeaturesPage() {
             const fetchedTabs = data.settings.mobileTabs;
             const contentMap: Record<string, any> = {};
             const ids: string[] = [];
-            
+
             fetchedTabs.forEach((tab: any) => {
               contentMap[tab.tabId] = {
                 badge: tab.badge,
@@ -308,8 +282,8 @@ export default function FeaturesPage() {
                 <div className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-[#FFA600] ring-2 ring-white"></div>
               </div>
               <div>
-                <span className="text-lg font-black tracking-tight"><span className="text-[#285E89]">Vidya</span><span className="text-[#FFA600]">Sanchalan</span></span>
-                <p className="text-[9px] text-[#285E89]/60 font-bold uppercase tracking-wider mt-0.5">Features Hub</p>
+                <span className="text-lg font-black mapping-tight"><span className="text-[#285E89]">Vidya</span><span className="text-[#FFA600]">Sanchalan</span></span>
+                <p className="text-[9px] text-[#285E89]/60 font-bold uppercase mapping-wider mt-0.5">Features Hub</p>
               </div>
             </Link>
 
@@ -400,11 +374,11 @@ export default function FeaturesPage() {
               <div className="space-y-4">
                 <Badge
                   variant="outline"
-                  className="rounded-full px-4 py-1.5 border-[#FFA600]/30 bg-[#FFA600]/10 text-[#FFA600] shadow-sm font-bold tracking-wider uppercase text-xs"
+                  className="rounded-full px-4 py-1.5 border-[#FFA600]/30 bg-[#FFA600]/10 text-[#FFA600] shadow-sm font-bold mapping-wider uppercase text-xs"
                 >
                   ✨ Mobile Ecosystem
                 </Badge>
-                <h1 className="text-3.5xl sm:text-5xl lg:text-5.5xl font-black tracking-tight leading-[1.15] text-white">
+                <h1 className="text-3.5xl sm:text-5xl lg:text-5.5xl font-black mapping-tight leading-[1.15] text-white">
                   Comprehensive App <span className="bg-gradient-to-r from-[#429CE4] via-[#E4FF4C] to-[#FFA600] bg-clip-text text-transparent block">For School Roles</span>
                 </h1>
                 <p className="text-slate-200/90 text-base sm:text-lg leading-relaxed max-w-xl font-medium">
@@ -421,7 +395,7 @@ export default function FeaturesPage() {
                       setActiveTab(tab);
                       setSliderIndex(tabIds.indexOf(tab));
                     }}
-                    className={`flex-1 py-3 text-xs sm:text-sm font-black rounded-xl capitalize tracking-wide transition-all duration-300 relative overflow-hidden ${activeTab === tab
+                    className={`flex-1 py-3 text-xs sm:text-sm font-black rounded-xl capitalize mapping-wide transition-all duration-300 relative overflow-hidden ${activeTab === tab
                       ? "text-white shadow-lg z-10"
                       : "text-slate-300 hover:text-slate-100"
                       }`}
@@ -449,7 +423,7 @@ export default function FeaturesPage() {
                   className="space-y-6 max-w-xl"
                 >
                   <div className="space-y-2">
-                    <span className={`inline-block px-3 py-1 rounded-full border text-[11px] font-black tracking-wider uppercase ${tabsContent[activeTab]?.accent || ""}`}>
+                    <span className={`inline-block px-3 py-1 rounded-full border text-[11px] font-black mapping-wider uppercase ${tabsContent[activeTab]?.accent || ""}`}>
                       {tabsContent[activeTab]?.badge || ""}
                     </span>
                     <h2 className="text-2xl sm:text-3xl font-black text-white">{tabsContent[activeTab]?.title || ""}</h2>
@@ -481,7 +455,7 @@ export default function FeaturesPage() {
 
               {/* Giant backdrop background text: "OUR APP" */}
               <div className="absolute inset-0 flex items-center justify-center select-none pointer-events-none -z-0 w-full">
-                <span className="text-[8.5rem] sm:text-[12rem] lg:text-[14rem] font-black tracking-wider text-white/[0.04] select-none uppercase font-sans">
+                <span className="text-[8.5rem] sm:text-[12rem] lg:text-[14rem] font-black mapping-wider text-white/[0.04] select-none uppercase font-sans">
                   OUR APP
                 </span>
               </div>
@@ -491,7 +465,7 @@ export default function FeaturesPage() {
 
                 {/* Underglow shadow */}
                 <div className="absolute bottom-[30px] w-[240px] h-[40px] bg-[#429CE4]/20 blur-3xl rounded-full -z-10"></div>
-                 {appScreens.map((screen, idx) => {
+                {appScreens.map((screen, idx) => {
                   const total = appScreens.length;
                   let diff = idx - sliderIndex;
                   if (diff > total / 2) diff -= total;
@@ -599,7 +573,7 @@ export default function FeaturesPage() {
 
               {/* Active Slide Label & Description */}
               <div className="mt-8 text-center max-w-[280px] z-10">
-                <h4 className="text-sm font-black text-white uppercase tracking-wider">{appScreens[sliderIndex]?.title || ""}</h4>
+                <h4 className="text-sm font-black text-white uppercase mapping-wider">{appScreens[sliderIndex]?.title || ""}</h4>
                 <p className="text-xs font-semibold text-slate-300 mt-1.5 leading-relaxed">{appScreens[sliderIndex]?.description || ""}</p>
 
                 {/* Dots indicator using 429CE4 and FFA600 */}
@@ -633,7 +607,7 @@ export default function FeaturesPage() {
           <div className="text-center max-w-2xl mx-auto mb-16 space-y-4">
             <Badge
               variant="outline"
-              className="rounded-full px-4 py-1.5 border-[#FFA600]/30 bg-[#FFA600]/10 text-[#FFA600] shadow-sm font-bold tracking-wider uppercase text-xs"
+              className="rounded-full px-4 py-1.5 border-[#FFA600]/30 bg-[#FFA600]/10 text-[#FFA600] shadow-sm font-bold mapping-wider uppercase text-xs"
             >
               🛠️ Technical Capabilities
             </Badge>
@@ -685,7 +659,7 @@ export default function FeaturesPage() {
 
             <CardContent className="p-12 md:p-16 relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
               <div className="space-y-4 max-w-xl">
-                <Badge variant="outline" className="rounded-lg px-3 py-1 border-[#FFA600]/30 bg-[#FFA600]/10 text-[#FFA600] font-bold text-xs tracking-wider uppercase">
+                <Badge variant="outline" className="rounded-lg px-3 py-1 border-[#FFA600]/30 bg-[#FFA600]/10 text-[#FFA600] font-bold text-xs mapping-wider uppercase">
                   🚀 Download Mobile Hub
                 </Badge>
                 <h2 className="text-2.5xl sm:text-4xl font-black text-white">
@@ -723,77 +697,105 @@ export default function FeaturesPage() {
 
       <footer className="border-t border-slate-200 bg-white text-slate-600">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 pb-6">
-          <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4 text-left">
+          <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-5 text-left">
             <div className="lg:col-span-2">
               <div className="flex items-center gap-3 mb-4">
                 <div className="relative h-16 w-auto flex items-center justify-center rounded-xl bg-white p-2 shadow-sm border border-[#285E89]/10">
                   <img src="/logo.png" alt="VidyaSanchalan Logo" className="h-12 w-auto max-w-[160px] object-contain" />
                 </div>
                 <div>
-                  <span className="text-xl font-black tracking-tight"><span className="text-[#285E89]">Vidya</span><span className="text-[#FFA600]">Sanchalan</span></span>
-                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-0.5">School Management</p>
+                  <span className="text-xl font-black mapping-tight"><span className="text-[#285E89]">Vidya</span><span className="text-[#FFA600]">Sanchalan</span></span>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase mapping-wider mt-0.5">School Management</p>
                 </div>
               </div>
-              <p className="text-sm text-slate-500 max-w-md leading-relaxed">
-                Complete school management solution based on comprehensive SRS documentation.
-                Automating administrative, academic, and operational tasks.
+              <p className="text-sm text-slate-500 max-w-sm leading-relaxed">
+                Complete school management solution based on comprehensive SRS documentation. Automating administrative, academic, and operational tasks.
               </p>
               <div className="flex gap-3 mt-6">
                 {[
-                  { icon: <Twitter />, color: "from-[#285E89] to-[#1D496C]" },
-                  { icon: <Github />, color: "from-[#6A7626] to-[#4F581D]" },
-                  { icon: <Linkedin />, color: "from-[#429CE4] to-[#285E89]" },
+                  { icon: <Twitter />, color: "from-[#1D496C] to-[#15354F]", href: "#" },
+                  { icon: <Github />, color: "from-[#6A7626] to-[#4F581D]", href: "#" },
+                  { icon: <Linkedin />, color: "from-[#429CE4] to-[#1D496C]", href: "#" },
                 ].map((social, i) => (
-                  <Button
-                    key={i}
-                    size="icon"
-                    className={`rounded-lg bg-gradient-to-br ${social.color} text-white hover:shadow-md transition-all duration-300 hover:scale-110`}
-                  >
-                    {social.icon}
-                  </Button>
+                  <a key={i} href={social.href} target="_blank" rel="noopener noreferrer">
+                    <Button
+                      size="icon"
+                      className={`rounded-lg bg-gradient-to-br ${social.color} text-white hover:shadow-md transition-all duration-300 hover:scale-110`}
+                    >
+                      {social.icon}
+                    </Button>
+                  </a>
                 ))}
               </div>
             </div>
 
-            {footerLinks.map((section, i) => (
-              <div key={i}>
-                <h3 className="font-semibold text-slate-900 mb-4">{section.title}</h3>
-                <ul className="space-y-3">
-                  {section.links.map((link, j) => (
-                    <li key={j}>
-                      <Link href={getLinkHref(link)} className="text-sm text-slate-500 hover:text-[#285E89] transition-colors">
-                        {link}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+            <div>
+              <h3 className="font-bold text-slate-900 mb-4 text-sm uppercase mapping-wider">Product</h3>
+              <ul className="space-y-3">
+                {[
+                  { label: "Features", href: "/features" },
+                  { label: "Modules", href: "/modules" },
+                  { label: "Contact Us", href: "/contact" },
+                  { label: "Get Started", href: "/login" },
+                ].map((link, j) => (
+                  <li key={j}>
+                    <Link href={link.href} className="text-sm text-slate-500 hover:text-[#285E89] transition-colors font-medium">
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-bold text-slate-900 mb-4 text-sm uppercase mapping-wider">Company</h3>
+              <ul className="space-y-3">
+                {[
+                  { label: "Why Choose Us", href: "/#why-choose-us" },
+                  { label: "FAQs", href: "/#faq" },
+                  { label: "Privacy Policy", href: "/privacy-policy" },
+                  { label: "Terms of Service", href: "/terms-and-conditions" },
+                  { label: "Cookie Policy", href: "#" },
+                ].map((link, j) => (
+                  <li key={j}>
+                    <Link href={link.href} className="text-sm text-slate-500 hover:text-[#285E89] transition-colors font-medium">
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-bold text-slate-900 mb-4 text-sm uppercase mapping-wider">Contact</h3>
+              <ul className="space-y-4">
+                <li className="flex items-start gap-2">
+                  <span className="text-[#FFA600] mt-0.5">📍</span>
+                  <span className="text-sm text-slate-500 leading-snug">Naroda, Gujarat, India</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-[#FFA600]">📞</span>
+                  <a href="tel:+919876543210" className="text-sm text-slate-500 hover:text-[#285E89] transition-colors font-medium">+91 98765 43210</a>
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-[#FFA600]">✉️</span>
+                  <a href="mailto:support@h-techsolutions.in" className="text-sm text-slate-500 hover:text-[#285E89] transition-colors font-medium">support@h-techsolutions.in</a>
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-[#FFA600]">🌐</span>
+                  <a href="https://h-techsolutions.in" target="_blank" rel="noopener noreferrer" className="text-sm text-slate-500 hover:text-[#285E89] transition-colors font-medium">h-techsolutions.in</a>
+                </li>
+              </ul>
+            </div>
           </div>
 
           <div className="border-t border-slate-200/80 my-8"></div>
 
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
-            <p className="text-slate-500">© 2026 VidyaSanchalan. All rights reserved. Based on School Management SRS v1.0</p>
-            <div className="flex gap-6 font-bold">
-              <Link href="#" className="text-slate-500 hover:text-[#285E89] transition-colors">Privacy Policy</Link>
-              <Link href="#" className="text-slate-500 hover:text-[#285E89] transition-colors">Terms of Service</Link>
-              <Link href="#" className="text-slate-500 hover:text-[#285E89] transition-colors">Cookie Policy</Link>
-            </div>
+            <p className="text-slate-500">© 2026 VidyaSanchalan. All rights reserved. Built by H-Tech Solutions.</p>
           </div>
         </div>
       </footer>
-
-      {/* Lagging Custom Cursor Follower Ring */}
-      {!isTouchDevice && (
-        <motion.div
-          className="fixed top-0 left-0 w-8 h-8 rounded-full border-2 border-[#FFA600] bg-[#FFA600]/10 pointer-events-none z-[9999] shadow-[0_0_12px_rgba(255,166,0,0.4)]"
-          style={{
-            x: cursorX,
-            y: cursorY,
-          }}
-        />
-      )}
 
     </div>
   );

@@ -393,7 +393,7 @@ function InteractiveMap({
     if (circleRef.current) {
       try {
         circleRef.current.remove();
-      } catch {}
+      } catch { }
       circleRef.current = null;
     }
 
@@ -477,7 +477,7 @@ function InteractiveMap({
       );
       const data = await res.json();
       if (data?.display_name) setAddress(data.display_name);
-    } catch {}
+    } catch { }
   };
 
   const doGetLocation = () => {
@@ -584,7 +584,7 @@ function InteractiveMap({
         {!readOnly && (
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-slate-200" />
-            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+            <span className="text-[11px] font-semibold text-slate-400 uppercase mapping-wider">
               or click map
             </span>
             <div className="flex-1 h-px bg-slate-200" />
@@ -652,7 +652,7 @@ function TimeRange({
 
   return (
     <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
-      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+      <p className="text-xs font-semibold text-slate-500 uppercase mapping-wider">
         Schedule Preview
       </p>
       <div className="relative h-8 bg-slate-200 rounded-full overflow-hidden">
@@ -798,7 +798,7 @@ function DataView({ data, onDelete }: { data: any; onDelete: () => void }) {
                     key={label}
                     className="rounded-xl bg-slate-50 border border-slate-100 px-4 py-3 space-y-1"
                   >
-                    <span className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                    <span className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 uppercase mapping-wider">
                       <Icon className="h-3 w-3" />
                       {label}
                     </span>
@@ -837,13 +837,13 @@ function DataView({ data, onDelete }: { data: any; onDelete: () => void }) {
 
               {/* Map — only render if valid coords */}
               {data.latitude &&
-              data.longitude &&
-              !isNaN(parseFloat(data.latitude)) ? (
+                data.longitude &&
+                !isNaN(parseFloat(data.latitude)) ? (
                 <InteractiveMap
                   lat={data.latitude}
                   lng={data.longitude}
                   radius={data.radius || "100"}
-                  onLocationSelect={() => {}}
+                  onLocationSelect={() => { }}
                   readOnly
                 />
               ) : (
@@ -884,7 +884,7 @@ function DataView({ data, onDelete }: { data: any; onDelete: () => void }) {
                     key={label}
                     className="rounded-xl bg-slate-50 border border-slate-100 px-4 py-3 space-y-1"
                   >
-                    <span className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                    <span className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-400 uppercase mapping-wider">
                       <Icon className="h-3 w-3" />
                       {label}
                     </span>
@@ -1372,7 +1372,7 @@ export default function LocationSettingsPage() {
           <Radar className="h-6 w-6" />
         </div>
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900">
+          <h2 className="text-3xl font-bold mapping-tight text-slate-900">
             Attendance Zone Settings
           </h2>
           <p className="text-sm font-medium text-slate-500 mt-1">

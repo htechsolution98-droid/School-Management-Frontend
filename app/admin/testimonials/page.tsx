@@ -126,7 +126,7 @@ export default function TestimonialsManager() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-800 tracking-tight">Testimonials Manager</h2>
+          <h2 className="text-2xl font-black text-slate-800 mapping-tight">Testimonials Manager</h2>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">Add, edit, or remove user reviews shown in the homepage slider</p>
         </div>
         <Button
@@ -307,7 +307,7 @@ export default function TestimonialsManager() {
                     onChange={e => setRating(parseInt(e.target.value))}
                     className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm focus:border-[#429CE4] focus:ring-1 focus:ring-[#429CE4]"
                   >
-                    {[5,4,3,2,1].map(r => <option key={r} value={r}>{r} Star{r > 1 ? "s" : ""}</option>)}
+                    {[5, 4, 3, 2, 1].map(r => <option key={r} value={r}>{r} Star{r > 1 ? "s" : ""}</option>)}
                   </select>
                   {/* Star preview */}
                   <div className="flex gap-0.5 pt-1">

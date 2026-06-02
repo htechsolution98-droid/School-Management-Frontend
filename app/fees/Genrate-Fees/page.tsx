@@ -1144,7 +1144,7 @@ export default function GenerateFeesPage() {
                     ].map((h) => (
                       <th
                         key={h}
-                        className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap"
+                        className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase mapping-wide whitespace-nowrap"
                       >
                         {h}
                       </th>
