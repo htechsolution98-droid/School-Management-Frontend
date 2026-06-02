@@ -202,7 +202,7 @@ const StatCard = ({
       <Icon size={22} className="text-white" />
     </div>
     <div className="min-w-0">
-      <p className="text-xs text-slate-400 font-medium uppercase tracking-wider">
+      <p className="text-xs text-slate-400 font-medium uppercase mapping-wider">
         {label}
       </p>
       <p className="text-2xl font-bold text-slate-800 mt-0.5">{value}</p>
@@ -237,7 +237,7 @@ const ReceiptModal = ({
             <FileText size={18} />
           </div>
           <div>
-            <p className="text-[10px] font-bold text-indigo-200 tracking-widest uppercase">
+            <p className="text-[10px] font-bold text-indigo-200 mapping-widest uppercase">
               Salary Slip
             </p>
             <p className="font-bold text-lg leading-tight">{data.staff_name}</p>
@@ -254,7 +254,7 @@ const ReceiptModal = ({
             { label: "Status", val: data.payment_status },
           ].map(({ label, val }) => (
             <div key={label} className="bg-white/10 rounded-xl p-2.5">
-              <p className="text-[10px] text-indigo-200 uppercase tracking-wider">
+              <p className="text-[10px] text-indigo-200 uppercase mapping-wider">
                 {label}
               </p>
               <p className="font-semibold text-sm mt-0.5 capitalize truncate">
@@ -269,7 +269,7 @@ const ReceiptModal = ({
       <div className="p-5 space-y-4 max-h-[60vh] overflow-y-auto">
         {/* Attendance */}
         <div>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+          <p className="text-[10px] font-bold text-slate-400 uppercase mapping-widest mb-2">
             Attendance
           </p>
           <div className="grid grid-cols-4 gap-2">
@@ -305,7 +305,7 @@ const ReceiptModal = ({
         {/* Earnings & Deductions */}
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4">
-            <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-1">
+            <p className="text-[10px] font-bold text-emerald-600 uppercase mapping-widest mb-1">
               Total Earnings
             </p>
             <p className="text-xl font-bold text-emerald-700">
@@ -316,7 +316,7 @@ const ReceiptModal = ({
             </p>
           </div>
           <div className="bg-red-50 border border-red-100 rounded-2xl p-4">
-            <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-1">
+            <p className="text-[10px] font-bold text-red-500 uppercase mapping-widest mb-1">
               Total Deductions
             </p>
             <p className="text-xl font-bold text-red-600">
@@ -331,7 +331,7 @@ const ReceiptModal = ({
         {/* Salary Components */}
         {data.component_snapshot?.length > 0 && (
           <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+            <p className="text-[10px] font-bold text-slate-400 uppercase mapping-widest mb-2">
               Salary Components
             </p>
             <div className="space-y-1.5">
@@ -610,7 +610,7 @@ const GenerateModal = ({
             </div>
 
             <div className="text-right shrink-0">
-              <p className="text-[10px] text-slate-400 uppercase tracking-wider">
+              <p className="text-[10px] text-slate-400 uppercase mapping-wider">
                 Basic
               </p>
 
@@ -627,7 +627,7 @@ const GenerateModal = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Category */}
             <div className="relative" data-dropdown>
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">
+              <label className="text-[10px] font-bold text-slate-400 uppercase mapping-widest mb-1.5 block">
                 Category *
               </label>
               <button
@@ -660,7 +660,7 @@ const GenerateModal = ({
 
             {/* Staff */}
             <div className="relative" data-dropdown>
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">
+              <label className="text-[10px] font-bold text-slate-400 uppercase mapping-widest mb-1.5 block">
                 Staff Name *
               </label>
               <button
@@ -697,7 +697,7 @@ const GenerateModal = ({
             </div>
           </div>
           <div>
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 block">
+            <label className="text-[10px] font-bold text-slate-400 uppercase mapping-widest mb-2 block">
               Payment Mode
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -724,7 +724,7 @@ const GenerateModal = ({
           {/* Transaction ID — online only */}
           {paymentMode === "online" && (
             <div>
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">
+              <label className="text-[10px] font-bold text-slate-400 uppercase mapping-widest mb-1.5 block">
                 Transaction ID *
               </label>
               <input
@@ -738,7 +738,7 @@ const GenerateModal = ({
 
           {/* Note */}
           <div>
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 block">
+            <label className="text-[10px] font-bold text-slate-400 uppercase mapping-widest mb-1.5 block">
               Note{" "}
               <span className="normal-case font-normal text-slate-300">
                 (optional)
@@ -853,8 +853,8 @@ const MonthPicker = ({
               data-monthpicker
               onClick={() => { onChange(m.val); setOpen(false); }}
               className={`w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-indigo-50 hover:text-indigo-700 ${value === m.val
-                  ? "bg-indigo-50 text-indigo-700 font-semibold"
-                  : "text-slate-700"
+                ? "bg-indigo-50 text-indigo-700 font-semibold"
+                : "text-slate-700"
                 }`}
             >
               {m.label}
@@ -1308,10 +1308,10 @@ export default function GenerateSalaryPage() {
                           />
                         </div>
                         {/* Category label — display-only, not in any payload */}
-                        <p className="text-xs text-slate-400 mt-0.5 truncate uppercase tracking-wide">
+                        <p className="text-xs text-slate-400 mt-0.5 truncate uppercase mapping-wide">
                           {s.role}
                           {s.receipt_number && s.salary_generated && (
-                            <span className="text-slate-300 font-mono ml-2 normal-case tracking-normal">
+                            <span className="text-slate-300 font-mono ml-2 normal-case mapping-normal">
                               · {s.receipt_number}
                             </span>
                           )}

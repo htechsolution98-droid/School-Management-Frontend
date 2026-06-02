@@ -104,7 +104,7 @@ export default function AboutManager() {
   const handleRemoveAboutImage = (indexToRemove: number) => {
     const updatedImages = aboutImages.filter((_, idx) => idx !== indexToRemove);
     setAboutImages(updatedImages);
-    
+
     // If the image we are removing is the current active cover image, update it.
     if (aboutImage === aboutImages[indexToRemove]) {
       const fallback = updatedImages.length > 0 ? updatedImages[0] : "/about sms.jpg";
@@ -131,11 +131,11 @@ export default function AboutManager() {
           setAboutTitleHighlight(data.settings.aboutTitleHighlight || "Complete School");
           setAboutDescription(
             data.settings.aboutDescription ||
-              "VidhyaSanchalan is an advanced school ERP and management system designed to simplify daily school operations."
+            "VidhyaSanchalan is an advanced school ERP and management system designed to simplify daily school operations."
           );
           setAboutQuote(
             data.settings.aboutQuote ||
-              "The system supports both online and offline processes and provides transparency between school staff, students, and parents."
+            "The system supports both online and offline processes and provides transparency between school staff, students, and parents."
           );
           const img = data.settings.aboutImage || "/about sms.jpg";
           setAboutImage(img);
@@ -211,7 +211,7 @@ export default function AboutManager() {
     if (!confirm("Are you sure you want to delete this highlight card?")) return;
 
     const updatedHighlights = highlights.filter((_, i) => i !== index);
-    
+
     // Save directly to backend
     setIsSaving(true);
     try {
@@ -296,7 +296,7 @@ export default function AboutManager() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-800 tracking-tight">About Section Manager</h2>
+          <h2 className="text-2xl font-black text-slate-800 mapping-tight">About Section Manager</h2>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
             Configure the homepage introduction, image highlights, and create/manage highlight tags
           </p>
@@ -403,9 +403,8 @@ export default function AboutManager() {
                           return (
                             <div
                               key={idx}
-                              className={`relative group rounded-xl overflow-hidden border-2 aspect-video bg-slate-50 transition-all ${
-                                isPrimary ? "border-[#429CE4]" : "border-slate-100 hover:border-slate-300"
-                              }`}
+                              className={`relative group rounded-xl overflow-hidden border-2 aspect-video bg-slate-50 transition-all ${isPrimary ? "border-[#429CE4]" : "border-slate-100 hover:border-slate-300"
+                                }`}
                             >
                               <img
                                 src={img}
@@ -590,7 +589,7 @@ export default function AboutManager() {
                 <div className="border border-slate-100 rounded-xl bg-slate-50/50 p-4 shadow-inner relative overflow-hidden mt-6">
                   <div className="flex items-center gap-2 mb-3 text-xs">
                     <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
-                    <span className="text-slate-500 font-bold tracking-wider uppercase text-[9px]">About Banner Preview</span>
+                    <span className="text-slate-500 font-bold mapping-wider uppercase text-[9px]">About Banner Preview</span>
                   </div>
                   <div className="flex items-center gap-4 bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
                     <div className="h-14 w-20 rounded-md bg-slate-100 overflow-hidden flex items-center justify-center shrink-0 border border-slate-200">
@@ -601,7 +600,7 @@ export default function AboutManager() {
                       )}
                     </div>
                     <div>
-                      <span className="text-[9px] font-bold uppercase tracking-wider text-[#6A7626] bg-[#6A7626]/10 px-2 py-0.5 rounded-full">
+                      <span className="text-[9px] font-bold uppercase mapping-wider text-[#6A7626] bg-[#6A7626]/10 px-2 py-0.5 rounded-full">
                         {aboutBadge}
                       </span>
                       <h5 className="font-extrabold text-[#1D496C] text-xs mt-1.5 truncate max-w-[200px]">

@@ -21,7 +21,7 @@ export default function InquiriesManager() {
       name: "Aditi Rao",
       email: "aditi.rao@gmail.com",
       subject: "Parent Mobile App Query",
-      message: "Hello, does the parent portal application have tracking features for school buses? Our guardians are looking for real-time location alerts.",
+      message: "Hello, does the parent portal application have mapping features for school buses? Our guardians are looking for real-time location alerts.",
       createdAt: new Date(Date.now() - 86400000).toISOString(),
       isRead: true
     }
@@ -40,7 +40,7 @@ export default function InquiriesManager() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-black text-slate-800 tracking-tight">Contact Form Inquiries</h2>
+        <h2 className="text-2xl font-black text-slate-800 mapping-tight">Contact Form Inquiries</h2>
         <p className="text-xs sm:text-sm text-slate-400 mt-1">Review feedback and inquiries submitted by potential customers via your site contact forms</p>
       </div>
 

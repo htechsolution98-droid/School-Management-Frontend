@@ -121,7 +121,7 @@ function StatCard({
       />
       <div className="relative">
         <div className="flex items-center justify-between gap-3 mb-3">
-          <p className={cn("text-[10px] font-black uppercase tracking-[0.18em]", s.label)}>
+          <p className={cn("text-[10px] font-black uppercase mapping-[0.18em]", s.label)}>
             {label}
           </p>
           <div
@@ -131,7 +131,7 @@ function StatCard({
             <Icon className="h-4 w-4 text-white" />
           </div>
         </div>
-        <p className="text-3xl font-black text-white tabular-nums leading-none tracking-tight">
+        <p className="text-3xl font-black text-white tabular-nums leading-none mapping-tight">
           <AnimatedNumber value={value} prefix={prefix} />
         </p>
       </div>
@@ -185,7 +185,7 @@ function StatusBadge({ verified }: { verified: boolean }) {
 function FieldItem({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl bg-slate-50 border border-slate-100 px-3 py-2.5">
-      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400 mb-0.5">
+      <p className="text-[10px] font-bold uppercase mapping-[0.12em] text-slate-400 mb-0.5">
         {label}
       </p>
       <p className="text-xs font-semibold text-slate-800">{value || "—"}</p>
@@ -275,7 +275,7 @@ function VerifyModal({
           <div className="flex items-center gap-2.5 rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
             <Hash className="h-4 w-4 text-slate-400 shrink-0" />
             <div>
-              <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+              <p className="text-[10px] font-black uppercase mapping-wider text-slate-400">
                 Admission Number
               </p>
               <p className="font-mono font-bold text-slate-800 text-sm mt-0.5">
@@ -286,16 +286,16 @@ function VerifyModal({
 
           {record.fee_data && (
             <div className="rounded-xl border border-slate-200 p-4 space-y-3">
-              <p className="text-[10px] font-black uppercase tracking-wider text-slate-500">
+              <p className="text-[10px] font-black uppercase mapping-wider text-slate-500">
                 Payment Details
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-[10px] text-slate-400 uppercase tracking-wide font-bold mb-1.5">Mode</p>
+                  <p className="text-[10px] text-slate-400 uppercase mapping-wide font-bold mb-1.5">Mode</p>
                   <ModeBadge mode={record.fee_data.payment_mode} />
                 </div>
                 <div>
-                  <p className="text-[10px] text-slate-400 uppercase tracking-wide font-bold mb-1">Paid At</p>
+                  <p className="text-[10px] text-slate-400 uppercase mapping-wide font-bold mb-1">Paid At</p>
                   <p className="text-xs font-bold text-slate-800">
                     {new Date(record.fee_data.paid_at).toLocaleDateString("en-IN", {
                       day: "2-digit", month: "short", year: "numeric",
@@ -304,7 +304,7 @@ function VerifyModal({
                 </div>
                 {record.fee_data.razorpay_order_id && (
                   <div className="col-span-2">
-                    <p className="text-[10px] text-slate-400 uppercase tracking-wide font-bold mb-1">Order ID</p>
+                    <p className="text-[10px] text-slate-400 uppercase mapping-wide font-bold mb-1">Order ID</p>
                     <p className="font-mono text-[11px] bg-slate-100 rounded-lg px-3 py-2 text-slate-700 border border-slate-200 truncate">
                       {record.fee_data.razorpay_order_id}
                     </p>
@@ -312,7 +312,7 @@ function VerifyModal({
                 )}
                 {record.fee_data.razorpay_payment_id && (
                   <div className="col-span-2">
-                    <p className="text-[10px] text-slate-400 uppercase tracking-wide font-bold mb-1">Payment ID</p>
+                    <p className="text-[10px] text-slate-400 uppercase mapping-wide font-bold mb-1">Payment ID</p>
                     <p className="font-mono text-[11px] bg-slate-100 rounded-lg px-3 py-2 text-slate-700 border border-slate-200 truncate">
                       {record.fee_data.razorpay_payment_id}
                     </p>
@@ -323,7 +323,7 @@ function VerifyModal({
           )}
 
           <div>
-            <p className="text-[10px] font-black uppercase tracking-wider text-slate-500 mb-2.5">
+            <p className="text-[10px] font-black uppercase mapping-wider text-slate-500 mb-2.5">
               Student Information
             </p>
             <div className="grid grid-cols-2 gap-2">
@@ -478,7 +478,7 @@ function RecordCard({
                   <IndianRupee className="h-3 w-3 text-emerald-600" />
                 </div>
                 <div>
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Amount</p>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase mapping-wide">Amount</p>
                   <p className="text-sm font-black text-emerald-600 leading-tight">
                     ₹{record.fee_data.amount.toLocaleString("en-IN")}
                     <span className="text-[10px] font-semibold text-slate-400 ml-1">
@@ -493,7 +493,7 @@ function RecordCard({
                   <Calendar className="h-3 w-3 text-indigo-600" />
                 </div>
                 <div>
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Paid At</p>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase mapping-wide">Paid At</p>
                   <p className="text-xs font-bold text-slate-800 leading-tight">
                     {new Date(record.fee_data.paid_at).toLocaleDateString("en-IN", {
                       day: "2-digit", month: "short", year: "numeric",
@@ -508,7 +508,7 @@ function RecordCard({
                     <Receipt className="h-3 w-3 text-violet-600" />
                   </div>
                   <div>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Order ID</p>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase mapping-wide">Order ID</p>
                     <p className="font-mono text-[11px] text-slate-700 max-w-[130px] truncate leading-tight">
                       {record.fee_data.razorpay_order_id}
                     </p>
@@ -522,7 +522,7 @@ function RecordCard({
                     <CreditCard className="h-3 w-3 text-sky-600" />
                   </div>
                   <div>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wide">Payment ID</p>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase mapping-wide">Payment ID</p>
                     <p className="font-mono text-[11px] text-slate-700 max-w-[130px] truncate leading-tight">
                       {record.fee_data.razorpay_payment_id}
                     </p>
@@ -709,11 +709,11 @@ export default function ClerkDashboard() {
               <div className="h-7 w-7 rounded-lg bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-300">
                 <Sparkles className="h-3.5 w-3.5 text-white" />
               </div>
-              <span className="text-[10px] font-black uppercase tracking-[0.22em] text-indigo-600">
+              <span className="text-[10px] font-black uppercase mapping-[0.22em] text-indigo-600">
                 Clerk Panel
               </span>
             </div>
-            <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-none">
+            <h1 className="text-2xl md:text-3xl font-black text-slate-900 mapping-tight leading-none">
               Fee Verification
             </h1>
             <p className="text-slate-500 mt-1.5 text-sm font-medium">

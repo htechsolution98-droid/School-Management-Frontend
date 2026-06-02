@@ -123,7 +123,7 @@ function StatCard({
         <Icon className="w-4 h-4" style={{ color }} />
       </div>
       <div className="min-w-0">
-        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-0.5 truncate">
+        <p className="text-[9px] font-bold text-slate-400 uppercase mapping-widest leading-none mb-0.5 truncate">
           {label}
         </p>
         <p className="text-lg font-extrabold text-slate-900 leading-none">
@@ -160,7 +160,7 @@ function ExpandedRow({ record }: { record: AttendanceRecord }) {
             },
           ].map(({ label, value }) => (
             <div key={label}>
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">
+              <p className="text-[9px] font-bold text-slate-400 uppercase mapping-wider mb-0.5">
                 {label}
               </p>
               <p className="text-xs font-semibold text-slate-700">{value}</p>
@@ -344,10 +344,10 @@ export default function AttendanceHistoryPage() {
                   style={
                     statusFilter === s
                       ? {
-                          background: "white",
-                          color: "#5b21b6",
-                          boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
-                        }
+                        background: "white",
+                        color: "#5b21b6",
+                        boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+                      }
                       : { color: "#94a3b8" }
                   }
                 >
@@ -436,7 +436,7 @@ export default function AttendanceHistoryPage() {
                   ].map((col) => (
                     <th
                       key={col}
-                      className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest whitespace-nowrap"
+                      className="px-4 py-3 text-left text-[10px] font-bold text-slate-500 uppercase mapping-widest whitespace-nowrap"
                     >
                       {col}
                     </th>

@@ -123,17 +123,15 @@ export function SignupForm() {
           </Label>
           <div className="relative">
             {identifier.includes("@") ||
-            (identifier.length > 0 && !/^\d+$/.test(identifier[0])) ? (
+              (identifier.length > 0 && !/^\d+$/.test(identifier[0])) ? (
               <Mail
-                className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors duration-200 ${
-                  focused === "identifier" ? "text-[#FFA600]" : "text-[#94A3B8]"
-                }`}
+                className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors duration-200 ${focused === "identifier" ? "text-[#FFA600]" : "text-[#94A3B8]"
+                  }`}
               />
             ) : (
               <Phone
-                className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors duration-200 ${
-                  focused === "identifier" ? "text-[#FFA600]" : "text-[#94A3B8]"
-                }`}
+                className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors duration-200 ${focused === "identifier" ? "text-[#FFA600]" : "text-[#94A3B8]"
+                  }`}
               />
             )}
             <Input
@@ -214,7 +212,7 @@ export function SignupForm() {
         {["Secure OTP", "Privacy Protected", "Instant Access"].map((badge) => (
           <span
             key={badge}
-            className="flex items-center gap-1.5 text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider"
+            className="flex items-center gap-1.5 text-[10px] font-bold text-[#94A3B8] uppercase mapping-wider"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-[#6A7626] inline-block" />
             {badge}

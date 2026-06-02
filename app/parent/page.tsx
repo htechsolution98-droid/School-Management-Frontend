@@ -8,7 +8,7 @@ export default function ParentDashboard() {
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+        <h2 className="text-2xl font-bold text-gray-900 mapping-tight">
           Parent Dashboard
         </h2>
         <p className="text-sm text-gray-500 mt-1">
@@ -91,7 +91,7 @@ export default function ParentDashboard() {
               key={item.label}
               className="bg-gray-50 rounded-xl px-4 py-3 border border-gray-100"
             >
-              <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">
+              <p className="text-xs text-gray-400 font-medium uppercase mapping-wide">
                 {item.label}
               </p>
               <p className="text-sm font-semibold text-gray-800 mt-0.5">

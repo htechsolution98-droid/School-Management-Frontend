@@ -121,7 +121,7 @@ const DEFAULT_SEEDS: InfrastructureCard[] = [
   },
   {
     title: "Biometric & Geo-location",
-    desc: "Security tracking logs for teacher roll-call ensuring verifiable attendance entries using mobile GPS services.",
+    desc: "Security mapping logs for teacher roll-call ensuring verifiable attendance entries using mobile GPS services.",
     iconName: "Fingerprint",
     hoverBg: "hover:bg-[#FFA600] hover:border-[#FFA600] hover:shadow-xl hover:shadow-[#FFA600]/20"
   }
@@ -180,11 +180,11 @@ export default function MobileInfrastructureManager() {
     setTitle(card.title);
     setDesc(card.desc);
     setIconName(card.iconName);
-    
+
     // Match preset theme
     const themeIdx = PRESET_HOVERS.findIndex(t => t.value === card.hoverBg);
     setSelectedThemeIndex(themeIdx >= 0 ? themeIdx : 0);
-    
+
     setIsOpen(true);
   };
 
@@ -284,7 +284,7 @@ export default function MobileInfrastructureManager() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-800 tracking-tight">Mobile Infrastructure Grid Manager</h2>
+          <h2 className="text-2xl font-black text-slate-800 mapping-tight">Mobile Infrastructure Grid Manager</h2>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
             Manage the "State-of-the-Art Mobile Infrastructure" capabilities cards, icons, descriptions, and hover effects
           </p>
@@ -377,7 +377,7 @@ export default function MobileInfrastructureManager() {
                         <div>
                           <div className="flex items-center gap-2">
                             <h4 className="font-extrabold text-sm text-slate-800 leading-tight">{card.title}</h4>
-                            <span className="text-[9px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-extrabold border border-slate-200/50 uppercase tracking-wide">
+                            <span className="text-[9px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-extrabold border border-slate-200/50 uppercase mapping-wide">
                               Card #{idx + 1}
                             </span>
                           </div>
@@ -447,13 +447,13 @@ export default function MobileInfrastructureManager() {
 
           {/* Interactive Live Mockup Preview */}
           <div className="space-y-4">
-            <span className="text-xs font-black uppercase text-slate-400 tracking-widest block text-center">
+            <span className="text-xs font-black uppercase text-slate-400 mapping-widest block text-center">
               Real-time grid mockup preview (Hover to trigger gradients)
             </span>
 
             <div className="py-10 bg-slate-50 border border-slate-100 rounded-3xl px-6 relative overflow-hidden">
               <div className="absolute top-[-100px] left-[-100px] w-[300px] h-[300px] bg-slate-100 rounded-full blur-[100px] pointer-events-none -z-0"></div>
-              
+
               <div className="container mx-auto max-w-6xl relative z-10">
                 <div className="text-center max-w-xl mx-auto mb-10 space-y-2.5">
                   <h3 className="text-xl font-black text-[#1D496C]">State-of-the-Art Mobile Infrastructure</h3>

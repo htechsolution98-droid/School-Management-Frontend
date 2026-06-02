@@ -18,14 +18,14 @@ import {
 type ComponentType = "earning" | "deduction";
 
 const PRESETS: { name: string; type: ComponentType; icon: string }[] = [
-  { name: "HRA",     type: "earning",   icon: "🏠" },
-  { name: "DA",      type: "earning",   icon: "📈" },
-  { name: "Bonus",   type: "earning",   icon: "🎁" },
-  { name: "Medical", type: "earning",   icon: "🏥" },
-  { name: "PF",      type: "deduction", icon: "🏦" },
-  { name: "Tax",     type: "deduction", icon: "📋" },
-  { name: "ESI",     type: "deduction", icon: "🛡️" },
-  { name: "TDS",     type: "deduction", icon: "💸" },
+  { name: "HRA", type: "earning", icon: "🏠" },
+  { name: "DA", type: "earning", icon: "📈" },
+  { name: "Bonus", type: "earning", icon: "🎁" },
+  { name: "Medical", type: "earning", icon: "🏥" },
+  { name: "PF", type: "deduction", icon: "🏦" },
+  { name: "Tax", type: "deduction", icon: "📋" },
+  { name: "ESI", type: "deduction", icon: "🛡️" },
+  { name: "TDS", type: "deduction", icon: "💸" },
 ];
 
 // ─── Component Badge ──────────────────────────────────────────────────────────
@@ -68,19 +68,19 @@ function PresetChip({
       style={
         used
           ? {
-              background: "#f8fafc",
-              borderColor: "#e2e8f0",
-              color: "#94a3b8",
-              cursor: "not-allowed",
-            }
+            background: "#f8fafc",
+            borderColor: "#e2e8f0",
+            color: "#94a3b8",
+            cursor: "not-allowed",
+          }
           : preset.type === "earning"
-          ? {
+            ? {
               background: "#f0fdf4",
               borderColor: "#86efac",
               color: "#15803d",
               cursor: "pointer",
             }
-          : {
+            : {
               background: "#fef2f2",
               borderColor: "#fca5a5",
               color: "#b91c1c",
@@ -99,15 +99,15 @@ function PresetChip({
 
 export default function SalaryComponentsPage() {
   const [components, setComponents] = useState<SalaryComponent[]>([]);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState("");
-  const [creating, setCreating]     = useState(false);
-  const [toast, setToast]           = useState<{ msg: string; type: "success" | "error" } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
 
   // Form state
-  const [name, setName]                 = useState("");
+  const [name, setName] = useState("");
   const [componentType, setComponentType] = useState<ComponentType>("earning");
-  const [formError, setFormError]       = useState("");
+  const [formError, setFormError] = useState("");
 
   const showToast = (msg: string, type: "success" | "error") => {
     setToast({ msg, type });
@@ -154,7 +154,7 @@ export default function SalaryComponentsPage() {
     }
   };
 
-  const earnings   = components.filter((c) => c.component_type === "earning");
+  const earnings = components.filter((c) => c.component_type === "earning");
   const deductions = components.filter((c) => c.component_type === "deduction");
 
   return (
@@ -198,11 +198,11 @@ export default function SalaryComponentsPage() {
             <div className="h-7 w-7 rounded-lg bg-orange-500 flex items-center justify-center shadow-md shadow-orange-200">
               <Layers className="h-3.5 w-3.5 text-white" />
             </div>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-orange-500">
-              Payroll Setup 
+            <span className="text-[10px] font-black uppercase mapping-[0.2em] text-orange-500">
+              Payroll Setup
             </span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-2xl md:text-3xl font-black text-slate-900 mapping-tight">
             Salary Components
           </h1>
           <p className="text-sm text-slate-500 mt-1 font-medium">
@@ -247,7 +247,7 @@ export default function SalaryComponentsPage() {
         <div className="p-5 space-y-4">
           {/* Presets */}
           <div>
-            <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2.5">
+            <p className="text-[10px] font-black uppercase mapping-wider text-slate-400 mb-2.5">
               Quick Presets
             </p>
             <div className="flex flex-wrap gap-2">
@@ -265,7 +265,7 @@ export default function SalaryComponentsPage() {
           {/* Divider */}
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-slate-100" />
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">or custom</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase mapping-widest">or custom</span>
             <div className="flex-1 h-px bg-slate-100" />
           </div>
 
@@ -273,7 +273,7 @@ export default function SalaryComponentsPage() {
           <div className="flex flex-col sm:flex-row gap-3">
             {/* Name input */}
             <div className="flex-1">
-              <label className="block text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1.5">
+              <label className="block text-[10px] font-black uppercase mapping-wider text-slate-500 mb-1.5">
                 Component Name
               </label>
               <input
@@ -288,7 +288,7 @@ export default function SalaryComponentsPage() {
 
             {/* Type toggle */}
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1.5">
+              <label className="block text-[10px] font-black uppercase mapping-wider text-slate-500 mb-1.5">
                 Type
               </label>
               <div className="flex items-center gap-1 bg-slate-100 rounded-xl p-1 h-[42px]">

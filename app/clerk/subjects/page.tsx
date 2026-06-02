@@ -256,7 +256,7 @@ export default function SubjectsPage() {
     <div className="flex-1 space-y-4 sm:space-y-6 px-3 sm:px-6 lg:px-8 py-4 sm:py-6 bg-white min-h-screen overflow-x-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 leading-tight">
+          <h2 className="text-2xl sm:text-3xl font-bold mapping-tight text-slate-900 leading-tight">
             Subject Management
           </h2>
           <p className="text-muted-foreground mt-1">

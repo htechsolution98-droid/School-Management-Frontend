@@ -91,7 +91,7 @@ const LandingSettingsSchema = new Schema({
   moduleHeroBadge: { type: String, default: "SMART SCHOOL ERP MODULES" },
   moduleHeroTitle: { type: String, default: "Powerful Modules for Complete School Management" },
   moduleHeroDesc: { type: String, default: "VidhyaSanchalan provides all essential school management modules in one powerful platform — from admissions and fees to attendance, examinations, homework, reports, and parent communication." },
-  modulePoints: { type: [String], default: ["Admission Management", "Fee Management", "Attendance & Geo Tracking", "Homework & Assignments", "Timetable Management", "Online Examination", "Progress Reports", "Parent & Student Panels"] },
+  modulePoints: { type: [String], default: ["Admission Management", "Fee Management", "Attendance & Geo mapping", "Homework & Assignments", "Timetable Management", "Online Examination", "Progress Reports", "Parent & Student Panels"] },
   moduleScreens: { type: [String], default: ["/moduleg.jpeg"] },
   gridModules: [
     {

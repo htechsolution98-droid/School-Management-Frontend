@@ -324,7 +324,7 @@ function StatCard({ card, index }: { card: StatCard; index: number }) {
 
       {/* CTA link */}
       <button
-        className={`text-sm font-semibold ${card.linkColor} hover:underline text-left group-hover:tracking-wide transition-all duration-200`}
+        className={`text-sm font-semibold ${card.linkColor} hover:underline text-left group-hover:mapping-wide transition-all duration-200`}
       >
         {card.linkText}
       </button>

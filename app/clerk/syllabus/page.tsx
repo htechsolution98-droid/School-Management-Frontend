@@ -178,7 +178,7 @@ export default function SyllabusPage() {
     const cls = schoolClasses.find((c) => c.id === div.SchoolClass);
     const classLabel = cls
       ? SCHOOL_CLASS_OPTIONS.find((o) => o.value === cls.school_class)?.label ||
-        cls.school_class
+      cls.school_class
       : "Unknown Class";
 
     return `${classLabel} - Div ${div.division}`;
@@ -207,13 +207,13 @@ export default function SyllabusPage() {
     const classB = schoolClasses.find((c) => c.id === b.SchoolClass);
     const indexA = classA
       ? SCHOOL_CLASS_OPTIONS.findIndex(
-          (opt) => opt.value === classA.school_class,
-        )
+        (opt) => opt.value === classA.school_class,
+      )
       : 999;
     const indexB = classB
       ? SCHOOL_CLASS_OPTIONS.findIndex(
-          (opt) => opt.value === classB.school_class,
-        )
+        (opt) => opt.value === classB.school_class,
+      )
       : 999;
     if (indexA !== indexB) return indexA - indexB;
     return a.division.localeCompare(b.division, undefined, { numeric: true });
@@ -223,7 +223,7 @@ export default function SyllabusPage() {
     <div className="flex-1 space-y-4 sm:space-y-6 px-3 sm:px-6 lg:px-8 py-4 sm:py-6 bg-white min-h-screen overflow-x-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 leading-tight">
+          <h2 className="text-2xl sm:text-3xl font-bold mapping-tight text-slate-900 leading-tight">
             Syllabus Management
           </h2>
           <p className="text-muted-foreground mt-1">
@@ -478,7 +478,7 @@ export default function SyllabusPage() {
                             </td>
                             <td className="px-6 py-4">
                               {item.syllabus_file &&
-                              typeof item.syllabus_file === "string" ? (
+                                typeof item.syllabus_file === "string" ? (
                                 <a
                                   href={item.syllabus_file}
                                   target="_blank"

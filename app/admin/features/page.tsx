@@ -188,7 +188,7 @@ export default function FeaturesManager() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-800 tracking-tight">Homepage Features Manager</h2>
+          <h2 className="text-2xl font-black text-slate-800 mapping-tight">Homepage Features Manager</h2>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
             Add, edit, or remove feature cards shown on the landing page
           </p>
@@ -262,7 +262,7 @@ export default function FeaturesManager() {
                 <div className={`h-2.5 w-full bg-gradient-to-r ${feature.color || "from-[#1D496C] to-[#1A3F5C]"}`} />
                 <CardHeader className="pb-3 flex flex-row items-start justify-between">
                   <div>
-                    <span className="text-[9px] font-black uppercase text-slate-400 tracking-wider">
+                    <span className="text-[9px] font-black uppercase text-slate-400 mapping-wider">
                       Card Module • Order #{feature.order ?? idx}
                     </span>
                     <CardTitle className="text-lg font-black text-[#1D496C] mt-1 leading-tight">
@@ -274,7 +274,7 @@ export default function FeaturesManager() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  <div className="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-50 pb-1.5 mb-2">
+                  <div className="text-xs font-bold text-slate-400 uppercase mapping-widest border-b border-slate-50 pb-1.5 mb-2">
                     Bullet Descriptions
                   </div>
                   <ul className="space-y-2 pl-0.5">

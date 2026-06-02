@@ -19,7 +19,7 @@ import {
   getAcademicYears,
   createAcademicYear,
   type AcademicYear,
-} from "@/lib/fees"; 
+} from "@/lib/fees";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -310,7 +310,7 @@ export default function AcademicYearPage() {
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Academic Years</h1>
+            <h1 className="text-2xl font-bold text-slate-800 mapping-tight">Academic Years</h1>
             <p className="text-sm text-slate-500 mt-0.5">Manage academic years and billing periods</p>
           </div>
           <button
@@ -345,7 +345,7 @@ export default function AcademicYearPage() {
         {!loading && !fetchError && (
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
             {/* Column headers */}
-            <div className="hidden sm:grid grid-cols-[2fr_2.5fr_1.5fr_1.5fr_1fr] px-5 py-3 bg-slate-50 border-b border-slate-100 text-xs font-bold uppercase tracking-wider text-slate-400">
+            <div className="hidden sm:grid grid-cols-[2fr_2.5fr_1.5fr_1.5fr_1fr] px-5 py-3 bg-slate-50 border-b border-slate-100 text-xs font-bold uppercase mapping-wider text-slate-400">
               <span>Year Name</span>
               <span>Duration</span>
               <span>Period Count</span>
@@ -468,7 +468,7 @@ export default function AcademicYearPage() {
                   key={code}
                   className="flex flex-col items-center justify-center gap-0.5 p-3 rounded-xl border border-slate-100 bg-slate-50 hover:border-indigo-200 hover:bg-indigo-50 hover:shadow-sm transition-all duration-150 cursor-pointer group"
                 >
-                  <span className="text-[10px] font-bold text-indigo-400 group-hover:text-indigo-600 transition-colors tracking-wider">
+                  <span className="text-[10px] font-bold text-indigo-400 group-hover:text-indigo-600 transition-colors mapping-wider">
                     {code}
                   </span>
                   <span className="text-xs font-semibold text-slate-600 group-hover:text-indigo-700 transition-colors">

@@ -98,7 +98,7 @@ function StatCard({
                     <span className="text-white">{icon}</span>
                 </div>
                 <div className="min-w-0">
-                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest truncate">{label}</p>
+                    <p className="text-xs font-semibold text-slate-400 uppercase mapping-widest truncate">{label}</p>
                     <p className="text-3xl font-black text-slate-800 leading-none mt-1 tabular-nums">{value}</p>
                     <p className="text-xs text-slate-400 mt-0.5 truncate">{sub}</p>
                 </div>
@@ -156,8 +156,8 @@ function ToggleButton({
             onClick={onClick}
             disabled={loading}
             className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold border transition-all duration-200 disabled:opacity-60 active:scale-95 ${isActive
-                    ? "border-red-200 bg-red-50 text-red-600 hover:bg-red-100 hover:border-red-300 hover:shadow-sm"
-                    : "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 hover:shadow-sm"
+                ? "border-red-200 bg-red-50 text-red-600 hover:bg-red-100 hover:border-red-300 hover:shadow-sm"
+                : "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 hover:shadow-sm"
                 }`}
         >
             {loading ? (
@@ -211,13 +211,13 @@ function MobileUserCard({
 
             <div className="bg-slate-50 rounded-xl p-3 mb-3 space-y-2">
                 <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider w-12">Email</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase mapping-wider w-12">Email</span>
                     <span className="text-xs text-slate-600 truncate font-medium">
                         {user.email ?? <span className="text-slate-300 italic">—</span>}
                     </span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider w-12">Mobile</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase mapping-wider w-12">Mobile</span>
                     <span className="text-xs text-slate-600 font-medium">
                         {user.mobile ?? <span className="text-slate-300 italic">—</span>}
                     </span>
@@ -375,7 +375,7 @@ export default function TempUsersPage() {
                             <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
                                 <Users className="h-4 w-4 text-white" />
                             </div>
-                            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Temp Users</h1>
+                            <h1 className="text-2xl font-black text-slate-900 mapping-tight">Temp Users</h1>
                         </div>
                         <p className="text-sm text-slate-500 ml-9">
                             Manage temporary accounts — activate or deactivate as needed.
@@ -491,7 +491,7 @@ export default function TempUsersPage() {
                                     {["#", "User", "Email", "Mobile", "Status", "Action"].map((h, i) => (
                                         <th
                                             key={h}
-                                            className={`px-6 py-3.5 text-[11px] font-bold uppercase tracking-widest text-slate-400 bg-slate-50/70 ${i === 5 ? "text-right" : "text-left"}`}
+                                            className={`px-6 py-3.5 text-[11px] font-bold uppercase mapping-widest text-slate-400 bg-slate-50/70 ${i === 5 ? "text-right" : "text-left"}`}
                                         >
                                             {h}
                                         </th>
@@ -615,8 +615,8 @@ export default function TempUsersPage() {
                                     key={p}
                                     onClick={() => setPage(p)}
                                     className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold transition-all duration-150 active:scale-95 ${p === page
-                                            ? "bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-sm shadow-blue-200"
-                                            : "border border-slate-200 bg-white text-slate-500 hover:bg-slate-100"
+                                        ? "bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-sm shadow-blue-200"
+                                        : "border border-slate-200 bg-white text-slate-500 hover:bg-slate-100"
                                         }`}
                                 >
                                     {p}

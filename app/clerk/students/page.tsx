@@ -488,7 +488,7 @@ export default function StudentRecordsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+          <h2 className="text-xl sm:text-2xl font-bold mapping-tight text-slate-900">
             Pending Addmisson
           </h2>
           <p className="text-sm text-muted-foreground mt-0.5">
@@ -654,7 +654,7 @@ export default function StudentRecordsPage() {
                             {/* Student Information */}
                             <div className="space-y-3">
                               <div className="flex items-center justify-between">
-                                <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                <h4 className="text-xs font-semibold text-slate-500 uppercase mapping-wider">
                                   Student Information
                                 </h4>
                                 <Button
@@ -679,7 +679,7 @@ export default function StudentRecordsPage() {
                                       className={cn(
                                         "flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 px-4 py-3 text-sm",
                                         idx !== adm.field_values.length - 1 &&
-                                          "border-b border-slate-100",
+                                        "border-b border-slate-100",
                                         idx % 2 === 0
                                           ? "bg-white"
                                           : "bg-slate-50/50",
@@ -703,7 +703,7 @@ export default function StudentRecordsPage() {
                             {/* Documents */}
                             <div className="space-y-3">
                               <div className="flex items-center justify-between">
-                                <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                                <h4 className="text-xs font-semibold text-slate-500 uppercase mapping-wider">
                                   Documents
                                 </h4>
                                 <Button
@@ -734,7 +734,7 @@ export default function StudentRecordsPage() {
                                       className={cn(
                                         "flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-4 py-3",
                                         idx !== adm.documents.length - 1 &&
-                                          "border-b border-slate-100",
+                                        "border-b border-slate-100",
                                         idx % 2 === 0
                                           ? "bg-white"
                                           : "bg-slate-50/50",

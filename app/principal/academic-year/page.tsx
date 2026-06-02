@@ -81,7 +81,7 @@ function StatCard({
                 <span className={iconColor}>{icon}</span>
             </div>
             <div className="min-w-0">
-                <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-1">{label}</p>
+                <p className="text-xs text-gray-400 font-semibold uppercase mapping-wide mb-1">{label}</p>
                 <p className="text-2xl font-black text-gray-900 leading-tight">{value}</p>
                 {badge && <div className="mt-1">{badge}</div>}
                 {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
@@ -398,7 +398,7 @@ export default function AcademicYearPage() {
                             <thead>
                                 <tr className="border-b border-gray-100">
                                     {["Year Name", "Duration", "Period", "Status", "Action"].map((h, i) => (
-                                        <th key={h} className={`text-xs font-bold text-gray-400 uppercase tracking-wide px-6 py-4 ${i === 4 ? "text-right" : "text-left"}`}>
+                                        <th key={h} className={`text-xs font-bold text-gray-400 uppercase mapping-wide px-6 py-4 ${i === 4 ? "text-right" : "text-left"}`}>
                                             {h}
                                         </th>
                                     ))}

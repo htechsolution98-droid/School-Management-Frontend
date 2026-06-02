@@ -163,8 +163,7 @@ export default function SuperAdminDashboard() {
       const updatedStatus = !currentStatus;
 
       const confirmAction = window.confirm(
-        `Are you sure you want to ${
-          updatedStatus ? "activate" : "disable"
+        `Are you sure you want to ${updatedStatus ? "activate" : "disable"
         } this feature?`,
       );
 
@@ -182,9 +181,9 @@ export default function SuperAdminDashboard() {
           selectedSchool.school_features?.map((sf) =>
             sf.id === schoolFeatureId
               ? {
-                  ...sf,
-                  is_enabled: updatedStatus,
-                }
+                ...sf,
+                is_enabled: updatedStatus,
+              }
               : sf,
           ) || [],
       });
@@ -269,45 +268,45 @@ export default function SuperAdminDashboard() {
     icon: React.ElementType;
     span?: boolean;
   }[] = [
-    {
-      key: "name",
-      label: "School / Organization Name",
-      placeholder: "e.g. Sunrise Academy",
-      icon: Building2,
-      span: true,
-    },
-    {
-      key: "email",
-      label: "Email",
-      placeholder: "contact@example.com",
-      type: "email",
-      icon: Mail,
-    },
-    {
-      key: "phone",
-      label: "Phone",
-      placeholder: "+91 9000000000",
-      icon: Phone,
-    },
-    {
-      key: "address",
-      label: "Address",
-      placeholder: "123 Main Street",
-      icon: MapPin,
-      span: true,
-    },
-    { key: "city", label: "City", placeholder: "Mumbai", icon: MapPin },
-    { key: "state", label: "State", placeholder: "Maharashtra", icon: MapPin },
-    { key: "country", label: "Country", placeholder: "India", icon: Globe },
-    { key: "pincode", label: "Pincode", placeholder: "400001", icon: Hash },
-  ];
+      {
+        key: "name",
+        label: "School / Organization Name",
+        placeholder: "e.g. Sunrise Academy",
+        icon: Building2,
+        span: true,
+      },
+      {
+        key: "email",
+        label: "Email",
+        placeholder: "contact@example.com",
+        type: "email",
+        icon: Mail,
+      },
+      {
+        key: "phone",
+        label: "Phone",
+        placeholder: "+91 9000000000",
+        icon: Phone,
+      },
+      {
+        key: "address",
+        label: "Address",
+        placeholder: "123 Main Street",
+        icon: MapPin,
+        span: true,
+      },
+      { key: "city", label: "City", placeholder: "Mumbai", icon: MapPin },
+      { key: "state", label: "State", placeholder: "Maharashtra", icon: MapPin },
+      { key: "country", label: "Country", placeholder: "India", icon: Globe },
+      { key: "pincode", label: "Pincode", placeholder: "400001", icon: Hash },
+    ];
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+          <h2 className="text-2xl font-bold text-gray-900 mapping-tight">
             Manage Schools
           </h2>
           <p className="text-sm text-gray-500 mt-1">
@@ -440,13 +439,12 @@ export default function SuperAdminDashboard() {
                             toggleFeature(feature.id);
                           }
                         }}
-                        className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all border ${
-                          isDisabled
+                        className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all border ${isDisabled
                             ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-60"
                             : isSelected
                               ? "bg-[#4F46E5] text-white border-[#4F46E5]"
                               : "bg-gray-50 text-gray-600 border-gray-200 hover:border-[#4F46E5]"
-                        }`}
+                          }`}
                       >
                         {feature.name}
                       </button>
@@ -476,7 +474,7 @@ export default function SuperAdminDashboard() {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="bg-gray-50 text-gray-500 font-medium border-b border-gray-100 text-xs uppercase tracking-wider">
+            <thead className="bg-gray-50 text-gray-500 font-medium border-b border-gray-100 text-xs uppercase mapping-wider">
               <tr>
                 <th className="px-6 py-4">Code</th>
                 <th className="px-6 py-4">Name</th>
@@ -555,11 +553,10 @@ export default function SuperAdminDashboard() {
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
-                          (school.is_active ?? true)
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${(school.is_active ?? true)
                             ? "bg-emerald-50 text-emerald-700"
                             : "bg-red-50 text-red-700"
-                        }`}
+                          }`}
                       >
                         {(school.is_active ?? true) ? "Active" : "Inactive"}
                       </span>
@@ -585,7 +582,7 @@ export default function SuperAdminDashboard() {
               {/* --- HEADER --- */}
               <div className="pt-8 px-8 pb-6 flex justify-between items-start">
                 <div>
-                  <h3 className="text-2xl font-black text-slate-800 tracking-tight">
+                  <h3 className="text-2xl font-black text-slate-800 mapping-tight">
                     Configure Access
                   </h3>
                   <p className="text-[15px] text-slate-500 mt-1">
@@ -605,10 +602,10 @@ export default function SuperAdminDashboard() {
 
               {/* --- COLUMN LABELS --- */}
               <div className="px-10 py-3 flex justify-between items-center bg-slate-50/50">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.1em]">
+                <span className="text-[11px] font-bold text-slate-400 uppercase mapping-[0.1em]">
                   Toggle School Access
                 </span>
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.1em]">
+                <span className="text-[11px] font-bold text-slate-400 uppercase mapping-[0.1em]">
                   Global Status
                 </span>
               </div>
@@ -630,11 +627,10 @@ export default function SuperAdminDashboard() {
                     <motion.div
                       key={feature.id}
                       whileHover={{ y: -2 }}
-                      className={`flex items-center justify-between p-4 rounded-[20px] transition-all border-2 ${
-                        isSelected
+                      className={`flex items-center justify-between p-4 rounded-[20px] transition-all border-2 ${isSelected
                           ? "bg-white border-indigo-100 shadow-[0_8px_20px_-6px_rgba(79,70,229,0.1)]"
                           : "bg-white border-slate-50 shadow-sm hover:border-slate-200"
-                      }`}
+                        }`}
                     >
                       {/* Left Side: Toggle Switch & Name */}
                       <div
@@ -643,8 +639,7 @@ export default function SuperAdminDashboard() {
                           if (isThisLoading) return;
 
                           const confirmAction = window.confirm(
-                            `Are you sure you want to ${
-                              !isSelected ? "enable" : "disable"
+                            `Are you sure you want to ${!isSelected ? "enable" : "disable"
                             } ${feature.name}?`,
                           );
 
@@ -658,9 +653,8 @@ export default function SuperAdminDashboard() {
                       >
                         {/* Premium Switch */}
                         <div
-                          className={`relative w-12 h-6 rounded-full transition-all duration-300 ${
-                            isSelected ? "bg-indigo-600" : "bg-slate-200"
-                          }`}
+                          className={`relative w-12 h-6 rounded-full transition-all duration-300 ${isSelected ? "bg-indigo-600" : "bg-slate-200"
+                            }`}
                         >
                           <motion.div
                             animate={{ x: isSelected ? 24 : 4 }}
@@ -678,7 +672,7 @@ export default function SuperAdminDashboard() {
                         </div>
 
                         <span
-                          className={`text-[15px] font-bold tracking-tight ${isSelected ? "text-indigo-900" : "text-slate-600"}`}
+                          className={`text-[15px] font-bold mapping-tight ${isSelected ? "text-indigo-900" : "text-slate-600"}`}
                         >
                           {feature.name}
                         </span>
@@ -697,11 +691,10 @@ export default function SuperAdminDashboard() {
                             );
                           }
                         }}
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black transition-all border ${
-                          isGlobalEnabled
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black transition-all border ${isGlobalEnabled
                             ? "bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100"
                             : "bg-rose-50 text-rose-600 border-rose-100 hover:bg-rose-100"
-                        }`}
+                          }`}
                       >
                         <div
                           className={`h-1.5 w-1.5 rounded-full ${isGlobalEnabled ? "bg-emerald-500" : "bg-rose-500"}`}
@@ -716,7 +709,7 @@ export default function SuperAdminDashboard() {
 
               {/* --- FOOTER --- */}
               <div className="p-8 bg-slate-50/80 border-t border-slate-100 flex justify-center">
-                <p className="text-xs text-slate-400 font-semibold tracking-tight">
+                <p className="text-xs text-slate-400 font-semibold mapping-tight">
                   Changes update the school profile in real-time.
                 </p>
               </div>

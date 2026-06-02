@@ -141,7 +141,7 @@ export default function TrusteeDashboard() {
               <p className="text-sm font-medium text-white/80">
                 Trustee Staff Directory
               </p>
-              <h2 className="text-3xl font-bold tracking-tight">
+              <h2 className="text-3xl font-bold mapping-tight">
                 Manage staff records
               </h2>
               <p className="max-w-xl text-sm text-white/80">
@@ -382,7 +382,7 @@ export default function TrusteeDashboard() {
 
         <div className="overflow-x-auto">
           <table className="w-full min-w-[960px] text-left text-sm">
-            <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+            <thead className="bg-slate-50 text-xs uppercase mapping-wide text-slate-500">
               <tr>
                 <th className="px-6 py-4">Staff</th>
                 <th className="px-6 py-4">Category</th>

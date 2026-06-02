@@ -96,7 +96,7 @@ function SidebarContent({
             <img src="/logo.png" alt="VidyaSanchalan Logo" className="h-11 w-auto max-w-[100px] object-contain" />
           </motion.div>
           <div>
-            <span className="font-black text-lg tracking-tight text-white leading-none">
+            <span className="font-black text-lg mapping-tight text-white leading-none">
               Vidya<span className="text-[#FFA600]">Sanchalan</span>
             </span>
             <p className="text-[10px] text-white/40 font-medium leading-none mt-0.5">School Management</p>
@@ -112,7 +112,7 @@ function SidebarContent({
               {config.badgeText}
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/40">Current Role</p>
+              <p className="text-[10px] font-semibold uppercase mapping-[0.12em] text-white/40">Current Role</p>
               <p className="text-sm font-bold text-white leading-tight">{roleTitle}</p>
             </div>
             <Sparkles className="h-3.5 w-3.5 text-white/20 ml-auto" />
@@ -121,7 +121,7 @@ function SidebarContent({
       </div>
 
       <div className="px-4 mb-3">
-        <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/25 px-2">Navigation</p>
+        <p className="text-[10px] font-bold uppercase mapping-[0.15em] text-white/25 px-2">Navigation</p>
       </div>
 
       {/* Nav Links */}
@@ -147,11 +147,10 @@ function SidebarContent({
               <Link
                 href={link.href}
                 onClick={onLinkClick}
-                className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group overflow-hidden ${
-                  isActive
+                className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group overflow-hidden ${isActive
                     ? "text-white"
                     : "text-white/50 hover:text-white/90 hover:bg-white/5"
-                }`}
+                  }`}
               >
                 {isActive && (
                   <motion.div

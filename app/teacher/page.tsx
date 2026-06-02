@@ -103,18 +103,18 @@ function calcDuration(
 
     if (checkIn.includes("T") || checkIn.includes("Z")) {
       // ISO datetime strings
-      inMs  = new Date(checkIn).getTime();
+      inMs = new Date(checkIn).getTime();
       outMs = new Date(checkOut).getTime();
     } else {
       // Plain "HH:MM:SS" strings — build a fake Date for today
       const base = new Date();
       const [ih, im, is_] = checkIn.split(":").map(Number);
       const [oh, om, os_] = checkOut.split(":").map(Number);
-      const inDate  = new Date(base);
+      const inDate = new Date(base);
       const outDate = new Date(base);
       inDate.setHours(ih, im, is_ || 0, 0);
       outDate.setHours(oh, om, os_ || 0, 0);
-      inMs  = inDate.getTime();
+      inMs = inDate.getTime();
       outMs = outDate.getTime();
     }
 
@@ -122,8 +122,8 @@ function calcDuration(
     if (diffMs <= 0) return "--h --m";
 
     const totalMinutes = Math.floor(diffMs / 60000);
-    const hours        = Math.floor(totalMinutes / 60);
-    const minutes      = totalMinutes % 60;
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
 
     return `${hours.toString().padStart(2, "0")}h ${minutes
       .toString()
@@ -288,7 +288,7 @@ export default function TeacherDashboard() {
           >
             <Fingerprint className="w-8 h-8 text-violet-500" />
           </motion.div>
-          <p className="text-xs font-semibold text-slate-400 tracking-widest uppercase">
+          <p className="text-xs font-semibold text-slate-400 mapping-widest uppercase">
             Loading attendance…
           </p>
         </motion.div>
@@ -340,7 +340,7 @@ export default function TeacherDashboard() {
         className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
       >
         <div>
-          <p className="text-[11px] font-bold text-violet-500 uppercase tracking-widest">
+          <p className="text-[11px] font-bold text-violet-500 uppercase mapping-widest">
             {getGreeting()} 👋
           </p>
           <h1 className="text-xl font-extrabold text-slate-900 leading-tight">
@@ -435,7 +435,7 @@ export default function TeacherDashboard() {
           <div className="flex items-center gap-2">
             <GpsPulse active={checkedIn && !checkedOut} />
             <div>
-              <p className="text-[10px] font-bold text-violet-500 uppercase tracking-widest">
+              <p className="text-[10px] font-bold text-violet-500 uppercase mapping-widest">
                 {checkedIn && !checkedOut
                   ? "In School Zone"
                   : checkedOut
@@ -450,7 +450,7 @@ export default function TeacherDashboard() {
             </div>
           </div>
           <div className="text-right">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            <p className="text-[10px] font-bold text-slate-400 uppercase mapping-widest">
               Now
             </p>
             <p className="text-lg font-extrabold text-violet-700 tabular-nums leading-tight">
@@ -515,10 +515,10 @@ export default function TeacherDashboard() {
               <p className="text-[10px] text-slate-400 font-medium mt-1">
                 {checkedIn
                   ? today?.attendance_date ||
-                    now.toLocaleDateString("en-IN", {
-                      day: "numeric",
-                      month: "short",
-                    })
+                  now.toLocaleDateString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                  })
                   : "Not yet"}
               </p>
             </div>
@@ -709,7 +709,7 @@ export default function TeacherDashboard() {
                 <Icon className="w-3.5 h-3.5" style={{ color }} />
               </div>
               <div className="min-w-0">
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-none mb-0.5">
+                <p className="text-[9px] font-bold text-slate-400 uppercase mapping-wider leading-none mb-0.5">
                   {label}
                 </p>
                 <p className="text-[11px] font-bold text-slate-700 leading-tight truncate">

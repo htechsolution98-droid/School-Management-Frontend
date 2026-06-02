@@ -1134,7 +1134,7 @@ function Step2TimeSlots({
 
               <div className="grid grid-cols-2 gap-2 mb-2">
                 <div>
-                  <p className="text-[9px] text-gray-400 font-semibold mb-1 uppercase tracking-wide">Start</p>
+                  <p className="text-[9px] text-gray-400 font-semibold mb-1 uppercase mapping-wide">Start</p>
                   <input
                     type="time"
                     value={slot.slot_start_time}
@@ -1147,7 +1147,7 @@ function Step2TimeSlots({
                   />
                 </div>
                 <div>
-                  <p className="text-[9px] text-gray-400 font-semibold mb-1 uppercase tracking-wide">End</p>
+                  <p className="text-[9px] text-gray-400 font-semibold mb-1 uppercase mapping-wide">End</p>
                   <input
                     type="time"
                     value={slot.slot_end_time}
@@ -1404,7 +1404,7 @@ function Step3PreviewSave({
           },
         ].map(({ label, value }) => (
           <div key={label}>
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">
+            <p className="text-[10px] text-gray-400 font-bold uppercase mapping-wide">
               {label}
             </p>
             <p className="text-sm font-black text-gray-800 mt-0.5 leading-tight">
@@ -1860,16 +1860,16 @@ function TimetablePreviewModal({
                 <table className="w-full border-collapse">
                   <thead>
                     <tr className="bg-violet-50">
-                      <th className="px-4 py-3 text-left text-xs font-bold text-violet-700 uppercase tracking-wide border border-violet-100 w-28">
+                      <th className="px-4 py-3 text-left text-xs font-bold text-violet-700 uppercase mapping-wide border border-violet-100 w-28">
                         Slot
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-violet-700 uppercase tracking-wide border border-violet-100 w-28">
+                      <th className="px-4 py-3 text-left text-xs font-bold text-violet-700 uppercase mapping-wide border border-violet-100 w-28">
                         Time
                       </th>
                       {data.map((d) => (
                         <th
                           key={d.id}
-                          className="px-4 py-3 text-center text-xs font-bold text-violet-700 uppercase tracking-wide border border-violet-100"
+                          className="px-4 py-3 text-center text-xs font-bold text-violet-700 uppercase mapping-wide border border-violet-100"
                         >
                           {DAY_FULL[d.day] ?? d.day}
                         </th>

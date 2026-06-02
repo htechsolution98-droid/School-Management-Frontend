@@ -41,7 +41,7 @@ function MaskedField({ value, label }: { value: string; label: string }) {
   const masked = value ? "•".repeat(Math.min(value.length, 20)) : "—";
   return (
     <div className="flex items-center gap-2 group">
-      <span className="font-mono text-xs text-slate-600 tracking-wider">
+      <span className="font-mono text-xs text-slate-600 mapping-wider">
         {show ? value : masked}
       </span>
       {value && (
@@ -205,7 +205,7 @@ function CredentialForm({
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* School selector */}
         <div className="space-y-1.5">
-          <Label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">School</Label>
+          <Label className="text-xs font-semibold text-gray-600 uppercase mapping-wider">School</Label>
           <SchoolSelect
             schools={schools}
             value={schoolId}
@@ -223,7 +223,7 @@ function CredentialForm({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Key ID */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            <Label className="text-xs font-semibold text-gray-600 uppercase mapping-wider">
               Razorpay Key ID
             </Label>
             <div className="relative">
@@ -239,7 +239,7 @@ function CredentialForm({
 
           {/* Secret */}
           <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+            <Label className="text-xs font-semibold text-gray-600 uppercase mapping-wider">
               Razorpay Secret Key
             </Label>
             <div className="relative">
@@ -408,7 +408,7 @@ export default function RazorpayCredentialsPage() {
             <div className="h-7 w-7 rounded-lg bg-[#4F46E5]/10 flex items-center justify-center">
               <CreditCard className="h-3.5 w-3.5 text-[#4F46E5]" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+            <h2 className="text-2xl font-bold text-gray-900 mapping-tight">
               Razorpay Credentials
             </h2>
           </div>
@@ -498,7 +498,7 @@ export default function RazorpayCredentialsPage() {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto -mx-0">
           <table className="w-full text-sm text-left min-w-[600px]">
-            <thead className="bg-gray-50 text-gray-500 font-medium border-b border-gray-100 text-xs uppercase tracking-wider">
+            <thead className="bg-gray-50 text-gray-500 font-medium border-b border-gray-100 text-xs uppercase mapping-wider">
               <tr>
                 <th className="px-6 py-4">School</th>
                 <th className="px-6 py-4">Key ID</th>

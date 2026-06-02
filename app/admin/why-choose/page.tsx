@@ -65,7 +65,7 @@ export default function WhyChooseUsManager() {
   const [whyImageLeft, setWhyImageLeft] = useState("/why choose us.jpg");
   const [whyImageBottomLeft, setWhyImageBottomLeft] = useState("/progress report.jpeg");
   const [whyImageBottomRight, setWhyImageBottomRight] = useState("/admission (1).jpg");
-  
+
   // Collage Cards CRUD State
   const [whyCollageCards, setWhyCollageCards] = useState<any[]>([]);
   const [isCollageOpen, setIsCollageOpen] = useState(false);
@@ -311,7 +311,7 @@ export default function WhyChooseUsManager() {
           setWhyTitle(data.settings.whyTitle || "VidyaSanchalan is a revolution in education management");
           setWhyTitleHighlight(data.settings.whyTitleHighlight || "revolution");
           setWhyPills(data.settings.whyPills && data.settings.whyPills.length > 0 ? data.settings.whyPills : ["100% Free Forever", "Instant Insights", "Limitless Scale"]);
-          
+
           const img = data.settings.whyImageMain || "/why chooseus.jpeg";
           setWhyImageMain(img);
           setImagePreview(img);
@@ -519,7 +519,7 @@ export default function WhyChooseUsManager() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-800 tracking-tight">"Why Choose Us" Manager</h2>
+          <h2 className="text-2xl font-black text-slate-800 mapping-tight">"Why Choose Us" Manager</h2>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
             Configure section header titles, dynamic capsule labels, and edit unique highlight benefits cards
           </p>
@@ -678,9 +678,8 @@ export default function WhyChooseUsManager() {
                           return (
                             <div
                               key={idx}
-                              className={`relative group rounded-xl overflow-hidden border-2 aspect-video bg-slate-50 transition-all ${
-                                isPrimary ? "border-[#429CE4]" : "border-slate-100 hover:border-slate-300"
-                              }`}
+                              className={`relative group rounded-xl overflow-hidden border-2 aspect-video bg-slate-50 transition-all ${isPrimary ? "border-[#429CE4]" : "border-slate-100 hover:border-slate-300"
+                                }`}
                             >
                               <img
                                 src={img}
@@ -752,7 +751,7 @@ export default function WhyChooseUsManager() {
                               </div>
                               <div>
                                 <h5 className="font-extrabold text-slate-800 text-xs">{card.label}</h5>
-                                <span className="text-[9px] uppercase tracking-wider font-bold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100 mt-0.5 inline-block">
+                                <span className="text-[9px] uppercase mapping-wider font-bold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100 mt-0.5 inline-block">
                                   {card.position}
                                 </span>
                               </div>
@@ -871,7 +870,7 @@ export default function WhyChooseUsManager() {
                 <div className="border border-slate-100 rounded-xl bg-slate-50/50 p-4 shadow-inner relative overflow-hidden mt-6">
                   <div className="flex items-center gap-2 mb-3 text-xs">
                     <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
-                    <span className="text-slate-500 font-bold tracking-wider uppercase text-[9px]">Collage Mockup Preview</span>
+                    <span className="text-slate-500 font-bold mapping-wider uppercase text-[9px]">Collage Mockup Preview</span>
                   </div>
                   <div className="relative border border-slate-100 bg-white rounded-xl p-3 flex flex-col gap-3">
                     <div className="flex items-center gap-3">
@@ -883,7 +882,7 @@ export default function WhyChooseUsManager() {
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-[#5D3FD3] bg-[#5D3FD3]/10 px-2 py-0.5 rounded-full">
+                        <span className="text-[9px] font-bold uppercase mapping-wider text-[#5D3FD3] bg-[#5D3FD3]/10 px-2 py-0.5 rounded-full">
                           {whyBadge}
                         </span>
                         <h5 className="font-extrabold text-[#1D496C] text-xs mt-1.5 truncate">
@@ -893,7 +892,7 @@ export default function WhyChooseUsManager() {
                     </div>
                     {whyCollageCards.length > 0 && (
                       <div className="space-y-1.5 border-t border-slate-50 pt-2 text-[10px] text-slate-500 font-semibold">
-                        <p className="text-[9px] uppercase tracking-wider text-slate-400 font-extrabold mb-1">Active Collage Cards</p>
+                        <p className="text-[9px] uppercase mapping-wider text-slate-400 font-extrabold mb-1">Active Collage Cards</p>
                         <div className="grid grid-cols-3 gap-2">
                           {whyCollageCards.map((c, idx) => (
                             <div key={idx} className="border border-slate-100 bg-slate-50 rounded p-1.5 flex flex-col gap-1 items-center text-center">
@@ -912,13 +911,13 @@ export default function WhyChooseUsManager() {
                 <div className="border border-slate-100 rounded-xl bg-slate-50/50 p-4 shadow-inner relative overflow-hidden mt-6">
                   <div className="flex items-center gap-2 mb-3 text-xs">
                     <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
-                    <span className="text-slate-500 font-bold tracking-wider uppercase text-[9px]">Floating Pills Preview</span>
+                    <span className="text-slate-500 font-bold mapping-wider uppercase text-[9px]">Floating Pills Preview</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {whyPills.map((pill, idx) => (
                       <span
                         key={idx}
-                        className="inline-flex items-center px-3 py-1 rounded-full bg-[#5D3FD3] text-white text-[9px] font-black tracking-wide"
+                        className="inline-flex items-center px-3 py-1 rounded-full bg-[#5D3FD3] text-white text-[9px] font-black mapping-wide"
                       >
                         {pill}
                       </span>

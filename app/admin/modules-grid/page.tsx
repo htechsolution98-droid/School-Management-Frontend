@@ -37,22 +37,22 @@ const ICON_NAMES = Object.keys(ICON_MAP);
 
 // ── Color presets ─────────────────────────────────────────────────────────────
 const COLOR_PRESETS = [
-  { label: "Ocean Blue",   hoverFrom: "#1D496C", hoverTo: "#429CE4", accent: "#429CE4" },
+  { label: "Ocean Blue", hoverFrom: "#1D496C", hoverTo: "#429CE4", accent: "#429CE4" },
   { label: "Forest Green", hoverFrom: "#6A7626", hoverTo: "#4F581D", accent: "#6A7626" },
-  { label: "Amber Gold",   hoverFrom: "#FFA600", hoverTo: "#ED6708", accent: "#FFA600" },
+  { label: "Amber Gold", hoverFrom: "#FFA600", hoverTo: "#ED6708", accent: "#FFA600" },
   { label: "Royal Purple", hoverFrom: "#5D3FD3", hoverTo: "#7C3AED", accent: "#8B5CF6" },
-  { label: "Sky Blue",     hoverFrom: "#285E89", hoverTo: "#429CE4", accent: "#429CE4" },
-  { label: "Sunset",       hoverFrom: "#1D496C", hoverTo: "#FFA600", accent: "#FFA600" },
+  { label: "Sky Blue", hoverFrom: "#285E89", hoverTo: "#429CE4", accent: "#429CE4" },
+  { label: "Sunset", hoverFrom: "#1D496C", hoverTo: "#FFA600", accent: "#FFA600" },
 ];
 
 const DEFAULT_CARDS = [
-  { title: "Student Dashboard",        emoji: "👨‍🎓", iconName: "GraduationCap", desc: "Designed to keep students organized, motivated, academic-centric, and highly engaged.",         points: ["Attendance percentage","Academic performance analytics","Timetable & upcoming exams","Homework and assignment tracker"],       hoverFrom: "#1D496C", hoverTo: "#429CE4", accentColor: "#429CE4", order: 0 },
-  { title: "Parent Portal",            emoji: "👨‍👩‍👧", iconName: "Users",         desc: "Instant tracking companion providing real-time data sync, fee alerts, and direct chats.",       points: ["Real-time student updates","Fee payment alerts","Direct communication with teachers","Daily activity reports"],                hoverFrom: "#6A7626", hoverTo: "#4F581D", accentColor: "#6A7626", order: 1 },
-  { title: "Online Fee Management",    emoji: "💳", iconName: "CreditCard",    desc: "Secure banking integration handling automatic reminders, instant receipts, and payouts.",       points: ["UPI/card/net banking integration","Auto fee reminders","Downloadable receipts","Pending fee analytics"],                         hoverFrom: "#FFA600", hoverTo: "#ED6708", accentColor: "#FFA600", order: 2 },
-  { title: "AI-Based Features",        emoji: "🧠", iconName: "Brain",         desc: "Smarter school intelligence systems generating predictions, notes, and report remarks.",         points: ["AI chatbot for student queries","Smart performance prediction","Personalized study recommendations","AI-generated report cards/remarks"], hoverFrom: "#285E89", hoverTo: "#429CE4", accentColor: "#429CE4", order: 3 },
-  { title: "Smart Attendance System",  emoji: "📅", iconName: "Fingerprint",   desc: "Instant roll-calls utilizing dynamic biometric readers, QR checks, and fast parent alerts.",    points: ["Face recognition attendance","RFID/QR code attendance","Biometric integration","Instant parent SMS alerts for absentees"],       hoverFrom: "#6A7626", hoverTo: "#4F581D", accentColor: "#6A7626", order: 4 },
-  { title: "Learning Management",      emoji: "📚", iconName: "Laptop",        desc: "Comprehensive virtual classrooms allowing easy study uploads, recordings, and gradings.",         points: ["Online classes integration","Study materials & notes upload","Assignment submission portal","Recorded lecture access"],              hoverFrom: "#FFA600", hoverTo: "#ED6708", accentColor: "#FFA600", order: 5 },
-  { title: "Communication Features",   emoji: "💬", iconName: "MessageSquare", desc: "Integrated micro-sockets connecting chat channels, live broadcasts, and meet systems.",           points: ["Teacher-parent chat","Broadcast messaging","Email/SMS integration","Video meeting integration"],                                   hoverFrom: "#1D496C", hoverTo: "#FFA600", accentColor: "#1D496C", order: 6 },
+  { title: "Student Dashboard", emoji: "👨‍🎓", iconName: "GraduationCap", desc: "Designed to keep students organized, motivated, academic-centric, and highly engaged.", points: ["Attendance percentage", "Academic performance analytics", "Timetable & upcoming exams", "Homework and assignment tracker"], hoverFrom: "#1D496C", hoverTo: "#429CE4", accentColor: "#429CE4", order: 0 },
+  { title: "Parent Portal", emoji: "👨‍👩‍👧", iconName: "Users", desc: "Instant mapping companion providing real-time data sync, fee alerts, and direct chats.", points: ["Real-time student updates", "Fee payment alerts", "Direct communication with teachers", "Daily activity reports"], hoverFrom: "#6A7626", hoverTo: "#4F581D", accentColor: "#6A7626", order: 1 },
+  { title: "Online Fee Management", emoji: "💳", iconName: "CreditCard", desc: "Secure banking integration handling automatic reminders, instant receipts, and payouts.", points: ["UPI/card/net banking integration", "Auto fee reminders", "Downloadable receipts", "Pending fee analytics"], hoverFrom: "#FFA600", hoverTo: "#ED6708", accentColor: "#FFA600", order: 2 },
+  { title: "AI-Based Features", emoji: "🧠", iconName: "Brain", desc: "Smarter school intelligence systems generating predictions, notes, and report remarks.", points: ["AI chatbot for student queries", "Smart performance prediction", "Personalized study recommendations", "AI-generated report cards/remarks"], hoverFrom: "#285E89", hoverTo: "#429CE4", accentColor: "#429CE4", order: 3 },
+  { title: "Smart Attendance System", emoji: "📅", iconName: "Fingerprint", desc: "Instant roll-calls utilizing dynamic biometric readers, QR checks, and fast parent alerts.", points: ["Face recognition attendance", "RFID/QR code attendance", "Biometric integration", "Instant parent SMS alerts for absentees"], hoverFrom: "#6A7626", hoverTo: "#4F581D", accentColor: "#6A7626", order: 4 },
+  { title: "Learning Management", emoji: "📚", iconName: "Laptop", desc: "Comprehensive virtual classrooms allowing easy study uploads, recordings, and gradings.", points: ["Online classes integration", "Study materials & notes upload", "Assignment submission portal", "Recorded lecture access"], hoverFrom: "#FFA600", hoverTo: "#ED6708", accentColor: "#FFA600", order: 5 },
+  { title: "Communication Features", emoji: "💬", iconName: "MessageSquare", desc: "Integrated micro-sockets connecting chat channels, live broadcasts, and meet systems.", points: ["Teacher-parent chat", "Broadcast messaging", "Email/SMS integration", "Video meeting integration"], hoverFrom: "#1D496C", hoverTo: "#FFA600", accentColor: "#1D496C", order: 6 },
 ];
 
 type Card = {
@@ -299,7 +299,7 @@ export default function ModulesGridPage() {
                         {ICON_MAP[card.iconName] || <Layers className="h-5 w-5" />}
                       </div>
                       <div>
-                        <p className="text-xs font-black text-slate-400 uppercase tracking-wider">{card.emoji} #{idx + 1}</p>
+                        <p className="text-xs font-black text-slate-400 uppercase mapping-wider">{card.emoji} #{idx + 1}</p>
                         <h4 className="text-sm font-black text-slate-800 leading-tight">{card.title}</h4>
                       </div>
                     </div>
@@ -389,18 +389,18 @@ export default function ModulesGridPage() {
                 {/* Title & Emoji */}
                 <div className="grid grid-cols-3 gap-4">
                   <div className="col-span-2 space-y-1.5">
-                    <Label className="text-xs font-black text-slate-600 uppercase tracking-wider">Card Title *</Label>
+                    <Label className="text-xs font-black text-slate-600 uppercase mapping-wider">Card Title *</Label>
                     <Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. Student Dashboard" className="rounded-xl border-slate-200 focus:border-[#1D496C]" required />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-black text-slate-600 uppercase tracking-wider">Emoji</Label>
+                    <Label className="text-xs font-black text-slate-600 uppercase mapping-wider">Emoji</Label>
                     <Input value={form.emoji} onChange={e => setForm(f => ({ ...f, emoji: e.target.value }))} placeholder="e.g. 📚" className="rounded-xl border-slate-200 text-xl text-center" maxLength={4} />
                   </div>
                 </div>
 
                 {/* Icon picker */}
                 <div className="space-y-2">
-                  <Label className="text-xs font-black text-slate-600 uppercase tracking-wider">Lucide Icon</Label>
+                  <Label className="text-xs font-black text-slate-600 uppercase mapping-wider">Lucide Icon</Label>
                   <div className="grid grid-cols-5 sm:grid-cols-8 gap-2">
                     {ICON_NAMES.map(name => (
                       <button
@@ -419,7 +419,7 @@ export default function ModulesGridPage() {
 
                 {/* Description */}
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-black text-slate-600 uppercase tracking-wider">Description *</Label>
+                  <Label className="text-xs font-black text-slate-600 uppercase mapping-wider">Description *</Label>
                   <Textarea
                     value={form.desc}
                     onChange={e => setForm(f => ({ ...f, desc: e.target.value }))}
@@ -432,7 +432,7 @@ export default function ModulesGridPage() {
 
                 {/* Bullet points */}
                 <div className="space-y-2">
-                  <Label className="text-xs font-black text-slate-600 uppercase tracking-wider">Feature Points</Label>
+                  <Label className="text-xs font-black text-slate-600 uppercase mapping-wider">Feature Points</Label>
                   <div className="space-y-2">
                     {form.points.map((pt, pi) => (
                       <div key={pi} className="flex items-center gap-2">
@@ -465,18 +465,17 @@ export default function ModulesGridPage() {
 
                 {/* Color presets */}
                 <div className="space-y-2">
-                  <Label className="text-xs font-black text-slate-600 uppercase tracking-wider">Hover Color Theme</Label>
+                  <Label className="text-xs font-black text-slate-600 uppercase mapping-wider">Hover Color Theme</Label>
                   <div className="grid grid-cols-3 gap-2">
                     {COLOR_PRESETS.map(preset => (
                       <button
                         key={preset.label}
                         type="button"
                         onClick={() => applyPreset(preset)}
-                        className={`flex items-center gap-2 p-2.5 rounded-xl border-2 transition-all text-xs font-bold ${
-                          form.hoverFrom === preset.hoverFrom && form.hoverTo === preset.hoverTo
+                        className={`flex items-center gap-2 p-2.5 rounded-xl border-2 transition-all text-xs font-bold ${form.hoverFrom === preset.hoverFrom && form.hoverTo === preset.hoverTo
                             ? "border-slate-400 bg-slate-50"
                             : "border-slate-100 hover:border-slate-300"
-                        }`}
+                          }`}
                       >
                         <div className="h-5 w-5 rounded-lg shrink-0" style={{ background: `linear-gradient(135deg, ${preset.hoverFrom}, ${preset.hoverTo})` }}></div>
                         <span className="text-slate-600 truncate">{preset.label}</span>
@@ -488,21 +487,21 @@ export default function ModulesGridPage() {
                   {/* Custom colors */}
                   <div className="grid grid-cols-3 gap-3 pt-1">
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">From Color</label>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase mapping-wider">From Color</label>
                       <div className="flex items-center gap-2">
                         <input type="color" value={form.hoverFrom} onChange={e => setForm(f => ({ ...f, hoverFrom: e.target.value }))} className="h-8 w-8 rounded-lg border border-slate-200 cursor-pointer" />
                         <Input value={form.hoverFrom} onChange={e => setForm(f => ({ ...f, hoverFrom: e.target.value }))} className="rounded-lg border-slate-200 text-xs font-mono flex-1 h-8" />
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">To Color</label>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase mapping-wider">To Color</label>
                       <div className="flex items-center gap-2">
                         <input type="color" value={form.hoverTo} onChange={e => setForm(f => ({ ...f, hoverTo: e.target.value }))} className="h-8 w-8 rounded-lg border border-slate-200 cursor-pointer" />
                         <Input value={form.hoverTo} onChange={e => setForm(f => ({ ...f, hoverTo: e.target.value }))} className="rounded-lg border-slate-200 text-xs font-mono flex-1 h-8" />
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Accent Color</label>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase mapping-wider">Accent Color</label>
                       <div className="flex items-center gap-2">
                         <input type="color" value={form.accentColor} onChange={e => setForm(f => ({ ...f, accentColor: e.target.value }))} className="h-8 w-8 rounded-lg border border-slate-200 cursor-pointer" />
                         <Input value={form.accentColor} onChange={e => setForm(f => ({ ...f, accentColor: e.target.value }))} className="rounded-lg border-slate-200 text-xs font-mono flex-1 h-8" />
@@ -513,7 +512,7 @@ export default function ModulesGridPage() {
 
                 {/* Preview */}
                 <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 space-y-2">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Live Preview</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase mapping-wider">Live Preview</p>
                   <div className="bg-white rounded-xl border border-slate-100 overflow-hidden shadow-sm">
                     <div className="h-1" style={{ background: `linear-gradient(to right, ${form.hoverFrom}, ${form.hoverTo})` }}></div>
                     <div className="p-4 space-y-2">

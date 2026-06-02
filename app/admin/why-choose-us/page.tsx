@@ -132,7 +132,7 @@ export default function WhyChooseUsManager() {
 
     const targetIndex = direction === "up" ? index - 1 : index + 1;
     const updatedList = [...whyChooseUs];
-    
+
     // Swap items
     const temp = updatedList[index];
     updatedList[index] = updatedList[targetIndex];
@@ -204,7 +204,7 @@ export default function WhyChooseUsManager() {
       {/* Header Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-800 tracking-tight">"Why Choose Us" Manager</h2>
+          <h2 className="text-2xl font-black text-slate-800 mapping-tight">"Why Choose Us" Manager</h2>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
             Configure the core USP value propositions displayed in the primary marketing grid
           </p>
@@ -268,10 +268,10 @@ export default function WhyChooseUsManager() {
         <div className="grid gap-8 lg:grid-cols-12">
           {/* Main List Management Table (Left side) */}
           <div className="lg:col-span-7 space-y-4">
-            <h3 className="text-base font-black text-slate-700 uppercase tracking-wider flex items-center gap-2">
+            <h3 className="text-base font-black text-slate-700 uppercase mapping-wider flex items-center gap-2">
               <Info className="h-4 w-4 text-[#429CE4]" /> Value propositions list
             </h3>
-            
+
             <div className="space-y-4">
               {whyChooseUs.map((item, idx) => {
                 const matchedTheme = COLOR_THEMES.find(t => t.class.startsWith(item.color)) || COLOR_THEMES[0];
@@ -348,13 +348,13 @@ export default function WhyChooseUsManager() {
 
           {/* Visual Live Mockup Panel (Right side) */}
           <div className="lg:col-span-5 space-y-4">
-            <h3 className="text-base font-black text-slate-700 uppercase tracking-wider flex items-center gap-2">
+            <h3 className="text-base font-black text-slate-700 uppercase mapping-wider flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-[#FFA600]" /> Live homepage rendering preview
             </h3>
 
             <Card className="rounded-[2.5rem] bg-gradient-to-tr from-slate-50 to-slate-100/50 p-6 border border-slate-200 shadow-inner overflow-hidden sticky top-6">
               <div className="mb-4">
-                <span className="text-[10px] bg-[#5D3FD3]/10 text-[#5D3FD3] px-3 py-1.5 rounded-full font-black uppercase tracking-widest">
+                <span className="text-[10px] bg-[#5D3FD3]/10 text-[#5D3FD3] px-3 py-1.5 rounded-full font-black uppercase mapping-widest">
                   Why Choose Us?
                 </span>
                 <h4 className="text-lg font-black text-slate-900 mt-2 leading-snug">
@@ -381,7 +381,7 @@ export default function WhyChooseUsManager() {
                 ))}
               </div>
 
-              <div className="mt-6 text-center text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
+              <div className="mt-6 text-center text-[10px] text-slate-400 font-semibold uppercase mapping-wider">
                 Homepage section representation layout
               </div>
             </Card>
@@ -448,11 +448,10 @@ export default function WhyChooseUsManager() {
                         key={theme.label}
                         type="button"
                         onClick={() => setColorClass(theme.class)}
-                        className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-semibold transition-all ${
-                          isActive
+                        className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-semibold transition-all ${isActive
                             ? "bg-slate-50 border-slate-800 ring-1 ring-slate-800"
                             : "bg-white border-slate-200 hover:bg-slate-50"
-                        }`}
+                          }`}
                       >
                         <span
                           className="h-3 w-3 rounded-full shrink-0 border border-black/10"
@@ -477,11 +476,10 @@ export default function WhyChooseUsManager() {
                         type="button"
                         title={icon.label}
                         onClick={() => setIconName(icon.name)}
-                        className={`flex flex-col items-center justify-center p-2 rounded-lg border aspect-square transition-all ${
-                          isSelected
+                        className={`flex flex-col items-center justify-center p-2 rounded-lg border aspect-square transition-all ${isSelected
                             ? "bg-[#429CE4] border-[#429CE4] text-white shadow"
                             : "bg-white border-slate-200 text-slate-600 hover:bg-slate-100"
-                        }`}
+                          }`}
                       >
                         <DynamicIcon name={icon.name} className="h-5 w-5" />
                       </button>

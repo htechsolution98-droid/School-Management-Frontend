@@ -14,9 +14,9 @@ const fadeUp = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { 
-      duration: 0.4, 
-      delay: i * 0.08, 
+    transition: {
+      duration: 0.4,
+      delay: i * 0.08,
       ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number]
     },
   }),
@@ -61,7 +61,7 @@ function VerifyOtpInner() {
       }
 
       await verifyOtp(payload);
-      
+
       router.push(`/login?identifier=${encodeURIComponent(identifier)}`);
     } catch (err: any) {
       setError(err.message || "Verification failed. Please check your OTP and try again.");
@@ -95,9 +95,8 @@ function VerifyOtpInner() {
           </Label>
           <div className="relative">
             <KeyRound
-              className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors duration-200 ${
-                focused === "otp" ? "text-[#FFA600]" : "text-[#94A3B8]"
-              }`}
+              className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors duration-200 ${focused === "otp" ? "text-[#FFA600]" : "text-[#94A3B8]"
+                }`}
             />
             <Input
               id="otp"
@@ -121,9 +120,8 @@ function VerifyOtpInner() {
           </Label>
           <div className="relative">
             <Lock
-              className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors duration-200 ${
-                focused === "password" ? "text-[#FFA600]" : "text-[#94A3B8]"
-              }`}
+              className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors duration-200 ${focused === "password" ? "text-[#FFA600]" : "text-[#94A3B8]"
+                }`}
             />
             <Input
               id="password"
@@ -164,9 +162,8 @@ function VerifyOtpInner() {
           </Label>
           <div className="relative">
             <Lock
-              className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors duration-200 ${
-                focused === "confirm-password" ? "text-[#FFA600]" : "text-[#94A3B8]"
-              }`}
+              className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors duration-200 ${focused === "confirm-password" ? "text-[#FFA600]" : "text-[#94A3B8]"
+                }`}
             />
             <Input
               id="confirm-password"
@@ -252,7 +249,7 @@ function VerifyOtpInner() {
         className="mt-8 pt-6 border-t border-[#F1F5F9] flex items-center justify-center gap-6"
       >
         {["256-bit Encryption", "Secure Session", "Double Verified"].map((badge) => (
-          <span key={badge} className="flex items-center gap-1.5 text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider">
+          <span key={badge} className="flex items-center gap-1.5 text-[10px] font-bold text-[#94A3B8] uppercase mapping-wider">
             <span className="h-1.5 w-1.5 rounded-full bg-[#6A7626] inline-block" />
             {badge}
           </span>

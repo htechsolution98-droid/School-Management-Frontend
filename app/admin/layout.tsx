@@ -202,11 +202,11 @@ export default function AdminLayout({
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white p-2 shadow-lg">
               <img src="/logo.png" alt="Logo" className="h-12 w-auto object-contain" />
             </div>
-            <h2 className="text-2xl font-black tracking-tight text-white">
+            <h2 className="text-2xl font-black mapping-tight text-white">
               <span className="text-[#285E89]">Vidya</span>
               <span className="text-[#FFA600]">Sanchalan</span>
             </h2>
-            <p className="mt-1 text-sm font-semibold text-white/60 uppercase tracking-widest text-[10px]">
+            <p className="mt-1 text-sm font-semibold text-white/60 uppercase mapping-widest text-[10px]">
               School ERP Admin Panel
             </p>
           </div>
@@ -272,11 +272,11 @@ export default function AdminLayout({
             <img src="/logo.png" alt="Logo" className="h-7 w-auto object-contain" />
           </div>
           <div>
-            <h1 className="text-sm font-black tracking-tight leading-none text-white">
+            <h1 className="text-sm font-black mapping-tight leading-none text-white">
               <span className="text-slate-100">Vidya</span>
               <span className="text-[#FFA600]">Sanchalan</span>
             </h1>
-            <span className="text-[9px] font-bold uppercase tracking-wider text-white/60">
+            <span className="text-[9px] font-bold uppercase mapping-wider text-white/60">
               Admin Workspace
             </span>
           </div>
@@ -290,11 +290,10 @@ export default function AdminLayout({
               <Link
                 key={item.name}
                 href={item.href}
-                className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
-                  isActive
+                className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${isActive
                     ? "bg-gradient-to-r from-[#429CE4] to-[#285E89] text-white shadow-md shadow-[#429CE4]/20 scale-105"
                     : "text-slate-200 hover:bg-white/5 hover:text-white"
-                }`}
+                  }`}
               >
                 <span className={isActive ? "text-[#E4FF4C]" : "text-white/70 group-hover:text-white"}>
                   {item.icon}
@@ -382,11 +381,10 @@ export default function AdminLayout({
                     <Link
                       key={item.name}
                       href={item.href}
-                      className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all ${
-                        isActive
+                      className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all ${isActive
                           ? "bg-[#429CE4] text-white shadow-md"
                           : "text-slate-200 hover:bg-white/5"
-                      }`}
+                        }`}
                       onClick={() => setIsSidebarOpen(false)}
                     >
                       {item.icon}

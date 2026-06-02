@@ -365,7 +365,7 @@ export default function MobileEcosystemManager() {
     <div className="space-y-8">
       {/* Page Header */}
       <div>
-        <h2 className="text-2xl font-black text-slate-800 tracking-tight">Mobile Ecosystem Manager</h2>
+        <h2 className="text-2xl font-black text-slate-800 mapping-tight">Mobile Ecosystem Manager</h2>
         <p className="text-xs sm:text-sm text-slate-400 mt-1">
           Perform full CRUD operations and image uploads to customize screenshots, tab role configurations, and core infrastructure cards on the Features Hub
         </p>
@@ -396,7 +396,7 @@ export default function MobileEcosystemManager() {
       ) : (
         <form onSubmit={handleSaveEcosystem} className="space-y-8 animate-fadeIn">
           <div className="grid gap-8 lg:grid-cols-12">
-            
+
             {/* Left Column: Role Details Copy & Checklist Bullets */}
             <div className="lg:col-span-7 space-y-6">
               <Card className="shadow-sm border border-slate-100 bg-white rounded-2xl">
@@ -407,7 +407,7 @@ export default function MobileEcosystemManager() {
                   <CardDescription>Configure specific details displayed for Student, Parent, and Teacher roles</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  
+
                   {/* Segmented Roles Selector inside Admin Panel */}
                   <div className="bg-slate-50 border border-slate-100 p-1 rounded-xl flex max-w-sm">
                     {(["parent", "student", "teacher"] as const).map((role) => (
@@ -415,11 +415,10 @@ export default function MobileEcosystemManager() {
                         key={role}
                         type="button"
                         onClick={() => setActiveRoleTab(role)}
-                        className={`flex-1 py-2.5 text-xs font-extrabold rounded-lg capitalize transition-all ${
-                          activeRoleTab === role
+                        className={`flex-1 py-2.5 text-xs font-extrabold rounded-lg capitalize transition-all ${activeRoleTab === role
                             ? "bg-[#1D496C] text-white shadow-sm"
                             : "text-slate-500 hover:text-slate-800"
-                        }`}
+                          }`}
                       >
                         {role}
                       </button>
@@ -662,7 +661,7 @@ export default function MobileEcosystemManager() {
                   </Button>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  
+
                   {mobileCapabilities.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-center border-dashed border-2 border-slate-100 rounded-2xl bg-slate-50/30">
                       <Sparkles className="h-8 w-8 text-slate-300 mb-2" />
@@ -738,7 +737,7 @@ export default function MobileEcosystemManager() {
                   </Button>
                 </CardHeader>
                 <CardContent className="py-4 space-y-4 flex-1">
-                  
+
                   {mobileScreens.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-center border-dashed border-2 border-slate-100 rounded-2xl bg-slate-50/30">
                       <Smartphone className="h-8 w-8 text-slate-300 mb-2" />
@@ -799,9 +798,9 @@ export default function MobileEcosystemManager() {
                       <div className="absolute inset-0 bg-grid-white/[0.04] pointer-events-none"></div>
                       <div className="flex items-center gap-2 mb-3 text-xs">
                         <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
-                        <span className="text-slate-400 font-bold tracking-wider uppercase text-[9px]">Mockup Carousel Preview</span>
+                        <span className="text-slate-400 font-bold mapping-wider uppercase text-[9px]">Mockup Carousel Preview</span>
                       </div>
-                      
+
                       <div className="flex flex-col items-center justify-center space-y-4">
                         <div className="w-[140px] aspect-[9/19] rounded-[1.2rem] bg-slate-950 p-1 border border-slate-800 shadow-xl relative overflow-hidden shrink-0">
                           <div className="w-full h-full rounded-[1.05rem] overflow-hidden bg-slate-900 relative">
@@ -815,7 +814,7 @@ export default function MobileEcosystemManager() {
                           </div>
                         </div>
                         <div className="text-center space-y-1 max-w-[200px]">
-                          <h5 className="text-[10px] font-black text-[#FFA600] uppercase tracking-wide">
+                          <h5 className="text-[10px] font-black text-[#FFA600] uppercase mapping-wide">
                             {mobileScreens[previewSliderIndex]?.title}
                           </h5>
                           <p className="text-[9px] font-medium text-slate-300 leading-tight">
@@ -832,7 +831,7 @@ export default function MobileEcosystemManager() {
                           >
                             <ChevronLeft className="h-3.5 w-3.5" />
                           </Button>
-                          <span className="text-[8px] font-black text-slate-400 tracking-wider">
+                          <span className="text-[8px] font-black text-slate-400 mapping-wider">
                             {previewSliderIndex + 1} / {mobileScreens.length}
                           </span>
                           <Button

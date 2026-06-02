@@ -5,9 +5,9 @@
     "heroSubtitle": "Complete Smart School Management System",
     "heroDescription": "Manage the complete school journey — from student admission to leaving certificate — with powerful digital panels for Trustees, Principals, Clerks, Teachers, Students, and Guardians.",
     "satisfactionRate": 99.8,
-    "heroImage": "/sms hero.jpg",
+    "heroImage": "/uploads/hero-1780392547867.jpeg",
     "heroImages": [
-      "/sms hero.jpg"
+      "/uploads/hero-1780392547867.jpeg"
     ],
     "stats": [
       {
@@ -174,7 +174,7 @@
       },
       {
         "title": "Biometric & Geo-location",
-        "desc": "Security tracking logs for teacher roll-call ensuring verifiable attendance entries using mobile GPS services.",
+        "desc": "Security mapping logs for teacher roll-call ensuring verifiable attendance entries using mobile GPS services.",
         "iconName": "Fingerprint"
       }
     ],
@@ -184,7 +184,7 @@
     "modulePoints": [
       "Admission Management",
       "Fee Management",
-      "Attendance & Geo Tracking",
+      "Attendance & Geo mapping",
       "Homework & Assignments",
       "Timetable Management",
       "Online Examination",
@@ -212,7 +212,7 @@
         "title": "Parent Portal",
         "emoji": "👨‍👩‍👧",
         "iconName": "Users",
-        "desc": "Instant tracking companion providing real-time data sync, fee alerts, and direct chats.",
+        "desc": "Instant mapping companion providing real-time data sync, fee alerts, and direct chats.",
         "points": [
           "Real-time student updates",
           "Fee payment alerts",
@@ -362,7 +362,7 @@
       },
       {
         "title": "Biometric & Geo-location",
-        "desc": "Security tracking logs for teacher roll-call ensuring verifiable attendance entries using mobile GPS services.",
+        "desc": "Security mapping logs for teacher roll-call ensuring verifiable attendance entries using mobile GPS services.",
         "iconName": "Fingerprint",
         "hoverBg": "hover:bg-[#FFA600] hover:border-[#FFA600] hover:shadow-xl hover:shadow-[#FFA600]/20"
       }
@@ -370,7 +370,7 @@
     "modulesHeroTags": [
       "Admission Management",
       "Fee Management",
-      "Attendance & Geo Tracking",
+      "Attendance & Geo mapping",
       "Homework & Assignments",
       "Timetable Management",
       "Online Examination",
@@ -399,7 +399,7 @@
         "title": "Parent Portal",
         "emoji": "👨‍👩‍👧",
         "iconName": "Users",
-        "desc": "Instant tracking companion providing real-time data sync, fee alerts, and direct chats.",
+        "desc": "Instant mapping companion providing real-time data sync, fee alerts, and direct chats.",
         "points": [
           "Real-time student updates",
           "Fee payment alerts",
@@ -542,7 +542,7 @@
       "points": [
         "Online and offline homework",
         "Assignment uploads",
-        "Subject-wise homework tracking",
+        "Subject-wise homework mapping",
         "Teacher to student communication"
       ],
       "order": 3
@@ -555,7 +555,7 @@
       "points": [
         "Report cards",
         "Marksheets",
-        "Attendance tracking",
+        "Attendance mapping",
         "Student performance analytics",
         "Guardian visibility panel"
       ],
@@ -668,7 +668,7 @@
     },
     {
       "_id": "m7",
-      "label": "GPS Attendance Tracking",
+      "label": "GPS Attendance mapping",
       "iconName": "Shield",
       "order": 6
     },

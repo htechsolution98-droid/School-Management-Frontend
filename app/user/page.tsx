@@ -469,7 +469,7 @@ function ChildrenList({
                       {/* Student info */}
                       <div className="bg-slate-50 rounded-2xl p-4 space-y-3">
                         <div className="flex justify-between items-center">
-                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                          <span className="text-xs font-bold text-slate-400 uppercase mapping-wider">
                             Student
                           </span>
                           <span className="text-sm font-black text-slate-800 text-right ml-2">
@@ -480,7 +480,7 @@ function ChildrenList({
                         </div>
                         <div className="h-px bg-slate-200" />
                         <div className="flex justify-between items-center">
-                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                          <span className="text-xs font-bold text-slate-400 uppercase mapping-wider">
                             Admission No.
                           </span>
                           <span className="text-sm font-black text-indigo-600 font-mono text-right ml-2 break-all">
@@ -489,7 +489,7 @@ function ChildrenList({
                         </div>
                         <div className="h-px bg-slate-200" />
                         <div className="flex justify-between items-center">
-                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                          <span className="text-xs font-bold text-slate-400 uppercase mapping-wider">
                             Form
                           </span>
                           <span className="text-sm font-black text-slate-800 text-right ml-2">
@@ -498,7 +498,7 @@ function ChildrenList({
                         </div>
                         <div className="h-px bg-slate-200" />
                         <div className="flex justify-between items-center">
-                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                          <span className="text-xs font-bold text-slate-400 uppercase mapping-wider">
                             Amount Paid
                           </span>
                           <span className="text-sm font-black text-emerald-600 text-right ml-2">
@@ -508,16 +508,16 @@ function ChildrenList({
                         </div>
                         <div className="h-px bg-slate-200" />
                         <div className="flex justify-between items-center gap-2">
-                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider shrink-0">
+                          <span className="text-xs font-bold text-slate-400 uppercase mapping-wider shrink-0">
                             Payment Mode
                           </span>
-                          <span className="text-xs font-black uppercase tracking-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
+                          <span className="text-xs font-black uppercase mapping-wider text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
                             {receiptData.payment_detail?.payment_mode}
                           </span>
                         </div>
                         <div className="h-px bg-slate-200" />
                         <div className="flex justify-between items-center">
-                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider shrink-0">
+                          <span className="text-xs font-bold text-slate-400 uppercase mapping-wider shrink-0">
                             Paid At
                           </span>
                           <span className="text-xs font-bold text-slate-600 text-right ml-2">
@@ -528,10 +528,10 @@ function ChildrenList({
                         </div>
                         <div className="h-px bg-slate-200" />
                         <div className="flex justify-between items-center gap-2">
-                          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider shrink-0">
+                          <span className="text-xs font-bold text-slate-400 uppercase mapping-wider shrink-0">
                             Status
                           </span>
-                          <span className="text-xs font-black uppercase tracking-wider text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+                          <span className="text-xs font-black uppercase mapping-wider text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
                             ✓ Paid
                           </span>
                         </div>
@@ -539,7 +539,7 @@ function ChildrenList({
                           <>
                             <div className="h-px bg-slate-200" />
                             <div className="flex justify-between items-center">
-                              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider shrink-0">
+                              <span className="text-xs font-bold text-slate-400 uppercase mapping-wider shrink-0">
                                 Payment ID
                               </span>
                               <span className="text-xs font-mono text-slate-500 text-right ml-2 break-all">
@@ -553,7 +553,7 @@ function ChildrenList({
                       {/* Documents */}
                       {receiptData.documents?.length > 0 && (
                         <div className="bg-slate-50 rounded-2xl p-4 space-y-2">
-                          <p className="text-xs font-black uppercase tracking-wider text-slate-400 mb-2">
+                          <p className="text-xs font-black uppercase mapping-wider text-slate-400 mb-2">
                             Documents Submitted
                           </p>
                           {receiptData.documents.map((doc: any) => (
@@ -652,7 +652,7 @@ function ChildrenList({
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.1, duration: 0.35 }}
-              className="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.18em] text-indigo-500 bg-indigo-50 px-3 py-1.5 rounded-full mb-3"
+              className="inline-flex items-center gap-2 text-[11px] font-black uppercase mapping-[0.18em] text-indigo-500 bg-indigo-50 px-3 py-1.5 rounded-full mb-3"
             >
               <motion.span
                 animate={{ rotate: [0, 15, -10, 0] }}
@@ -667,7 +667,7 @@ function ChildrenList({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-tight"
+              className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 mapping-tight leading-tight"
             >
               Welcome back,{" "}
               <motion.span
@@ -804,7 +804,7 @@ function ChildrenList({
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: i * 0.08 + 0.55 }}
-                        className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-full ${badgeClass}`}
+                        className={`text-[10px] font-black uppercase mapping-widest px-2.5 py-1 rounded-full ${badgeClass}`}
                       >
                         {child.status}
                       </motion.span>
@@ -1241,7 +1241,7 @@ function MultiStepForm({
         {step > 1 && (
           <div className="flex items-center gap-2 sm:gap-4">
             <div className="text-right hidden sm:block">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-0.5">
+              <p className="text-[10px] font-black text-slate-400 uppercase mapping-widest leading-none mb-0.5">
                 Application ID
               </p>
               <p className="text-sm font-bold text-indigo-600 font-mono">
@@ -1260,7 +1260,7 @@ function MultiStepForm({
         {/* ── LEFT SIDEBAR — desktop only ── */}
         <aside className="w-80 border-r border-slate-100 bg-slate-50/50 p-8 hidden lg:flex flex-col shrink-0">
           <div className="mb-8">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">
+            <p className="text-[10px] font-black text-slate-400 uppercase mapping-[0.2em] mb-1.5">
               Currently on
             </p>
             <motion.h3
@@ -1290,7 +1290,7 @@ function MultiStepForm({
                     {isCompleted ? <CheckCircle2 size={20} /> : <s.icon size={20} />}
                   </div>
                   <div className="flex-1">
-                    <p className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                    <p className="text-[10px] font-black uppercase mapping-wider text-slate-400">
                       Step 0{s.id}
                     </p>
                     <p className={`text-sm font-bold ${isCurrent ? "text-indigo-700" : "text-slate-700"}`}>
@@ -1328,10 +1328,10 @@ function MultiStepForm({
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.22 }}
               >
-                <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full mb-1.5">
+                <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase mapping-widest text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full mb-1.5">
                   Step 0{step} of 03
                 </span>
-                <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-tight">
+                <h2 className="text-lg sm:text-xl font-black text-slate-900 mapping-tight leading-tight">
                   {STEPS[step - 1].title}
                 </h2>
                 <p className="text-slate-400 text-xs sm:text-sm font-medium mt-0.5">
@@ -1530,7 +1530,7 @@ function StudentDetailsStep({
             <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 bg-gradient-to-r from-indigo-600 to-indigo-500">
               <div className="flex items-center gap-2.5">
                 <div className="w-1 h-4 rounded-full bg-white/60" />
-                <h3 className="text-[11px] font-black uppercase tracking-[0.18em] text-white">
+                <h3 className="text-[11px] font-black uppercase mapping-[0.18em] text-white">
                   {section.title}
                 </h3>
               </div>
@@ -1643,7 +1643,7 @@ function DynamicField({
   ].join(" ");
 
   const labelClass = [
-    "flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest mb-1.5 transition-colors duration-200",
+    "flex items-center gap-1.5 text-[11px] font-black uppercase mapping-widest mb-1.5 transition-colors duration-200",
     error ? "text-rose-500" : focused ? "text-indigo-600" : isFilled ? "text-emerald-600" : "text-slate-400",
   ].join(" ");
 
@@ -1907,7 +1907,7 @@ function DocRow({
               {doc.label}
             </span>
             {doc.is_required && (
-              <span className="text-[10px] font-black uppercase tracking-widest text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100 shrink-0">
+              <span className="text-[10px] font-black uppercase mapping-widest text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100 shrink-0">
                 Required
               </span>
             )}
@@ -1915,7 +1915,7 @@ function DocRow({
               <motion.span
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="text-[9px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-200 shrink-0"
+                className="text-[9px] font-black uppercase mapping-widest text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-200 shrink-0"
               >
                 ✓ Done
               </motion.span>
@@ -2012,7 +2012,7 @@ function ReviewStep({
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.25 }}
-              className="font-black text-lg sm:text-xl mb-0.5 tracking-tight"
+              className="font-black text-lg sm:text-xl mb-0.5 mapping-tight"
             >
               Application Complete! 🎉
             </motion.p>
@@ -2068,11 +2068,11 @@ function ReviewStep({
                 <CreditCard size={17} className="text-indigo-600" />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Breakdown</p>
+                <p className="text-[10px] font-black uppercase mapping-widest text-slate-400">Breakdown</p>
                 <p className="text-sm font-black text-slate-800 leading-tight">Order Summary</p>
               </div>
             </div>
-            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100">
+            <span className="text-[10px] font-black uppercase mapping-widest text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100">
               ✓ Verified
             </span>
           </div>
@@ -2115,7 +2115,7 @@ function ReviewStep({
             className="mx-4 sm:mx-5 mb-4 sm:mb-5 rounded-2xl bg-gradient-to-r from-indigo-50 to-violet-50 border border-indigo-100 px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between"
           >
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-0.5">Amount Payable</p>
+              <p className="text-[10px] font-black uppercase mapping-widest text-indigo-400 mb-0.5">Amount Payable</p>
               <p className="text-base sm:text-lg font-black text-slate-900">Total Due</p>
               <p className="text-xs text-slate-400 font-medium mt-0.5">Inclusive of all taxes & fees</p>
             </div>
@@ -2124,7 +2124,7 @@ function ReviewStep({
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
-                className="text-2xl sm:text-3xl font-black text-indigo-600 tracking-tight"
+                className="text-2xl sm:text-3xl font-black text-indigo-600 mapping-tight"
               >
                 ₹{Number(total).toLocaleString("en-IN")}
               </motion.p>
@@ -2150,7 +2150,7 @@ function ReviewStep({
                   <Shield size={20} className="text-white drop-shadow-md" />
                 </div>
                 <div>
-                  <h3 className="text-base sm:text-lg font-extrabold tracking-tight leading-none">
+                  <h3 className="text-base sm:text-lg font-extrabold mapping-tight leading-none">
                     Secure Checkout
                   </h3>
                 </div>
@@ -2169,7 +2169,7 @@ function ReviewStep({
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.5 + i * 0.1 }}
-                    className="cursor-default rounded-xl border border-white/20 bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm transition-colors"
+                    className="cursor-default rounded-xl border border-white/20 bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase mapping-wider text-white backdrop-blur-sm transition-colors"
                   >
                     {method}
                   </motion.span>
@@ -2234,7 +2234,7 @@ function UploadRow({
               {label}
             </span>
             {required && (
-              <span className="text-[10px] font-black uppercase tracking-widest text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100">
+              <span className="text-[10px] font-black uppercase mapping-widest text-rose-500 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-100">
                 Required
               </span>
             )}

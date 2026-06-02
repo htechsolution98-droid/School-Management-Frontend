@@ -242,7 +242,7 @@ function FeeCard({ fee, onEdit, onDelete }: FeeCardProps) {
 
       {/* Description */}
       <div className="mb-5">
-        <p className="text-xs text-gray-400 mb-1 font-medium uppercase tracking-wide">
+        <p className="text-xs text-gray-400 mb-1 font-medium uppercase mapping-wide">
           Billing Cycle
         </p>
         <p className="text-sm text-gray-700 font-medium">

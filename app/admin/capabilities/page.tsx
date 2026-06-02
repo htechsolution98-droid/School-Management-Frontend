@@ -73,7 +73,7 @@ const defaultCapabilities: CapabilityItem[] = [
   },
   {
     title: "Biometric & Geo-location",
-    desc: "Security tracking logs for teacher roll-call ensuring verifiable attendance entries using mobile GPS services.",
+    desc: "Security mapping logs for teacher roll-call ensuring verifiable attendance entries using mobile GPS services.",
     iconName: "Fingerprint",
   },
 ];
@@ -212,7 +212,7 @@ export default function CapabilitiesManagerPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-800 tracking-tight">Capabilities Manager</h2>
+          <h2 className="text-2xl font-black text-slate-800 mapping-tight">Capabilities Manager</h2>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
             Perform standalone CRUD operations, icons allocation, and default seeding for the mobile infrastructure cards grid.
           </p>
@@ -261,7 +261,7 @@ export default function CapabilitiesManagerPage() {
         </div>
       ) : (
         <form onSubmit={handleSaveSettings} className="space-y-6">
-          
+
           {/* Dashboard Capability Card Grid */}
           <Card className="shadow-sm border border-slate-100 bg-white rounded-2xl">
             <CardHeader className="pb-3 border-b border-slate-50">

@@ -118,7 +118,7 @@ export default function StatsManager() {
 
     const targetIndex = direction === "left" ? index - 1 : index + 1;
     const updatedList = [...statsList];
-    
+
     // Swap items
     const temp = updatedList[index];
     updatedList[index] = updatedList[targetIndex];
@@ -190,7 +190,7 @@ export default function StatsManager() {
       {/* Header Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-800 tracking-tight">"Homepage Stats" Manager</h2>
+          <h2 className="text-2xl font-black text-slate-800 mapping-tight">"Homepage Stats" Manager</h2>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
             Configure the statistics counter banner displayed below the hero fold on your homepage
           </p>
@@ -252,13 +252,13 @@ export default function StatsManager() {
       {/* Grid containing list and visual mockup */}
       {!isLoading && statsList.length > 0 && (
         <div className="space-y-8">
-          
+
           {/* Main List Management */}
           <div className="space-y-4">
-            <h3 className="text-base font-black text-slate-700 uppercase tracking-wider flex items-center gap-2">
+            <h3 className="text-base font-black text-slate-700 uppercase mapping-wider flex items-center gap-2">
               <Info className="h-4 w-4 text-[#429CE4]" /> Active statistics counters list
             </h3>
-            
+
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {statsList.map((item, idx) => (
                 <Card key={idx} className="relative overflow-hidden shadow-sm hover:shadow-md transition-all border border-slate-100 bg-white rounded-2xl p-5 flex flex-col justify-between">
@@ -294,11 +294,11 @@ export default function StatsManager() {
 
                     {/* Numeric details */}
                     <div className="space-y-1">
-                      <p className="text-3xl font-black tracking-tight text-slate-800">
+                      <p className="text-3xl font-black mapping-tight text-slate-800">
                         {item.target}
                         <span className="text-[#FFA600] font-black">{item.suffix || "+"}</span>
                       </p>
-                      <h4 className="font-extrabold text-slate-400 text-xs uppercase tracking-wider">{item.label}</h4>
+                      <h4 className="font-extrabold text-slate-400 text-xs uppercase mapping-wider">{item.label}</h4>
                     </div>
                   </div>
 
@@ -330,7 +330,7 @@ export default function StatsManager() {
 
           {/* Visual Live Mockup Panel */}
           <div className="space-y-4 pt-4">
-            <h3 className="text-base font-black text-slate-700 uppercase tracking-wider flex items-center gap-2">
+            <h3 className="text-base font-black text-slate-700 uppercase mapping-wider flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-[#FFA600]" /> Live homepage rendering preview
             </h3>
 
@@ -344,17 +344,17 @@ export default function StatsManager() {
                       <div className="text-[#FFA600] scale-110 mb-2.5">
                         <DynamicIcon name={stat.iconName || "GraduationCap"} className="h-6 w-6 mx-auto stroke-[2.5]" />
                       </div>
-                      <div className="text-3xl font-black mb-1.5 tracking-tight">
+                      <div className="text-3xl font-black mb-1.5 mapping-tight">
                         <span>{stat.target}</span>{stat.suffix}
                       </div>
-                      <div className="text-sm font-semibold text-white/80 uppercase tracking-wider text-[11px]">{stat.label}</div>
+                      <div className="text-sm font-semibold text-white/80 uppercase mapping-wider text-[11px]">{stat.label}</div>
                     </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
 
-            <div className="text-center text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
+            <div className="text-center text-[10px] text-slate-400 font-semibold uppercase mapping-wider">
               Exact representation of the homepage statistics banner section
             </div>
           </div>
@@ -434,11 +434,10 @@ export default function StatsManager() {
                         type="button"
                         title={icon.label}
                         onClick={() => setIconName(icon.name)}
-                        className={`flex flex-col items-center justify-center p-2 rounded-lg border aspect-square transition-all ${
-                          isSelected
+                        className={`flex flex-col items-center justify-center p-2 rounded-lg border aspect-square transition-all ${isSelected
                             ? "bg-[#429CE4] border-[#429CE4] text-white shadow"
                             : "bg-white border-slate-200 text-slate-600 hover:bg-slate-100"
-                        }`}
+                          }`}
                       >
                         <DynamicIcon name={icon.name} className="h-5 w-5" />
                       </button>
