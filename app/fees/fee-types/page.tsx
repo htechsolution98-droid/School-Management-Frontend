@@ -35,7 +35,7 @@ import {
   getBillingCycleLabel,
   getBillingCycleBadgeColor,
   getFeeTypeIconBg,
-} from "@/lib/forms";
+} from "@/lib/fees";
 
 // ─── Icon Map ────────────────────────────────────────────────────────────────
 const getIconComponent = (name: string) => {
@@ -75,11 +75,10 @@ function Toast({ message, type, onClose }: ToastProps) {
   return (
     <div
       className={`fixed top-6 right-6 z-[9999] flex items-center gap-3 px-5 py-4 rounded-2xl shadow-2xl border animate-slide-in max-w-sm
-      ${
-        type === "success"
+      ${type === "success"
           ? "bg-white border-emerald-200 text-emerald-800"
           : "bg-white border-red-200 text-red-800"
-      }`}
+        }`}
     >
       {type === "success" ? (
         <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
@@ -282,21 +281,18 @@ function FeeTypeModal({
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<FeeTypeFormData>({
     resolver: zodResolver(feeTypeSchema),
-    defaultValues: {
-      name: "",
-      billing_cycle: "monthly",
-    },
+    defaultValues: { name: "", billing_cycle: "monthly" },
   });
+  const billingCycleValue = watch("billing_cycle");
 
   useEffect(() => {
     if (editingFee) {
-      reset({
-        name: editingFee.name,
-        billing_cycle: editingFee.billing_cycle,
-      });
+      reset({ name: editingFee.name, billing_cycle: editingFee.billing_cycle });
     } else {
       reset({ name: "", billing_cycle: "monthly" });
     }
@@ -343,10 +339,9 @@ function FeeTypeModal({
               placeholder="e.g. Tuition Fee, Lab Fee..."
               className={`w-full px-4 py-3.5 rounded-xl border-2 text-gray-900 placeholder-gray-400 text-sm
                 outline-none transition-all focus:ring-0
-                ${
-                  errors.name
-                    ? "border-red-300 focus:border-red-400 bg-red-50"
-                    : "border-gray-200 focus:border-indigo-400 bg-gray-50 focus:bg-white"
+                ${errors.name
+                  ? "border-red-300 focus:border-red-400 bg-red-50"
+                  : "border-gray-200 focus:border-indigo-400 bg-gray-50 focus:bg-white"
                 }`}
             />
             {errors.name && (
@@ -362,33 +357,17 @@ function FeeTypeModal({
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Billing Cycle <span className="text-red-500">*</span>
             </label>
-            <div className="relative">
-              <select
-                {...register("billing_cycle")}
-                className={`w-full px-4 py-3.5 rounded-xl border-2 text-gray-900 text-sm
-                  outline-none transition-all appearance-none cursor-pointer
-                  ${
-                    errors.billing_cycle
-                      ? "border-red-300 focus:border-red-400 bg-red-50"
-                      : "border-gray-200 focus:border-indigo-400 bg-gray-50 focus:bg-white"
-                  }`}
-              >
-                {billingCycleOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-            </div>
+            <BillingCycleDropdown
+              value={billingCycleValue}
+              onChange={(v) => setValue("billing_cycle", v as FeeTypeFormData["billing_cycle"], { shouldValidate: true })}
+              error={!!errors.billing_cycle}
+            />
             {errors.billing_cycle && (
               <p className="mt-2 text-xs text-red-500 flex items-center gap-1.5">
                 <AlertCircle className="w-3.5 h-3.5" />
                 {errors.billing_cycle.message}
               </p>
             )}
-
-            {/* Billing Cycle Pills */}
             <div className="mt-3 flex flex-wrap gap-2">
               {billingCycleOptions.map((opt) => (
                 <span
@@ -441,6 +420,56 @@ function FeeTypeModal({
   );
 }
 
+function BillingCycleDropdown({
+  value,
+  onChange,
+  error,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  error?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const selected = billingCycleOptions.find((o) => o.value === value);
+
+  useEffect(() => {
+    const close = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, []);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen((p) => !p)}
+        className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl border-2 text-sm text-gray-900 bg-gray-50 outline-none transition-all
+          ${error ? "border-red-300" : open ? "border-indigo-400 bg-white" : "border-gray-200"}`}
+      >
+        <span>{selected?.label ?? "Select..."}</span>
+        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div className="absolute z-[200] top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden">
+          {billingCycleOptions.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => { onChange(opt.value); setOpen(false); }}
+              className={`w-full text-left px-4 py-3 text-sm transition-colors hover:bg-indigo-50 hover:text-indigo-700
+                ${value === opt.value ? "bg-indigo-50 text-indigo-700 font-semibold" : "text-gray-700"}`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 // ─── Empty State ──────────────────────────────────────────────────────────────
 function EmptyState({ onAdd }: { onAdd: () => void }) {
   return (
@@ -733,21 +762,10 @@ export default function FeeTypePage() {
                 className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-indigo-400 transition-all"
               />
             </div>
-            <div className="relative">
-              <select
-                value={filterCycle}
-                onChange={(e) => setFilterCycle(e.target.value)}
-                className="appearance-none pl-4 pr-10 py-3 rounded-xl border-2 border-gray-200 bg-white text-sm text-gray-700 outline-none focus:border-indigo-400 transition-all cursor-pointer font-medium"
-              >
-                <option value="all">All Billing Cycles</option>
-                {billingCycleOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-            </div>
+            <BillingCycleDropdown
+              value={filterCycle}
+              onChange={setFilterCycle}
+            />
           </div>
         )}
 

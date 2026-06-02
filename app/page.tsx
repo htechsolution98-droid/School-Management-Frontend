@@ -2,15 +2,14 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useMotionValue, useSpring, useInView, animate } from "framer-motion";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { Card as MuiCard, CardContent as MuiCardContent, CardMedia as MuiCardMedia } from "@mui/material";
 import {
   GraduationCap,
   Users,
@@ -31,22 +30,353 @@ import {
   Rocket,
   DollarSign,
   BookMarked,
-  X,
-  Loader2,
+  Lightbulb,
+  Target,
+  ChevronLeft,
+  ChevronRight,
+  Quote,
 } from "lucide-react";
-import { getPublishedFormLink } from "@/lib/forms";
-import { toast } from "sonner";
+import { getPublishedFormLink } from "@/lib/principal";
+
+function StatCounter({ target, suffix }: { target: number; suffix: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (isInView) {
+      const controls = animate(0, target, {
+        duration: 2,
+        ease: "easeOut",
+        onUpdate: (latest) => setCount(Math.floor(latest)),
+      });
+      return () => controls.stop();
+    }
+  }, [isInView, target]);
+
+  return <span ref={ref}>{count}{suffix}</span>;
+}
+
+// Helper to render lucide icons dynamically based on name
+const getIcon = (name: string, className?: string) => {
+  switch (name) {
+    case "GraduationCap": return <GraduationCap className={className} />;
+    case "Users": return <Users className={className} />;
+    case "BookOpen": return <BookOpen className={className} />;
+    case "Calendar": return <Calendar className={className} />;
+    case "Shield": return <Shield className={className} />;
+    case "Bell": return <Bell className={className} />;
+    case "CreditCard": return <CreditCard className={className} />;
+    case "ArrowRight": return <ArrowRight className={className} />;
+    case "CheckCircle2": return <CheckCircle2 className={className} />;
+    case "ChevronDown": return <ChevronDown className={className} />;
+    case "Sparkles": return <Sparkles className={className} />;
+    case "Star": return <Star className={className} />;
+    case "TrendingUp": return <TrendingUp className={className} />;
+    case "Award": return <Award className={className} />;
+    case "Heart": return <Heart className={className} />;
+    case "Rocket": return <Rocket className={className} />;
+    case "DollarSign": return <DollarSign className={className} />;
+    case "BookMarked": return <BookMarked className={className} />;
+    case "Lightbulb": return <Lightbulb className={className} />;
+    case "Target": return <Target className={className} />;
+    default: return <Sparkles className={className} />;
+  }
+};
 
 export default function LandingPage() {
   const [formLink, setFormLink] = useState("");
+  const [activeFeatureIdx, setActiveFeatureIdx] = useState<number | null>(null);
+  const [expandedCardIdxs, setExpandedCardIdxs] = useState<number[]>([]);
+
+  // States restored from Sudhir branch for Interactive Panels
   const [activePanelIndex, setActivePanelIndex] = useState(0);
   const [activeChooseIdx, setActiveChooseIdx] = useState<number | null>(0);
 
+  // Dynamic MongoDB Landing Page States
+  const [heroBadge, setHeroBadge] = useState("★ Smart School ERP Platform");
+  const [heroTitle, setHeroTitle] = useState("VidhyaSanchalan");
+  const [heroSubtitle, setHeroSubtitle] = useState("Complete Smart School Management System");
+  const [heroDescription, setHeroDescription] = useState("Manage the complete school journey — from student admission to leaving certificate — with powerful digital panels for Trustees, Principals, Clerks, Teachers, Students, and Guardians.");
+  const [satisfactionRate, setSatisfactionRate] = useState(99.8);
+  const [heroImage, setHeroImage] = useState("/sms hero.jpg");
+  const [heroImages, setHeroImages] = useState<string[]>(["/sms hero.jpg"]);
+  const [currentHeroIdx, setCurrentHeroIdx] = useState(0);
+  const [stats, setStats] = useState([
+    { label: "Schools", target: 500, suffix: "+", iconName: "GraduationCap" },
+    { label: "Students", target: 50, suffix: "K+", iconName: "Users" },
+    { label: "Teachers", target: 5, suffix: "K+", iconName: "BookOpen" },
+    { label: "Parents", target: 100, suffix: "K+", iconName: "Heart" },
+  ]);
+  const [whyChooseUs, setWhyChooseUs] = useState([
+    {
+      title: "Innovation at our core",
+      description: "VidyaSanchalan stands as the vanguard of school-management solutions, consistently pioneering the integration of next-generation technologies that redefine educational administration worldwide.",
+      iconName: "Lightbulb",
+      color: "text-[#5D3FD3]"
+    },
+    {
+      title: "Simplifying complexity",
+      description: "Infographics & animations distill complex academic data into intuitive visuals—transforming every report and result into an easily grasped, optimized experience for students, parents, and educators.",
+      iconName: "Target",
+      color: "text-[#285E89]"
+    },
+    {
+      title: "Empowering institutional growth",
+      description: "Our platform equips schools with automated workflows, real-time communication, and scalable features designed for any school size to thrive in the modern age.",
+      iconName: "TrendingUp",
+      color: "text-[#FFA600]"
+    }
+  ]);
+
+  const [whyBadge, setWhyBadge] = useState("Why Choose Us?");
+  const [whyTitle, setWhyTitle] = useState("VidyaSanchalan is a revolution in education management");
+  const [whyTitleHighlight, setWhyTitleHighlight] = useState("revolution");
+  const [whyPills, setWhyPills] = useState<string[]>(["100% Free Forever", "Instant Insights", "Limitless Scale"]);
+
+  const [whyImageMain, setWhyImageMain] = useState("/why chooseus.jpeg");
+  const [whyImagesMain, setWhyImagesMain] = useState<string[]>(["/why chooseus.jpeg"]);
+  const [currentWhyIdx, setCurrentWhyIdx] = useState(0);
+  const [whyImageLeft, setWhyImageLeft] = useState("/why choose us.jpg");
+  const [whyImageBottomLeft, setWhyImageBottomLeft] = useState("/progress report.jpeg");
+  const [whyImageBottomRight, setWhyImageBottomRight] = useState("/admission (1).jpg");
+  const [whyCollageCards, setWhyCollageCards] = useState<any[]>([
+    { label: "Smart Campus", image: "/why choose us.jpg", position: "behind-left" },
+    { label: "Analytics Panel", image: "/progress report.jpeg", position: "bottom-left" },
+    { label: "Admission Desk", image: "/admission (1).jpg", position: "bottom-right" }
+  ]);
+
+  // About Section States
+  const [aboutBadge, setAboutBadge] = useState("★ About VidhyaSanchalan");
+  const [aboutTitle, setAboutTitle] = useState("One Platform for Complete School Management");
+  const [aboutTitleHighlight, setAboutTitleHighlight] = useState("Complete School");
+  const [aboutDescription, setAboutDescription] = useState("VidhyaSanchalan is an advanced school ERP and management system designed to simplify daily school operations. It helps schools manage admissions, fees, staff, attendance, examinations, homework, reports, announcements, and student progress through separate role-based panels.");
+  const [aboutQuote, setAboutQuote] = useState("The system supports both online and offline processes and provides transparency between school staff, students, and parents.");
+  const [aboutImage, setAboutImage] = useState("/about sms.jpg");
+  const [aboutImages, setAboutImages] = useState<string[]>(["/about sms.jpg"]);
+  const [currentAboutIdx, setCurrentAboutIdx] = useState(0);
+  const [aboutHighlights, setAboutHighlights] = useState<any[]>([
+    { title: "Transparency", desc: "For staff, students & parents" },
+    { title: "Role-Based Access", desc: "Private secure panels" }
+  ]);
+
+  const [features, setFeatures] = useState<any[]>([]);
+  const [modules, setModules] = useState<any[]>([]);
+  const [badges, setBadges] = useState<any[]>([]);
+  const [testimonialsList, setTestimonialsList] = useState<any[]>([]);
+
+  // Set initial fallbacks on mount, then fetch live data from MongoDB
+  useEffect(() => {
+    setFeatures(fallbackFeatures);
+    setModules(fallbackModules);
+    setBadges(fallbackBadges);
+    setTestimonialsList(fallbackTestimonials);
+
+    // 1. Fetch Landing Settings
+    fetch("/api/landing/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.isSeeded && data.settings) {
+          setHeroBadge(data.settings.heroBadge || "★ Smart School ERP Platform");
+          setHeroTitle(data.settings.heroTitle || "VidhyaSanchalan");
+          setHeroSubtitle(data.settings.heroSubtitle || "Complete Smart School Management System");
+          setHeroDescription(data.settings.heroDescription || "");
+          setSatisfactionRate(data.settings.satisfactionRate || 99.8);
+          if (data.settings.heroImage) setHeroImage(data.settings.heroImage);
+          if (data.settings.heroImages && data.settings.heroImages.length > 0) {
+            setHeroImages(data.settings.heroImages);
+          } else if (data.settings.heroImage) {
+            setHeroImages([data.settings.heroImage]);
+          }
+          if (data.settings.stats && data.settings.stats.length > 0) {
+            setStats(data.settings.stats);
+          }
+          if (data.settings.whyChooseUs && data.settings.whyChooseUs.length > 0) {
+            setWhyChooseUs(data.settings.whyChooseUs);
+          }
+          if (data.settings.whyBadge) setWhyBadge(data.settings.whyBadge);
+          if (data.settings.whyTitle) setWhyTitle(data.settings.whyTitle);
+          if (data.settings.whyTitleHighlight) setWhyTitleHighlight(data.settings.whyTitleHighlight);
+          if (data.settings.whyPills && data.settings.whyPills.length > 0) {
+            setWhyPills(data.settings.whyPills);
+          }
+          if (data.settings.whyImageMain) setWhyImageMain(data.settings.whyImageMain);
+          if (data.settings.whyImagesMain && data.settings.whyImagesMain.length > 0) {
+            setWhyImagesMain(data.settings.whyImagesMain);
+          } else if (data.settings.whyImageMain) {
+            setWhyImagesMain([data.settings.whyImageMain]);
+          }
+          if (data.settings.whyImageLeft) setWhyImageLeft(data.settings.whyImageLeft);
+          if (data.settings.whyImageBottomLeft) setWhyImageBottomLeft(data.settings.whyImageBottomLeft);
+          if (data.settings.whyImageBottomRight) setWhyImageBottomRight(data.settings.whyImageBottomRight);
+          if (data.settings.whyCollageCards && data.settings.whyCollageCards.length > 0) {
+            setWhyCollageCards(data.settings.whyCollageCards);
+          } else {
+            setWhyCollageCards([
+              { label: "Smart Campus", image: data.settings.whyImageLeft || "/why choose us.jpg", position: "behind-left" },
+              { label: "Analytics Panel", image: data.settings.whyImageBottomLeft || "/progress report.jpeg", position: "bottom-left" },
+              { label: "Admission Desk", image: data.settings.whyImageBottomRight || "/admission (1).jpg", position: "bottom-right" }
+            ]);
+          }
+          if (data.settings.aboutBadge) setAboutBadge(data.settings.aboutBadge);
+          if (data.settings.aboutTitle) setAboutTitle(data.settings.aboutTitle);
+          if (data.settings.aboutTitleHighlight) setAboutTitleHighlight(data.settings.aboutTitleHighlight);
+          if (data.settings.aboutDescription) setAboutDescription(data.settings.aboutDescription);
+          if (data.settings.aboutQuote) setAboutQuote(data.settings.aboutQuote);
+          if (data.settings.aboutImage) setAboutImage(data.settings.aboutImage);
+          if (data.settings.aboutImages && data.settings.aboutImages.length > 0) {
+            setAboutImages(data.settings.aboutImages);
+          } else if (data.settings.aboutImage) {
+            setAboutImages([data.settings.aboutImage]);
+          }
+          if (data.settings.aboutHighlights && data.settings.aboutHighlights.length > 0) {
+            setAboutHighlights(data.settings.aboutHighlights);
+          }
+        }
+      })
+      .catch((err) => console.log("Failed to fetch settings from DB, using fallback", err));
+
+    // 2. Fetch Features
+    fetch("/api/landing/features")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.features && data.features.length > 0) {
+          setFeatures(data.features);
+        }
+      })
+      .catch((err) => console.log("Failed to fetch features from DB, using fallback", err));
+
+    // 3. Fetch Slider Modules
+    fetch("/api/landing/modules")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          if (data.modules && data.modules.length > 0) setModules(data.modules);
+          if (data.badges && data.badges.length > 0) setBadges(data.badges);
+        }
+      })
+      .catch((err) => console.log("Failed to fetch slider modules from DB, using fallback", err));
+
+    // 4. Fetch Testimonials
+    fetch("/api/landing/testimonials")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.testimonials && data.testimonials.length > 0) {
+          setTestimonialsList(data.testimonials);
+        }
+      })
+      .catch((err) => console.log("Failed to fetch testimonials from DB, using fallback", err));
+  }, []);
+
+  useEffect(() => {
+    if (heroImages.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentHeroIdx((prev) => (prev + 1) % heroImages.length);
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [heroImages]);
+
+  useEffect(() => {
+    if (aboutImages.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentAboutIdx((prev) => (prev + 1) % aboutImages.length);
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [aboutImages]);
+
+  useEffect(() => {
+    if (whyImagesMain.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentWhyIdx((prev) => (prev + 1) % whyImagesMain.length);
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [whyImagesMain]);
+
+  const toggleCardPoints = (index: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpandedCardIdxs(prev =>
+      prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index]
+    );
+  };
+
+  // Testimonial slider states
+  const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [slideDirection, setSlideDirection] = useState(1);
+  const [isTestimonialPaused, setIsTestimonialPaused] = useState(false);
+
+  // Custom lagging cursor follower spring physics
+  const [isTouchDevice, setIsTouchDevice] = useState(true);
+  const mouseX = useMotionValue(-100);
+  const mouseY = useMotionValue(-100);
+
+  const springConfig = { damping: 30, stiffness: 220, mass: 0.6 };
+  const cursorX = useSpring(mouseX, springConfig);
+  const cursorY = useSpring(mouseY, springConfig);
+
+  useEffect(() => {
+    // Detect touchscreen query
+    const touchQuery = window.matchMedia("(pointer: coarse)");
+    setIsTouchDevice(touchQuery.matches);
+
+    const listener = (e: MediaQueryListEvent) => {
+      setIsTouchDevice(e.matches);
+    };
+    touchQuery.addEventListener("change", listener);
+
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX.set(e.clientX - 16);
+      mouseY.set(e.clientY - 16);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      touchQuery.removeEventListener("change", listener);
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, [mouseX, mouseY]);
+
+  const activeBgStyles = [
+    { bg: "bg-[#1D496C] text-white border-[#1D496C] shadow-[#1D496C]/25", text: "text-slate-100/90", check: "text-white" },
+    { bg: "bg-[#429CE4] text-white border-[#429CE4] shadow-[#429CE4]/25", text: "text-slate-100/90", check: "text-white" },
+    { bg: "bg-[#6A7626] text-white border-[#6A7626] shadow-[#6A7626]/25", text: "text-slate-100/90", check: "text-white" },
+    { bg: "bg-[#E4FF4C] text-[#1D496C] border-[#E4FF4C] shadow-[#E4FF4C]/25", text: "text-[#1D496C]/85", check: "text-[#1D496C]" },
+    { bg: "bg-[#FFA600] text-white border-[#FFA600] shadow-[#FFA600]/25", text: "text-slate-100/90", check: "text-white" },
+    { bg: "bg-[#ED6708] text-white border-[#ED6708] shadow-[#ED6708]/25", text: "text-slate-100/90", check: "text-white" },
+    { bg: "bg-[#285E89] text-white border-[#285E89] shadow-[#285E89]/25", text: "text-slate-100/90", check: "text-white" },
+    { bg: "bg-[#FFA600] text-white border-[#FFA600] shadow-[#FFA600]/25", text: "text-slate-100/90", check: "text-white" }
+  ];
+
+  useEffect(() => {
+    if (isTestimonialPaused || testimonialsList.length === 0) return;
+    const timer = setInterval(() => {
+      setSlideDirection(1);
+      setCurrentTestimonial((prev) => (prev + 1) % testimonialsList.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, [isTestimonialPaused, testimonialsList]);
+
   useEffect(() => {
     getPublishedFormLink()
-      .then((data) => setFormLink(data.form_link))
-      .catch((err) => console.error("Failed to fetch link", err));
+      .then((data: any) => setFormLink(data.form_link))
+      .catch((err: any) => console.error("Failed to fetch link", err));
   }, []);
+
+  const handleNextTestimonial = () => {
+    if (testimonialsList.length === 0) return;
+    setSlideDirection(1);
+    setCurrentTestimonial((prev) => (prev + 1) % testimonialsList.length);
+  };
+
+  const handlePrevTestimonial = () => {
+    if (testimonialsList.length === 0) return;
+    setSlideDirection(-1);
+    setCurrentTestimonial((prev) => (prev - 1 + testimonialsList.length) % testimonialsList.length);
+  };
+
+  const handleDotClick = (index: number) => {
+    setSlideDirection(index > currentTestimonial ? 1 : -1);
+    setCurrentTestimonial(index);
+  };
 
   const gsapContainerRef = useRef<HTMLDivElement>(null);
 
@@ -55,9 +385,9 @@ export default function LandingPage() {
       gsap.registerPlugin(ScrollTrigger);
 
 
-      
+
       const ctx = gsap.context(() => {
-        gsap.fromTo(".main-feature-card", 
+        gsap.fromTo(".main-feature-card",
           { opacity: 0, y: 60, scale: 0.9 },
           {
             opacity: 1,
@@ -87,31 +417,36 @@ export default function LandingPage() {
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-[#F8FAFC] via-white to-[#429CE4]/5">
 
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-[#1D496C]/10 bg-white/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/60">
+      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-gradient-to-r from-[#1D496C]/95 via-[#285E89]/95 to-[#1D496C]/95 shadow-lg backdrop-blur-md supports-[backdrop-filter]:bg-gradient-to-r">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="relative flex items-center">
-                <div className="flex h-14 w-auto items-center justify-center rounded-xl bg-white p-1.5 shadow-md border border-[#1D496C]/10">
+                <div className="flex h-14 w-auto items-center justify-center rounded-xl bg-white p-1.5 shadow-md border border-white/10">
                   <img src="/logo.png" alt="VidyaSanchalan Logo" className="h-10 w-auto max-w-[160px] object-contain" />
                 </div>
                 <div className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-[#FFA600] ring-2 ring-white"></div>
               </div>
               <div>
-                <span className="text-xl font-black tracking-tight"><span className="text-[#285E89]">Vidya</span><span className="text-[#FFA600]">Sanchalan</span></span>
-                <p className="text-[10px] text-[#475569]/80 font-bold uppercase tracking-wider mt-0.5">School Management</p>
+                <span className="text-xl font-black tracking-tight"><span className="text-white">Vidya</span><span className="text-[#FFA600]">Sanchalan</span></span>
+                <p className="text-[10px] text-white/70 font-bold uppercase tracking-wider mt-0.5">School Management</p>
               </div>
             </div>
 
             <nav className="hidden md:flex items-center gap-8">
-              {["Modules", "About", "Pricing", "Contact"].map((item) => (
+              {[
+                { name: "Home", href: "/" },
+                { name: "Features", href: "/features" },
+                { name: "Modules", href: "/modules" },
+                { name: "Contact Us", href: "/contact" },
+              ].map((item) => (
                 <Link
-                  key={item}
-                  href={`#${item.toLowerCase()}`}
-                  className="group relative text-sm font-medium text-[#475569] transition-colors hover:text-[#285E89]"
+                  key={item.name}
+                  href={item.href}
+                  className="group relative text-sm font-medium text-white/90 transition-colors hover:text-[#FFA600]"
                 >
-                  {item}
-                  <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-gradient-to-r from-[#1D496C] to-[#6A7626] transition-all group-hover:w-full"></span>
+                  {item.name}
+                  <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-gradient-to-r from-[#FFA600] to-[#ED6708] transition-all group-hover:w-full"></span>
                 </Link>
               ))}
             </nav>
@@ -120,20 +455,20 @@ export default function LandingPage() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="hidden md:inline-flex rounded-lg text-[#475569] hover:bg-[#429CE4]/10 hover:text-[#285E89]"
+                className="hidden md:inline-flex rounded-lg text-white/90 hover:bg-white/10 hover:text-white"
                 asChild
               >
                 <Link href="/login">Sign in</Link>
               </Button>
               <Button
                 size="sm"
-                className="rounded-lg bg-[#429CE4] text-white shadow-md hover:bg-[#1D496C] transition-all duration-300"
+                className="rounded-lg bg-[#FFA600] text-white shadow-md hover:bg-[#ED6708] hover:scale-105 transition-all duration-300"
                 onClick={handleGetStarted}
               >
                 Get Started
                 <ArrowRight className="ml-2 h-3 w-3" />
               </Button>
-              <Button variant="outline" size="icon" className="md:hidden rounded-lg border-[#6A7626]/30 text-[#1D496C]">
+              <Button variant="outline" size="icon" className="md:hidden rounded-lg border-white/20 text-white hover:bg-white/10">
                 <Menu className="h-4 w-4" />
               </Button>
             </div>
@@ -144,15 +479,7 @@ export default function LandingPage() {
       {/* Admission Marquee */}
       {formLink && (
         <div className="sticky top-16 z-40 overflow-hidden bg-[#ED6708] py-2 border-b border-[#ED6708]/20 shadow-sm">
-          <motion.div
-            animate={{ x: ["0%", "-50%"] }}
-            transition={{
-              duration: 30,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-            className="flex whitespace-nowrap items-center gap-12 px-4"
-          >
+          <div className="flex whitespace-nowrap items-center gap-12 px-4 w-max animate-marquee-left-fast pause-on-hover">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="flex items-center gap-3 text-sm font-medium text-white">
                 <Sparkles className="h-4 w-4 text-white/80" />
@@ -167,16 +494,43 @@ export default function LandingPage() {
                 </a>
               </div>
             ))}
-          </motion.div>
+          </div>
         </div>
       )}
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-8 pb-8 lg:pt-8 lg:pb-12 bg-gradient-to-b from-white via-[#429CE4]/5 to-white">
+      <section
+        className="relative overflow-hidden pt-8 pb-8 lg:pt-8 lg:pb-12 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "linear-gradient(to bottom, rgba(255, 255, 255, 0.90), rgba(244, 249, 254, 0.85)), url('/bg-image.png')" }}
+      >
         {/* Soft background elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 right-1/4 h-[500px] w-[500px] rounded-full bg-[#429CE4]/10 blur-3xl"></div>
-          <div className="absolute bottom-0 left-1/4 h-[500px] w-[500px] rounded-full bg-[#6A7626]/5 blur-3xl"></div>
+          {/* Automatic sliding blue gradient blobs */}
+          <motion.div
+            animate={{
+              x: ["-20%", "120%", "-20%"],
+              y: ["0%", "15%", "0%"],
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="absolute top-0 left-0 h-[500px] w-[500px] rounded-full bg-gradient-to-r from-[#429CE4]/15 via-[#285E89]/15 to-[#1D496C]/10 blur-[90px]"
+          />
+
+          <motion.div
+            animate={{
+              x: ["120%", "-20%", "120%"],
+              y: ["15%", "0%", "15%"],
+            }}
+            transition={{
+              duration: 24,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-gradient-to-r from-[#285E89]/10 via-[#429CE4]/15 to-[#FFA600]/10 blur-[90px]"
+          />
         </div>
 
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
@@ -194,21 +548,21 @@ export default function LandingPage() {
                   variant="outline"
                   className="rounded-full px-4 py-1.5 border-[#6A7626]/30 bg-[#6A7626]/10 text-[#6A7626] shadow-sm font-bold tracking-wider uppercase text-xs"
                 >
-                  ★ Smart School ERP Platform
+                  {heroBadge}
                 </Badge>
 
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.15]">
                   <span className="bg-gradient-to-r from-[#285E89] to-[#FFA600] bg-clip-text text-transparent block font-black mb-2 text-5xl sm:text-6xl lg:text-7.5xl tracking-tighter">
-                    VidhyaSanchalan
+                    {heroTitle}
                   </span>
                   <span className="text-[#1D496C] text-2xl sm:text-3xl lg:text-4xl font-extrabold block">
-                    Complete Smart School Management System
+                    {heroSubtitle}
                   </span>
                 </h1>
               </div>
 
               <p className="text-base sm:text-lg text-[#475569] leading-relaxed font-medium">
-                Manage the complete school journey — from student admission to leaving certificate — with powerful digital panels for Trustees, Principals, Clerks, Teachers, Students, and Guardians.
+                {heroDescription}
               </p>
 
               {/* Small Highlights Checklist */}
@@ -250,7 +604,7 @@ export default function LandingPage() {
                   className="rounded-xl border-2 border-[#6A7626] bg-white text-[#6A7626] hover:bg-[#6A7626]/5 px-8 py-6 text-base font-bold transition-all duration-300 transform hover:scale-105"
                   asChild
                 >
-                  <Link href="#about">Learn More</Link>
+                  <Link href="#features">Learn More</Link>
                 </Button>
               </div>
             </motion.div>
@@ -278,14 +632,43 @@ export default function LandingPage() {
                 }}
                 className="relative overflow-hidden rounded-[2.5rem] border-4 border-white bg-slate-100 shadow-2xl shadow-slate-900/10 hover:shadow-slate-900/20 transition-shadow duration-500 max-w-[480px] w-full aspect-[4/3] flex items-center justify-center group"
               >
-                <img
-                  src="/sms hero.jpg"
-                  alt="VidhyaSanchalan Smart School Management"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                />
+                <AnimatePresence mode="wait">
+                  <motion.img
+                    key={currentHeroIdx}
+                    src={heroImages[currentHeroIdx] || "/sms hero.jpg"}
+                    alt="VidhyaSanchalan Smart School Management"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 1.05 }}
+                    transition={{ duration: 0.6 }}
+                    className="absolute inset-0 w-full h-full object-cover rounded-[2.2rem] group-hover:scale-105 transition-transform duration-700 ease-out"
+                  />
+                </AnimatePresence>
 
                 {/* Decorative glass overlay elements */}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/20 via-transparent to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/20 via-transparent to-transparent pointer-events-none"></div>
+
+                {/* Dots indicator overlays inside the frame */}
+                {heroImages.length > 1 && (
+                  <div className="absolute bottom-[5.5rem] left-1/2 -translate-x-1/2 flex gap-1.5 z-20 bg-slate-950/60 px-3 py-1 rounded-full border border-white/10 backdrop-blur-sm">
+                    {heroImages.map((_, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCurrentHeroIdx(idx);
+                        }}
+                        className={`h-1.5 w-1.5 rounded-full transition-all duration-300 ${
+                          idx === currentHeroIdx 
+                            ? "bg-[#FFA600] scale-125 w-3.5" 
+                            : "bg-white/40 hover:bg-white"
+                        }`}
+                        aria-label={`Go to slide ${idx + 1}`}
+                      />
+                    ))}
+                  </div>
+                )}
 
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8 }}
@@ -321,12 +704,82 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Infinite Horizontal Sliders Section */}
+      <section className="py-6 bg-slate-50 overflow-hidden border-b border-[#1D496C]/10 relative z-10">
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="space-y-6">
+            <div className="text-center mb-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#1D496C]/75">VidyaSanchalan Ecosystem Modules & Highlights</span>
+            </div>
+
+            {/* Slider 1: Modules (Right to Left) */}
+            <div className="relative w-full overflow-hidden py-1.5" style={{ maskImage: "linear-gradient(to right, transparent, white 15%, white 85%, transparent)", WebkitMaskImage: "linear-gradient(to right, transparent, white 15%, white 85%, transparent)" }}>
+              <div className="flex whitespace-nowrap gap-4 w-max animate-marquee-left pause-on-hover">
+                {/* First set */}
+                {modules.map((item, idx) => (
+                  <div
+                    key={`m1-${idx}`}
+                    className="flex items-center gap-3 backdrop-blur-md bg-white/60 border border-slate-200/60 rounded-full px-5 py-2.5 shadow-sm hover:shadow-md hover:border-[#429CE4]/40 transition-all cursor-pointer group"
+                  >
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#429CE4]/10 text-[#429CE4] group-hover:scale-110 transition-transform">
+                      {getIcon(item.iconName, "h-4 w-4")}
+                    </div>
+                    <span className="text-sm font-bold text-[#1D496C]">{item.label}</span>
+                  </div>
+                ))}
+                {/* Duplicated set for infinite loop */}
+                {modules.map((item, idx) => (
+                  <div
+                    key={`m1-dup-${idx}`}
+                    className="flex items-center gap-3 backdrop-blur-md bg-white/60 border border-slate-200/60 rounded-full px-5 py-2.5 shadow-sm hover:shadow-md hover:border-[#429CE4]/40 transition-all cursor-pointer group"
+                  >
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#429CE4]/10 text-[#429CE4] group-hover:scale-110 transition-transform">
+                      {getIcon(item.iconName, "h-4 w-4")}
+                    </div>
+                    <span className="text-sm font-bold text-[#1D496C]">{item.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Slider 2: Badges (Left to Right) */}
+            <div className="relative w-full overflow-hidden py-1.5" style={{ maskImage: "linear-gradient(to right, transparent, white 15%, white 85%, transparent)", WebkitMaskImage: "linear-gradient(to right, transparent, white 15%, white 85%, transparent)" }}>
+              <div className="flex whitespace-nowrap gap-4 w-max animate-marquee-right pause-on-hover">
+                {/* First set */}
+                {badges.map((item, idx) => (
+                  <div
+                    key={`b1-${idx}`}
+                    className="flex items-center gap-3 backdrop-blur-md bg-white/60 border border-slate-200/60 rounded-full px-5 py-2.5 shadow-sm hover:shadow-md hover:border-[#6A7626]/40 transition-all cursor-pointer group"
+                  >
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#6A7626]/10 text-[#6A7626] group-hover:scale-110 transition-transform">
+                      {getIcon(item.iconName, item.iconName === "Star" ? "h-4 w-4 text-amber-500 fill-amber-500" : "h-4 w-4")}
+                    </div>
+                    <span className="text-sm font-bold text-[#475569]">{item.label}</span>
+                  </div>
+                ))}
+                {/* Duplicated set for infinite loop */}
+                {badges.map((item, idx) => (
+                  <div
+                    key={`b1-dup-${idx}`}
+                    className="flex items-center gap-3 backdrop-blur-md bg-white/60 border border-slate-200/60 rounded-full px-5 py-2.5 shadow-sm hover:shadow-md hover:border-[#6A7626]/40 transition-all cursor-pointer group"
+                  >
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#6A7626]/10 text-[#6A7626] group-hover:scale-110 transition-transform">
+                      {getIcon(item.iconName, item.iconName === "Star" ? "h-4 w-4 text-amber-500 fill-amber-500" : "h-4 w-4")}
+                    </div>
+                    <span className="text-sm font-bold text-[#475569]">{item.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* About Section */}
       <section id="about" className="py-12 overflow-hidden bg-gradient-to-br from-[#1D496C]/5 via-white to-white border-y border-[#1D496C]/10">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-12 gap-12 items-center">
             
-            {/* Left Side: Image with translate curv & hover float effect */}
             <motion.div 
               initial={{ opacity: 0, x: -60 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -334,10 +787,8 @@ export default function LandingPage() {
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
               className="lg:col-span-5 relative flex justify-center"
             >
-              {/* Ambient backdrop glow */}
               <div className="absolute -inset-4 bg-gradient-to-tr from-[#6A7626]/20 to-[#429CE4]/20 rounded-[2.5rem] blur-2xl opacity-75 -z-10 animate-pulse"></div>
               
-              {/* Floating Image Frame */}
               <motion.div
                 animate={{
                   y: [0, 10, 0],
@@ -350,14 +801,42 @@ export default function LandingPage() {
                 }}
                 className="relative overflow-hidden rounded-[2.5rem] border-4 border-white bg-slate-100 shadow-2xl shadow-slate-900/10 max-w-[480px] w-full aspect-[4/3] flex items-center justify-center group"
               >
-                <img 
-                  src="/about sms.jpg" 
-                  alt="One Platform for Complete School Management" 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                />
+                <AnimatePresence mode="wait">
+                  <motion.img
+                    key={currentAboutIdx}
+                    src={aboutImages[currentAboutIdx] || "/about sms.jpg"}
+                    alt={aboutTitle}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 1.05 }}
+                    transition={{ duration: 0.6 }}
+                    className="absolute inset-0 w-full h-full object-cover rounded-[2.2rem] group-hover:scale-105 transition-transform duration-700 ease-out"
+                  />
+                </AnimatePresence>
+
+                {/* Dots indicator overlays inside the frame */}
+                {aboutImages.length > 1 && (
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-20 bg-slate-950/60 px-3 py-1 rounded-full border border-white/10 backdrop-blur-sm">
+                    {aboutImages.map((_, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCurrentAboutIdx(idx);
+                        }}
+                        className={`h-1.5 w-1.5 rounded-full transition-all duration-300 ${
+                          idx === currentAboutIdx 
+                            ? "bg-[#FFA600] scale-125 w-3.5" 
+                            : "bg-white/40 hover:bg-white"
+                        }`}
+                        aria-label={`Go to slide ${idx + 1}`}
+                      />
+                    ))}
+                  </div>
+                )}
                 
-                {/* Dynamic corner decoration */}
-                <div className="absolute top-4 left-4 backdrop-blur-md bg-white/80 border border-white/20 px-3 py-1.5 rounded-full shadow-sm">
+                <div className="absolute top-4 left-4 backdrop-blur-md bg-white/80 border border-white/20 px-3 py-1.5 rounded-full shadow-sm z-20">
                   <span className="text-xs font-bold text-[#1D496C] flex items-center gap-1.5">
                     <span className="h-2 w-2 rounded-full bg-[#FFA600]"></span>
                     ERP System
@@ -366,7 +845,6 @@ export default function LandingPage() {
               </motion.div>
             </motion.div>
 
-            {/* Right Side: Content */}
             <motion.div 
               initial={{ opacity: 0, x: 60 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -379,29 +857,35 @@ export default function LandingPage() {
                   variant="outline" 
                   className="rounded-full px-4 py-1.5 border-[#6A7626]/30 bg-[#6A7626]/10 text-[#6A7626] shadow-sm font-bold tracking-wider uppercase text-xs"
                 >
-                  ★ About VidhyaSanchalan
+                  {aboutBadge}
                 </Badge>
                 
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#1D496C] leading-tight">
-                  One Platform for <span className="bg-gradient-to-r from-[#285E89] to-[#FFA600] bg-clip-text text-transparent">Complete School</span> Management
+                <h2 className="text-3.5xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#1D496C] leading-tight">
+                  {aboutTitle.includes(aboutTitleHighlight) ? (
+                    <>
+                      {aboutTitle.split(aboutTitleHighlight)[0]}
+                      <span className="bg-gradient-to-r from-[#285E89] to-[#FFA600] bg-clip-text text-transparent">
+                        {aboutTitleHighlight}
+                      </span>
+                      {aboutTitle.split(aboutTitleHighlight)[1]}
+                    </>
+                  ) : (
+                    aboutTitle
+                  )}
                 </h2>
               </div>
               
               <div className="space-y-4 text-slate-600 font-medium leading-relaxed text-base sm:text-lg">
                 <p>
-                  VidhyaSanchalan is an advanced school ERP and management system designed to simplify daily school operations. It helps schools manage admissions, fees, staff, attendance, examinations, homework, reports, announcements, and student progress through separate role-based panels.
+                  {aboutDescription}
                 </p>
                 <p className="border-l-4 border-[#FFA600] pl-4 italic text-[#1D496C]/90 bg-[#FFA600]/5 py-2.5 rounded-r-xl">
-                  The system supports both online and offline processes and provides transparency between school staff, students, and parents.
+                  {aboutQuote}
                 </p>
               </div>
 
-              {/* Decorative Features list */}
               <div className="grid grid-cols-2 gap-4 pt-2">
-                {[
-                  { title: "Transparency", desc: "For staff, students & parents" },
-                  { title: "Role-Based Access", desc: "Private secure panels" }
-                ].map((item, i) => (
+                {aboutHighlights.map((item, i) => (
                   <div key={i} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-start gap-3">
                     <div className="h-8 w-8 rounded-lg bg-[#429CE4]/10 flex items-center justify-center text-[#429CE4] shrink-0">
                       <Sparkles className="h-4 w-4" />
@@ -420,11 +904,11 @@ export default function LandingPage() {
       </section>
 
       {/* Main Features Section */}
-      <section id="features" className="pt-20 pb-6 bg-white overflow-hidden border-b border-[#1D496C]/10" ref={gsapContainerRef}>
+      <section id="features" className="pt-10 pb-4 bg-white overflow-hidden border-b border-[#1D496C]/10" ref={gsapContainerRef}>
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-            <Badge 
-              variant="outline" 
+          <div className="text-center max-w-3xl mx-auto mb-8 space-y-4">
+            <Badge
+              variant="outline"
               className="rounded-full px-4 py-1.5 border-[#6A7626]/30 bg-[#6A7626]/10 text-[#6A7626] shadow-sm font-bold tracking-wider uppercase text-xs"
             >
               ★ Full Capabilities
@@ -437,403 +921,364 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="flex overflow-x-auto gap-8 pb-8 pt-4 px-2 premium-scrollbar snap-x">
-            {mainFeatures.map((feature, index) => (
-              <MuiCard 
-                key={index} 
-                className="main-feature-card group relative bg-white rounded-[24px] border border-slate-100 shadow-lg shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-300/60 flex flex-col justify-between transition-all duration-500 hover:-translate-y-2 overflow-hidden cursor-pointer min-w-[320px] md:min-w-[360px] max-w-[380px] shrink-0 snap-start"
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pb-8 pt-4">
+            {features.map((feature, index) => (
+              <div
+                key={index}
+                onClick={() => setActiveFeatureIdx(activeFeatureIdx === index ? null : index)}
+                className={`main-feature-card relative rounded-[24px] border shadow-lg hover:shadow-2xl flex flex-col justify-between transition-all duration-500 hover:-translate-y-2 overflow-hidden cursor-pointer w-full p-6 transition-colors duration-300 ${activeFeatureIdx === index
+                  ? activeBgStyles[index].bg
+                  : "group bg-white text-slate-800 border-slate-100 shadow-slate-200/50 hover:bg-[#1D496C] hover:text-white hover:border-[#1D496C] hover:shadow-[#1D496C]/25"
+                  }`}
               >
-                <MuiCardMedia
-                  component="img"
-                  height="200"
-                  image={feature.image}
-                  alt={feature.title}
-                  className="h-48 w-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                />
+                <div>
+                  {/* Accent color bar */}
+                  <div className={`w-12 h-1 bg-gradient-to-r ${feature.color} rounded-full mb-4 group-hover:w-20 transition-all duration-300 ${activeFeatureIdx === index ? "opacity-0" : "group-hover:opacity-0"}`}></div>
 
-                <MuiCardContent className="p-6 flex-grow flex flex-col justify-between">
-                  <div>
-                    {/* Accent color bar */}
-                    <div className={`w-12 h-1 bg-gradient-to-r ${feature.color} rounded-full mb-4 group-hover:w-20 transition-all duration-300`}></div>
+                  <h3 className={`font-extrabold text-xl leading-snug mb-4 transition-colors duration-300 ${activeFeatureIdx === index
+                    ? (index === 3 ? "text-[#1D496C]" : "text-white")
+                    : "text-[#1D496C] group-hover:text-white"
+                    }`}>
+                    {feature.title}
+                  </h3>
 
-                    <h3 className="font-extrabold text-[#1D496C] text-xl leading-snug group-hover:text-[#FFA600] transition-colors duration-300 mb-4">
-                      {feature.title}
-                    </h3>
+                  <ul className="space-y-3.5 pl-0.5">
+                    {((expandedCardIdxs.includes(index) || feature.points.length <= 4)
+                      ? feature.points
+                      : feature.points.slice(0, 4)
+                    ).map((point: string, i: number) => (
+                      <li key={i} className="flex items-start gap-2.5 text-sm">
+                        <CheckCircle2 className={`mt-0.5 h-4.5 w-4.5 stroke-[2.5] shrink-0 transition-colors ${activeFeatureIdx === index
+                          ? (activeBgStyles[index].check === "text-white"
+                            ? "text-white"
+                            : "text-[#1D496C]")
+                          : "text-[#6A7626] group-hover:text-white"
+                          }`} />
+                        <span className={`font-semibold leading-relaxed transition-colors ${activeFeatureIdx === index
+                          ? activeBgStyles[index].text
+                          : "text-slate-600 group-hover:text-slate-200"
+                          }`}>
+                          {point}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
 
-                    <ul className="space-y-3.5 pl-0.5">
-                      {feature.points.map((point, i) => (
-                        <li key={i} className="flex items-start gap-2.5 text-sm">
-                          <CheckCircle2 className="mt-0.5 h-4.5 w-4.5 text-[#6A7626] stroke-[2.5] shrink-0" />
-                          <span className="text-slate-600 font-semibold leading-relaxed group-hover:text-slate-700 transition-colors">
-                            {point}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Subtle bottom highlights indicator */}
-                  <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-[#1D496C]">
-                    <span className="text-[#6A7626]">Advanced Module</span>
-                    <div className="h-5 w-5 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-[#429CE4]/10 group-hover:text-[#429CE4] transition-colors">
-                      <ArrowRight className="h-3 w-3" />
-                    </div>
-                  </div>
-                </MuiCardContent>
-              </MuiCard>
+                  {feature.points.length > 4 && (
+                    <button
+                      onClick={(e) => toggleCardPoints(index, e)}
+                      className={`mt-4 text-xs font-black transition-colors inline-flex items-center gap-1.5 hover:underline ${
+                        activeFeatureIdx === index
+                          ? (index === 3 ? "text-[#1D496C]/90 hover:text-[#1D496C]" : "text-white/90 hover:text-white")
+                          : "text-[#1D496C] hover:text-[#285E89] group-hover:text-white/90"
+                      }`}
+                    >
+                      {expandedCardIdxs.includes(index) ? (
+                        <>
+                          Read Less
+                          <ChevronDown className="h-3 w-3 rotate-180 transition-transform duration-300" />
+                        </>
+                      ) : (
+                        <>
+                          Read More
+                          <ChevronDown className="h-3 w-3 transition-transform duration-300" />
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Interactive Panels Section */}
-      <section id="modules" className="pt-10 pb-20 bg-gradient-to-b from-[#F8FAFC] via-[#F1F5F9] to-white relative overflow-hidden">
-        {/* Abstract background decorative elements */}
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-gradient-to-br from-[#1D496C]/5 to-[#429CE4]/5 rounded-full blur-3xl -translate-y-1/2 pointer-events-none"></div>
-        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-gradient-to-tr from-[#6A7626]/5 to-[#FFA600]/5 rounded-full blur-3xl translate-y-1/2 pointer-events-none"></div>
 
-        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center max-w-3xl mx-auto mb-8 space-y-3">
-            <Badge className="rounded-full px-4 py-1.5 bg-[#1D496C]/10 text-[#1D496C] border-0 font-bold uppercase tracking-wider text-xs">
-              <Users className="mr-2 h-3.5 w-3.5" />
-              Role-Based Portals
-            </Badge>
-            <h2 className="text-3.5xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#1D496C] leading-tight">
-              Tailored Portals for <span className="bg-gradient-to-r from-[#285E89] to-[#6A7626] bg-clip-text text-transparent">Every Stakeholder</span>
-            </h2>
-            <p className="text-slate-500 font-medium text-base sm:text-lg">
-              Explore dynamic, dedicated panels built specifically to optimize administrative workflows, teaching activities, and parent-student engagement.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* Left Side Selector List */}
-            <div className="lg:col-span-4 flex flex-row lg:flex-col gap-3 overflow-x-auto lg:overflow-x-visible pb-4 lg:pb-0 scrollbar-none snap-x shrink-0 min-w-0">
-              {panelsData.map((panel, idx) => {
-                const Icon = panel.icon;
-                const isActive = activePanelIndex === idx;
-                return (
-                  <button
-                    key={panel.id}
-                    onClick={() => setActivePanelIndex(idx)}
-                    className={`flex items-center gap-4 p-4 rounded-2xl text-left border transition-all duration-300 snap-start shrink-0 min-w-[240px] lg:min-w-0 ${
-                      isActive
-                        ? `bg-white border-slate-200 shadow-lg ${panel.glowColor} translate-x-1 lg:translate-x-2`
-                        : "bg-white/60 hover:bg-white border-transparent hover:border-slate-100 hover:shadow-md"
-                    }`}
-                  >
-                    {/* Icon container */}
-                    <div
-                      className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 ${
-                        isActive ? `bg-gradient-to-br ${panel.color} text-white scale-110` : "bg-slate-100 text-slate-500"
-                      }`}
-                    >
-                      <Icon className="h-5 w-5" />
-                    </div>
-
-                    <div className="flex-grow">
-                      <span
-                        className={`block font-bold text-sm lg:text-base transition-colors duration-300 ${
-                          isActive ? "text-[#1D496C]" : "text-slate-600 hover:text-[#1D496C]"
-                        }`}
-                      >
-                        {panel.name}
-                      </span>
-                      <span className="block text-xs font-semibold text-slate-400 mt-0.5">
-                        {isActive ? "Active Workspace" : "Click to explore"}
-                      </span>
-                    </div>
-
-                    {/* Active Right Indicator Line */}
-                    {isActive && (
-                      <div className={`hidden lg:block w-1.5 h-8 bg-gradient-to-b ${panel.color} rounded-full`}></div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Right Side Details & Live Mockup */}
-            <div className="lg:col-span-8">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activePanelIndex}
-                  initial={{ opacity: 0, y: 20, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -20, scale: 0.98 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="bg-white rounded-[32px] border border-slate-100 shadow-xl overflow-hidden flex flex-col p-6 sm:p-8 relative"
-                >
-                  {/* Background overlay accent matching the active panel's bgColor */}
-                  <div className={`absolute top-0 right-0 h-56 w-56 rounded-full blur-3xl pointer-events-none -translate-y-20 translate-x-20 ${panelsData[activePanelIndex].bgColor}`}></div>
-
-                  <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-                    <div className="flex items-center gap-3">
-                      <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${panelsData[activePanelIndex].color} text-white flex items-center justify-center`}>
-                        {(() => {
-                          const Icon = panelsData[activePanelIndex].icon;
-                          return <Icon className="h-5 w-5" />;
-                        })()}
-                      </div>
-                      <h3 className="text-2xl sm:text-3xl font-black text-[#1D496C]">
-                        {panelsData[activePanelIndex].name}
-                      </h3>
-                    </div>
-                    <Badge variant="outline" className={`rounded-full px-3 py-1 font-bold text-xs uppercase bg-white border-${panelsData[activePanelIndex].accentColor}/30`}>
-                      ★ Dedicated Portal
-                    </Badge>
-                  </div>
-
-                  <p className="text-slate-600 font-semibold text-sm sm:text-base leading-relaxed mb-8">
-                    {panelsData[activePanelIndex].description}
-                  </p>
-
-                  <div className="mb-8">
-                    <h4 className="text-[#1D496C] font-extrabold text-sm sm:text-base uppercase tracking-wider mb-4 flex items-center gap-2">
-                      <Sparkles className="h-4 w-4 text-[#FFA600]" />
-                      Core Features & Capabilities
-                    </h4>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      {panelsData[activePanelIndex].features.map((feature, idx) => (
-                        <div key={idx} className="flex items-start gap-2.5 p-1">
-                          <div className="h-5 w-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-slate-100">
-                            <CheckCircle2 className="h-3.5 w-3.5 text-[#6A7626]" strokeWidth={3} />
-                          </div>
-                          <span className="text-[#475569] font-bold text-sm leading-snug">
-                            {feature}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Mock Dashboard Workspace */}
-                  <div className="border border-slate-100 rounded-2xl bg-slate-950 p-5 sm:p-6 shadow-inner relative overflow-hidden">
-                    <div className="absolute inset-0 bg-grid-white/[0.02] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
-
-                    {/* Window Control Header */}
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4 text-xs">
-                      <div className="flex items-center gap-2">
-                        <span className="h-3 w-3 rounded-full bg-rose-500/80"></span>
-                        <span className="h-3 w-3 rounded-full bg-amber-500/80"></span>
-                        <span className="h-3 w-3 rounded-full bg-emerald-500/80"></span>
-                        <span className="text-slate-400 font-bold ml-2 hidden sm:inline text-[11px] uppercase tracking-wider">
-                          {panelsData[activePanelIndex].mockup.title}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span className="text-emerald-400 font-bold text-[10px] tracking-wider uppercase">Live Preview</span>
-                      </div>
-                    </div>
-
-                    {/* Metric Card Grid */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4 relative z-10">
-                      {panelsData[activePanelIndex].mockup.metrics.map((metric, mIdx) => (
-                        <div key={mIdx} className="bg-slate-900/80 border border-slate-900/60 p-3.5 rounded-xl flex flex-col justify-between">
-                          <span className="text-slate-500 font-semibold text-[10px] sm:text-xs uppercase tracking-wider block mb-1">
-                            {metric.label}
-                          </span>
-                          <span className="text-white font-extrabold text-sm sm:text-lg block tracking-tight">
-                            {metric.value}
-                          </span>
-                          <span className="text-slate-400 font-bold text-[9px] sm:text-[10px] block mt-1">
-                            {metric.change}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Preview Workspace zone */}
-                    <div className="bg-slate-900/50 border border-slate-900/40 p-3.5 rounded-xl relative z-10">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className={`h-2.5 w-2.5 rounded-full bg-gradient-to-r ${panelsData[activePanelIndex].color}`}></div>
-                        <span className="text-slate-300 font-extrabold text-xs uppercase tracking-wider">System Workspace Logs</span>
-                      </div>
-                      <p className="text-slate-400 text-[11px] sm:text-xs font-semibold leading-relaxed">
-                        {panelsData[activePanelIndex].mockup.previewText}
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Why Choose Us Section */}
-      <section id="why-choose-us" className="pt-10 pb-20 bg-white relative overflow-hidden">
-        {/* Soft background decor */}
-        <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-[#6A7626]/5 rounded-full blur-3xl -translate-y-1/2 pointer-events-none"></div>
+      <section
+        id="why-choose-us"
+        className="pt-12 pb-16 bg-[#F8FAFC] relative overflow-hidden bg-cover bg-center"
+        style={{ backgroundImage: "linear-gradient(to bottom, rgba(248, 250, 252, 0.96), rgba(248, 250, 252, 0.92)), url('/bg-image.png')" }}
+      >
+        {/* Soft background decor blobs */}
+        <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-[#5D3FD3]/5 rounded-full blur-3xl -translate-y-1/2 pointer-events-none"></div>
         <div className="absolute top-1/4 right-0 w-[500px] h-[500px] bg-[#429CE4]/5 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
-          {/* Centered Heading */}
-          <div className="text-center max-w-3xl mx-auto mb-8 space-y-3">
-            <Badge className="rounded-full px-4 py-1.5 bg-[#6A7626]/10 text-[#6A7626] border-0 font-bold uppercase tracking-wider text-xs">
-              Why Choose Us
-            </Badge>
-            <h2 className="text-3.5xl sm:text-4xl lg:text-5xl font-black tracking-tight text-[#1D496C] leading-tight">
-              Why Schools Choose <span className="bg-gradient-to-r from-[#285E89] to-[#6A7626] bg-clip-text text-transparent">VidhyaSanchalan</span>
-            </h2>
-            <p className="text-slate-500 font-medium text-base sm:text-lg">
-              Empower your educational institution with a platform designed to simplify administration, enhance student performance, and foster seamless communication.
-            </p>
-          </div>
-
-          {/* 2-Column Accordion Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-            
-            {/* Left Column (First 4 points) */}
-            <div className="space-y-4">
-              {whyChooseUsData.slice(0, 4).map((item, i) => {
-                const idx = i;
-                const isOpen = activeChooseIdx === idx;
-                return (
-                  <div
-                    key={idx}
-                    className={`border rounded-2xl transition-all duration-300 overflow-hidden ${
-                      isOpen
-                        ? "border-[#6A7626]/40 bg-gradient-to-br from-[#6A7626]/5 to-[#429CE4]/5 shadow-md shadow-[#6A7626]/5"
-                        : "border-slate-100 bg-white hover:border-slate-300 hover:shadow-sm"
-                    }`}
-                  >
-                    <button
-                      onClick={() => setActiveChooseIdx(isOpen ? null : idx)}
-                      className="w-full flex items-center justify-between p-5 text-left transition-colors focus:outline-none"
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-8 items-center">
+            {/* Left Column - Graphic Column */}
+            <div className="lg:col-span-5 relative flex items-center justify-center min-h-[500px] sm:min-h-[580px] py-10">
+              <div className="relative w-full max-w-[340px] sm:max-w-[420px] aspect-square flex items-center justify-center group">
+                
+                {/* Behind-Left Image Card */}
+                {(() => {
+                  const card = whyCollageCards.find(c => c.position === "behind-left");
+                  if (!card) return null;
+                  return (
+                    <motion.div
+                      initial={{ opacity: 0, x: -30, y: -20, rotate: -6 }}
+                      whileInView={{ opacity: 1, x: 0, y: 0, rotate: -4 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.8, delay: 0.2 }}
+                      className="absolute left-[-1.5rem] md:left-[-3rem] top-[1.5rem] w-[180px] sm:w-[220px] bg-white border border-slate-100 shadow-2xl rounded-3xl p-1.5 sm:p-2 z-10 hidden xs:block transition-all duration-300 hover:rotate-[-2deg] hover:scale-105"
                     >
-                      <div className="flex items-center gap-3.5">
-                        <CheckCircle2
-                          className={`h-6 w-6 shrink-0 transition-colors duration-300 ${
-                            isOpen ? "text-[#6A7626]" : "text-slate-400"
-                          }`}
+                      <div className="relative overflow-hidden rounded-2xl aspect-[4/3] bg-slate-100">
+                        <img 
+                          src={card.image} 
+                          alt={card.label} 
+                          className="w-full h-full object-cover rounded-2xl" 
                         />
-                        <span
-                          className={`font-bold text-base sm:text-lg transition-colors duration-300 ${
-                            isOpen ? "text-[#1D496C]" : "text-[#475569]"
-                          }`}
-                        >
-                          {item.title}
-                        </span>
+                        <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-md px-2 py-0.5 rounded-full text-[9px] font-black text-[#5D3FD3]">
+                          {card.label}
+                        </div>
                       </div>
-                      <ChevronDown
-                        className={`h-5 w-5 text-slate-400 shrink-0 transition-transform duration-300 ${
-                          isOpen ? "rotate-180 text-[#6A7626]" : ""
-                        }`}
-                      />
-                    </button>
+                    </motion.div>
+                  );
+                })()}
 
-                    <AnimatePresence initial={false}>
-                      {isOpen && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.25, ease: "easeInOut" }}
-                        >
-                          <div className="px-5 pb-5 pt-0 pl-[48px] text-sm sm:text-base text-slate-600 font-medium leading-relaxed">
-                            {item.description}
-                          </div>
-                        </motion.div>
-                      )}
+                {/* Main Card (Slideshow and Dot indicators with scale fix) */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.8 }}
+                  className="relative w-[280px] sm:w-[320px] aspect-square rounded-[2rem] shadow-2xl border border-slate-100 bg-white flex items-center justify-center overflow-visible z-20 transition-all duration-300 hover:scale-[1.02]"
+                >
+                  <div className="w-full h-full rounded-[2rem] overflow-hidden relative">
+                    <AnimatePresence mode="wait">
+                      <motion.img
+                        key={currentWhyIdx}
+                        src={whyImagesMain[currentWhyIdx] || "/why chooseus.jpeg"}
+                        alt="Laptop and Mobile Dashboard Mockup"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 1.05 }}
+                        transition={{ duration: 0.6 }}
+                        className="absolute inset-0 w-full h-full object-cover rounded-[2rem] group-hover:scale-105 transition-transform duration-700 ease-out"
+                      />
                     </AnimatePresence>
                   </div>
-                );
-              })}
-            </div>
 
-            {/* Right Column (Last 4 points) */}
-            <div className="space-y-4">
-              {whyChooseUsData.slice(4, 8).map((item, i) => {
-                const idx = i + 4;
-                const isOpen = activeChooseIdx === idx;
-                return (
-                  <div
-                    key={idx}
-                    className={`border rounded-2xl transition-all duration-300 overflow-hidden ${
-                      isOpen
-                        ? "border-[#6A7626]/40 bg-gradient-to-br from-[#6A7626]/5 to-[#429CE4]/5 shadow-md shadow-[#6A7626]/5"
-                        : "border-slate-100 bg-white hover:border-slate-300 hover:shadow-sm"
-                    }`}
-                  >
-                    <button
-                      onClick={() => setActiveChooseIdx(isOpen ? null : idx)}
-                      className="w-full flex items-center justify-between p-5 text-left transition-colors focus:outline-none"
-                    >
-                      <div className="flex items-center gap-3.5">
-                        <CheckCircle2
-                          className={`h-6 w-6 shrink-0 transition-colors duration-300 ${
-                            isOpen ? "text-[#6A7626]" : "text-slate-400"
+                  {/* Dots indicator overlays inside the frame */}
+                  {whyImagesMain.length > 1 && (
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-30 bg-slate-950/60 px-3 py-1 rounded-full border border-white/10 backdrop-blur-sm">
+                      {whyImagesMain.map((_, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setCurrentWhyIdx(idx);
+                          }}
+                          className={`h-1.5 w-1.5 rounded-full transition-all duration-300 ${
+                            idx === currentWhyIdx
+                              ? "bg-[#FFA600] scale-125 w-3.5"
+                              : "bg-white/40 hover:bg-white"
                           }`}
+                          aria-label={`Go to slide ${idx + 1}`}
                         />
-                        <span
-                          className={`font-bold text-base sm:text-lg transition-colors duration-300 ${
-                            isOpen ? "text-[#1D496C]" : "text-[#475569]"
-                          }`}
-                        >
-                          {item.title}
-                        </span>
-                      </div>
-                      <ChevronDown
-                        className={`h-5 w-5 text-slate-400 shrink-0 transition-transform duration-300 ${
-                          isOpen ? "rotate-180 text-[#6A7626]" : ""
-                        }`}
-                      />
-                    </button>
+                      ))}
+                    </div>
+                  )}
 
-                    <AnimatePresence initial={false}>
-                      {isOpen && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.25, ease: "easeInOut" }}
-                        >
-                          <div className="px-5 pb-5 pt-0 pl-[48px] text-sm sm:text-base text-slate-600 font-medium leading-relaxed">
-                            {item.description}
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                );
-              })}
+                  {/* Floating User Satisfaction Badge */}
+                  <motion.div
+                    animate={{ y: [0, -6, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute bottom-[2rem] right-[-1.5rem] sm:right-[-3rem] bg-white border border-slate-100 shadow-2xl rounded-2xl p-3 sm:p-4 flex items-center gap-3 z-35 transition-transform duration-500 hover:translate-x-2"
+                  >
+                    <div className="h-10 w-10 rounded-xl bg-slate-950 text-white flex items-center justify-center text-xl shrink-0 shadow-lg shadow-slate-950/20">
+                      😊
+                    </div>
+                    <div>
+                      <div className="text-base sm:text-lg font-black text-slate-950 leading-none mb-0.5">{satisfactionRate}%</div>
+                      <div className="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">User Satisfaction</div>
+                    </div>
+                  </motion.div>
+                </motion.div>
+
+                {/* Bottom-Left Image Card */}
+                {(() => {
+                  const card = whyCollageCards.find(c => c.position === "bottom-left");
+                  if (!card) return null;
+                  return (
+                    <motion.div
+                      initial={{ opacity: 0, x: -20, y: 30, rotate: 2 }}
+                      whileInView={{ opacity: 1, x: 0, y: 0, rotate: 2 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.8, delay: 0.3 }}
+                      className="absolute left-[-2rem] md:left-[-3.5rem] bottom-[-1.5rem] w-[170px] sm:w-[200px] bg-white border border-slate-100 shadow-2xl rounded-3xl p-1.5 sm:p-2 z-30 hidden xs:block transition-all duration-300 hover:rotate-[0deg] hover:scale-105"
+                    >
+                      <div className="relative overflow-hidden rounded-2xl aspect-[4/3] bg-slate-100">
+                        <img 
+                          src={card.image} 
+                          alt={card.label} 
+                          className="w-full h-full object-cover rounded-2xl" 
+                        />
+                        <div className="absolute bottom-2 right-2 bg-slate-900/90 backdrop-blur-md px-2 py-0.5 rounded-full text-[9px] font-black text-white">
+                          {card.label}
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })()}
+
+                {/* Bottom-Right Image Card */}
+                {(() => {
+                  const card = whyCollageCards.find(c => c.position === "bottom-right");
+                  if (!card) return null;
+                  return (
+                    <motion.div
+                      initial={{ opacity: 0, x: 20, y: 20, rotate: -2 }}
+                      whileInView={{ opacity: 1, x: 0, y: 0, rotate: -2 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.8, delay: 0.4 }}
+                      className="absolute right-[-2.5rem] bottom-[-2.5rem] w-[150px] sm:w-[180px] bg-white border border-slate-100 shadow-2xl rounded-3xl p-1.5 sm:p-2 z-30 hidden xs:block transition-all duration-300 hover:rotate-[0deg] hover:scale-105"
+                    >
+                      <div className="relative overflow-hidden rounded-2xl aspect-[4/3] bg-slate-100">
+                        <img 
+                          src={card.image} 
+                          alt={card.label} 
+                          className="w-full h-full object-cover rounded-2xl" 
+                        />
+                        <div className="absolute bottom-2 left-2 bg-[#5D3FD3]/90 backdrop-blur-md px-2 py-0.5 rounded-full text-[9px] font-black text-white">
+                          {card.label}
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })()}
+
+                {/* Floating Capsule Pills underneath */}
+                <div className="absolute bottom-[-4.5rem] left-[1rem] sm:left-[3rem] md:left-0 flex flex-wrap gap-2 z-40 max-w-[340px]">
+                  {whyPills.map((pill, idx) => {
+                    const pillBgClasses = ["bg-[#5D3FD3] shadow-[#5D3FD3]/20", "bg-[#1C1C1E] border border-white/10", "bg-[#285E89] shadow-[#285E89]/20"];
+                    const activeBg = pillBgClasses[idx % pillBgClasses.length];
+                    return (
+                      <span key={idx} className={`inline-flex items-center px-4 py-2 rounded-full text-white text-[10px] font-black tracking-wide shadow-lg hover:scale-105 transition-transform cursor-pointer border-0 ${activeBg}`}>
+                        {pill}
+                      </span>
+                    );
+                  })}
+                </div>
+
+              </div>
             </div>
+
+            {/* Right Column - White Content Card */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="lg:col-span-7 relative bg-white border border-slate-100 shadow-xl rounded-[2.5rem] p-6 sm:p-8 lg:p-10"
+            >
+              {/* Soft visual background glow */}
+              <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-[#5D3FD3]/5 rounded-full blur-3xl pointer-events-none"></div>
+
+              <div className="space-y-6">
+                {/* Purple pill badge */}
+                <div>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-[#5D3FD3]/10 text-[#5D3FD3] text-[11px] font-black tracking-wide uppercase">
+                    {whyBadge}
+                  </span>
+                </div>
+
+                {/* Main Styled Heading */}
+                <h2 className="text-2xl sm:text-3xl lg:text-[2.1rem] font-extrabold tracking-tight text-slate-900 leading-[1.2]">
+                  {whyTitle.includes(whyTitleHighlight) ? (
+                    <>
+                      {whyTitle.split(whyTitleHighlight)[0]}
+                      <span className="font-black text-[#5D3FD3] relative inline-block">
+                        {whyTitleHighlight}
+                        <span className="absolute -bottom-1 left-0 w-full h-[3px] bg-[#5D3FD3]/20 rounded-full"></span>
+                      </span>
+                      {whyTitle.split(whyTitleHighlight)[1]}
+                    </>
+                  ) : (
+                    whyTitle
+                  )}
+                </h2>
+
+                {/* Structured Points list */}
+                <div className="space-y-6 pt-2">
+                  {whyChooseUs.map((point, index) => {
+                    const colorMap: any = {
+                      "text-[#5D3FD3]": { border: "border-[#5D3FD3]/20", bg: "group-hover:bg-[#5D3FD3]", text: "text-[#5D3FD3]", hoverText: "group-hover:text-[#5D3FD3]", hoverBorder: "group-hover:border-[#5D3FD3]" },
+                      "text-[#285E89]": { border: "border-[#285E89]/20", bg: "group-hover:bg-[#285E89]", text: "text-[#285E89]", hoverText: "group-hover:text-[#285E89]", hoverBorder: "group-hover:border-[#285E89]" },
+                      "text-[#FFA600]": { border: "border-[#FFA600]/20", bg: "group-hover:bg-[#FFA600]", text: "text-[#FFA600]", hoverText: "group-hover:text-[#FFA600]", hoverBorder: "group-hover:border-[#FFA600]" },
+                    };
+                    const colors = colorMap[point.color] || colorMap["text-[#5D3FD3]"];
+                    return (
+                      <div key={index} className="flex gap-4 group">
+                        <div className={`w-11 h-11 rounded-full border-[2px] ${colors.border} bg-white flex items-center justify-center ${colors.text} shadow-sm shrink-0 group-hover:scale-110 ${colors.hoverBorder} ${colors.bg} group-hover:text-white transition-all duration-300`}>
+                          {getIcon(point.iconName, "h-5.5 w-5.5 stroke-[2.2]")}
+                        </div>
+                        <div className="space-y-1">
+                          <h3 className={`text-base sm:text-lg font-extrabold text-slate-900 ${colors.hoverText} transition-colors duration-300`}>{point.title}</h3>
+                          <p className="text-xs sm:text-sm font-medium text-slate-500 leading-relaxed max-w-xl">
+                            {point.description}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </motion.div>
 
           </div>
         </div>
       </section>
 
       {/* Stats Section */}
-      <section className="py-12">
+      <section className="py-6">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <Card className="border-0 bg-gradient-to-r from-[#1D496C] to-[#15354F] text-white shadow-xl overflow-hidden">
             <div className="absolute inset-0 bg-grid-white/[0.08] [mask-image:radial-gradient(ellipse_at_center,white,transparent)]"></div>
-            <CardContent className="p-12 relative">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-                {[
-                  { label: "Schools", value: "500+", icon: <GraduationCap className="h-6 w-6 mx-auto mb-2 opacity-80" /> },
-                  { label: "Students", value: "50K+", icon: <Users className="h-6 w-6 mx-auto mb-2 opacity-80" /> },
-                  { label: "Teachers", value: "5K+", icon: <BookOpen className="h-6 w-6 mx-auto mb-2 opacity-80" /> },
-                  { label: "Parents", value: "100K+", icon: <Heart className="h-6 w-6 mx-auto mb-2 opacity-80" /> },
-                ].map((stat, i) => (
-                  <div key={i} className="group hover:scale-110 transition-transform duration-300">
-                    {stat.icon}
-                    <div className="text-3xl font-bold mb-2">{stat.value}</div>
-                    <div className="text-sm text-white/80">{stat.label}</div>
-                  </div>
+            <CardContent className="py-6 px-8 md:px-12 relative">
+              <motion.div 
+                className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                variants={{
+                  hidden: {},
+                  visible: {
+                    transition: {
+                      staggerChildren: 0.1
+                    }
+                  }
+                }}
+              >
+                {stats.map((stat, i) => (
+                  <motion.div 
+                    key={i} 
+                    className="group hover:scale-110 transition-transform duration-300 cursor-pointer"
+                    variants={{
+                      hidden: { opacity: 0, y: 30 },
+                      visible: { opacity: 1, y: 0 }
+                    }}
+                    transition={{ type: "spring", stiffness: 100, damping: 15 }}
+                  >
+                    <div className="group-hover:scale-110 group-hover:text-[#FFA600] transition-all duration-300">
+                      {getIcon(stat.iconName, "h-6 w-6 mx-auto mb-2 opacity-80")}
+                    </div>
+                    <div className="text-3xl font-extrabold mb-2 tracking-tight group-hover:text-[#FFA600] transition-colors duration-300">
+                      <StatCounter target={stat.target} suffix={stat.suffix} />
+                    </div>
+                    <div className="text-sm font-medium text-white/80 group-hover:text-white transition-colors duration-300">{stat.label}</div>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             </CardContent>
           </Card>
         </div>
       </section>
 
       {/* Testimonials Section */}
-      <section className="pt-20 pb-12 bg-[#F8FAFC]">
+      <section className="pt-10 pb-6 bg-[#F8FAFC]">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-16">
+          <div className="text-center max-w-2xl mx-auto mb-8">
             <Badge className="rounded-lg px-4 py-2 bg-white text-[#1D496C] border-0 mb-4">
               <Star className="mr-2 h-3 w-3 fill-[#FFA600] text-[#FFA600]" />
               Testimonials
@@ -846,77 +1291,137 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-3">
-            {[
-              {
-                name: "Rajesh Sharma",
-                role: "Principal, Apex International School",
-                content: "VidhyaSanchalan simplified our complete admission and fee management process.",
-                rating: 5,
-                color: "bg-white"
-              },
-              {
-                name: "Sunita Deshmukh",
-                role: "Parent of Class IX Student",
-                content: "Parents can now easily track student performance and attendance.",
-                rating: 5,
-                color: "bg-white"
-              },
-              {
-                name: "Devendra Patel",
-                role: "Administration Trustee",
-                content: "The geo-attendance feature made staff management much easier.",
-                rating: 5,
-                color: "bg-white"
-              }
-            ].map((testimonial, i) => (
-              <Card key={i} className={`border-0 ${testimonial.color} shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1`}>
-                <CardContent className="p-6">
-                  <div className="flex gap-1 mb-4">
-                    {[...Array(testimonial.rating)].map((_, idx) => (
-                      <Star key={idx} className="h-4 w-4 fill-[#FFA600] text-[#FFA600]" />
-                    ))}
-                  </div>
-                  <p className="text-[#475569] mb-4">"{testimonial.content}"</p>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10 border-2 border-[#6A7626]/30">
-                      <AvatarFallback className="bg-gradient-to-br from-[#1D496C] to-[#6A7626] text-white">
-                        {testimonial.name.split(' ').map(n => n[0]).join('')}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-semibold text-[#0F172A]">{testimonial.name}</p>
-                      <p className="text-xs text-[#475569]">{testimonial.role}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {testimonialsList.length > 0 && (
+            <div 
+              className="relative max-w-4xl mx-auto px-4 py-4"
+              onMouseEnter={() => setIsTestimonialPaused(true)}
+              onMouseLeave={() => setIsTestimonialPaused(false)}
+            >
+              {/* Testimonial slider viewport */}
+              <div className="relative w-full overflow-hidden min-h-[360px] sm:min-h-[280px] flex items-center justify-center">
+                <AnimatePresence initial={false} custom={slideDirection} mode="wait">
+                  <motion.div
+                    key={currentTestimonial}
+                    custom={slideDirection}
+                    variants={slideVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{
+                      x: { type: "spring", stiffness: 350, damping: 35 },
+                      opacity: { duration: 0.25 }
+                    }}
+                    className="w-full"
+                  >
+                    <Card className="border border-slate-100 bg-white shadow-xl rounded-[2.5rem] p-8 sm:p-12 relative overflow-hidden">
+                      {/* Subtle quote icon background */}
+                      <div className="absolute top-6 right-8 text-slate-100 pointer-events-none">
+                        <Quote className="h-24 w-24 stroke-[1.5] opacity-20" />
+                      </div>
+
+                      <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center">
+                        {/* Left side: Avatar */}
+                        <div className="relative shrink-0">
+                          <div className="absolute -inset-1.5 rounded-full bg-gradient-to-r from-[#1D496C] to-[#6A7626] opacity-35 blur-[3px]"></div>
+                          <Avatar className="h-24 w-24 sm:h-28 sm:w-28 border-4 border-white relative shadow-xl">
+                            <AvatarImage 
+                              src={testimonialsList[currentTestimonial].image} 
+                              alt={testimonialsList[currentTestimonial].name}
+                              className="object-cover"
+                            />
+                            <AvatarFallback className="bg-gradient-to-br from-[#1D496C] to-[#6A7626] text-white text-2xl font-black">
+                              {testimonialsList[currentTestimonial].name.split(' ').map((n: string) => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                        </div>
+
+                        {/* Right side: Review */}
+                        <div className="flex-1 space-y-4 text-center md:text-left">
+                          {/* Rating */}
+                          <div className="flex gap-1 justify-center md:justify-start">
+                            {[...Array(testimonialsList[currentTestimonial].rating)].map((_, idx) => (
+                              <Star key={idx} className="h-5 w-5 fill-[#FFA600] text-[#FFA600]" />
+                            ))}
+                          </div>
+
+                          {/* Content */}
+                          <blockquote className="text-lg sm:text-xl font-extrabold text-slate-800 leading-relaxed italic">
+                            &ldquo;{testimonialsList[currentTestimonial].content}&rdquo;
+                          </blockquote>
+
+                          {/* Author info */}
+                          <div>
+                            <cite className="not-italic font-black text-[#0F172A] text-lg block">
+                              {testimonialsList[currentTestimonial].name}
+                            </cite>
+                            <span className="text-sm font-semibold text-slate-500 block mt-0.5">
+                              {testimonialsList[currentTestimonial].role}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+
+              {/* Navigation Arrows */}
+              <button
+                onClick={handlePrevTestimonial}
+                className="absolute left-[-1.5rem] sm:left-[-3rem] top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white border border-slate-100 shadow-lg flex items-center justify-center text-slate-600 hover:text-[#1D496C] hover:bg-slate-50 hover:scale-110 active:scale-95 transition-all duration-300 z-20"
+                aria-label="Previous testimonial"
+              >
+                <ChevronLeft className="h-6 w-6 stroke-[2.5]" />
+              </button>
+              <button
+                onClick={handleNextTestimonial}
+                className="absolute right-[-1.5rem] sm:right-[-3rem] top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white border border-slate-100 shadow-lg flex items-center justify-center text-slate-600 hover:text-[#1D496C] hover:bg-slate-50 hover:scale-110 active:scale-95 transition-all duration-300 z-20"
+                aria-label="Next testimonial"
+              >
+                <ChevronRight className="h-6 w-6 stroke-[2.5]" />
+              </button>
+
+              {/* Navigation Dots */}
+              <div className="flex justify-center gap-2.5 mt-8 relative z-20">
+                {testimonialsList.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleDotClick(index)}
+                    className={`h-2.5 rounded-full transition-all duration-500 ${
+                      index === currentTestimonial 
+                        ? "w-8 bg-[#1D496C]" 
+                        : "w-2.5 bg-slate-300 hover:bg-slate-400"
+                    }`}
+                    aria-label={`Go to testimonial ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="pt-10 pb-20 bg-white">
+      <section className="pt-6 pb-10 bg-white">
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <Card className="border-0 bg-gradient-to-br from-[#429CE4]/5 to-white shadow-xl overflow-hidden cursor-pointer">
-            <div className="absolute inset-0 bg-grid-[#1D496C]/5 [mask-image:radial-gradient(ellipse_at_center,white,transparent)]"></div>
+          <Card className="border-0 bg-gradient-to-br from-[#1D496C] to-[#15354F] text-white shadow-2xl overflow-hidden rounded-[2.5rem] cursor-pointer">
+            <div className="absolute inset-0 bg-grid-white/[0.08] [mask-image:radial-gradient(ellipse_at_center,white,transparent)]"></div>
             <CardContent className="p-16 text-center relative">
               <div className="max-w-2xl mx-auto space-y-6">
-                <Badge variant="outline" className="rounded-lg px-4 py-2 border-[#6A7626] bg-white text-[#1D496C]">
-                  <Rocket className="mr-2 h-3 w-3 text-[#1D496C]" />
+                <Badge variant="outline" className="rounded-lg px-4 py-2 border-white/20 bg-white/10 text-white shadow-sm font-semibold">
+                  <Rocket className="mr-2 h-3.5 w-3.5 text-[#FFA600]" />
                   Get Started Today
                 </Badge>
-                <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-[#0F172A]">
+                <h2 className="text-3xl font-black tracking-tight sm:text-4xl lg:text-5xl text-white">
                   Ready to Transform Your School Management?
                 </h2>
-                <p className="text-[#475569] text-lg">
+                <p className="text-slate-200/90 text-base sm:text-lg font-medium">
                   Join thousands of schools already using VidyaSanchalan to streamline their operations
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
                   <Button
                     size="lg"
-                    className="rounded-lg bg-[#429CE4] text-white shadow-md hover:bg-[#1D496C] transition-all duration-300 transform hover:scale-105"
+                    className="rounded-xl bg-[#FFA600] text-white shadow-xl shadow-[#FFA600]/10 hover:shadow-2xl hover:shadow-[#FFA600]/20 hover:bg-[#ED6708] px-8 py-6 text-base font-bold transition-all duration-300 transform hover:scale-105"
                     onClick={handleGetStarted}
                   >
                     Start Free Trial
@@ -925,13 +1430,13 @@ export default function LandingPage() {
                   <Button
                     size="lg"
                     variant="outline"
-                    className="rounded-lg border-2 border-[#6A7626] bg-white text-[#6A7626] hover:bg-[#6A7626]/5"
+                    className="rounded-xl border-2 border-white/30 bg-transparent text-white hover:bg-white/10 hover:border-white/50 px-8 py-6 text-base font-bold transition-all duration-300 transform hover:scale-105"
                     asChild
                   >
                     <Link href="/login">Contact Sales</Link>
                   </Button>
                 </div>
-                <p className="text-sm text-[#475569]">
+                <p className="text-sm text-slate-300/80">
                   No credit card required • Free 14-day trial • 24/7 support
                 </p>
               </div>
@@ -940,10 +1445,9 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="border-t border-[#6A7626]/20 bg-white">
-        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-          <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-5">
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-12 pb-6">
+          <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
             <div className="lg:col-span-2">
               <div className="flex items-center gap-3 mb-4">
                 <div className="relative h-20 w-auto flex items-center justify-center rounded-xl bg-white p-2 shadow-md border border-[#1D496C]/10">
@@ -981,7 +1485,7 @@ export default function LandingPage() {
                 <ul className="space-y-3">
                   {section.links.map((link, j) => (
                     <li key={j}>
-                      <Link href="#" className="text-sm text-[#475569] hover:text-[#285E89] transition-colors">
+                      <Link href={getLinkHref(link)} className="text-sm text-[#475569] hover:text-[#285E89] transition-colors">
                         {link}
                       </Link>
                     </li>
@@ -1003,6 +1507,17 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* Lagging Custom Cursor Follower Ring */}
+      {!isTouchDevice && (
+        <motion.div
+          className="fixed top-0 left-0 w-8 h-8 rounded-full border-2 border-[#429CE4] bg-[#429CE4]/10 pointer-events-none z-[9999] shadow-[0_0_12px_rgba(66,156,228,0.4)]"
+          style={{
+            x: cursorX,
+            y: cursorY,
+          }}
+        />
+      )}
 
     </div>
   );
@@ -1036,11 +1551,11 @@ function Linkedin() {
 
 
 
-const mainFeatures = [
+const fallbackFeatures = [
   {
     title: "Admission Management",
     image: "/admission (1).jpg",
-    icon: <GraduationCap className="h-6 w-6" />,
+    iconName: "GraduationCap",
     color: "from-[#1D496C] to-[#1A3F5C]",
     points: [
       "Online admission forms",
@@ -1053,7 +1568,7 @@ const mainFeatures = [
   {
     title: "Fee Management",
     image: "/fees (1).jpg",
-    icon: <CreditCard className="h-6 w-6" />,
+    iconName: "CreditCard",
     color: "from-[#6A7626] to-[#596420]",
     points: [
       "Online & offline fee collection",
@@ -1067,7 +1582,7 @@ const mainFeatures = [
   {
     title: "Timetable Management",
     image: "/timetable (1).jpg",
-    icon: <Calendar className="h-6 w-6" />,
+    iconName: "Calendar",
     color: "from-[#429CE4] to-[#2E85CC]",
     points: [
       "Class-wise timetable creation",
@@ -1079,7 +1594,7 @@ const mainFeatures = [
   {
     title: "Homework & Assignment",
     image: "/homework (1).jpg",
-    icon: <BookOpen className="h-6 w-6" />,
+    iconName: "BookOpen",
     color: "from-[#ED6708] to-[#CD5804]",
     points: [
       "Online and offline homework",
@@ -1091,7 +1606,7 @@ const mainFeatures = [
   {
     title: "Progress Reports",
     image: "/progress report.jpeg",
-    icon: <TrendingUp className="h-6 w-6" />,
+    iconName: "TrendingUp",
     color: "from-[#FFA600] to-[#E09200]",
     points: [
       "Report cards",
@@ -1104,7 +1619,7 @@ const mainFeatures = [
   {
     title: "Announcement System",
     image: "/announcement.jpeg",
-    icon: <Bell className="h-6 w-6" />,
+    iconName: "Bell",
     color: "from-[#1D496C] to-[#6A7626]",
     points: [
       "School announcements",
@@ -1116,7 +1631,7 @@ const mainFeatures = [
   {
     title: "Geo Attendance Feature",
     image: "/geo mapping.jpeg",
-    icon: <Shield className="h-6 w-6" />,
+    iconName: "Shield",
     color: "from-[#6A7626] to-[#1D496C]",
     points: [
       "Staff attendance with geo-location tracking",
@@ -1127,7 +1642,7 @@ const mainFeatures = [
   {
     title: "Online Examination",
     image: "/examination.jpeg",
-    icon: <Award className="h-6 w-6" />,
+    iconName: "Award",
     color: "from-[#429CE4] to-[#ED6708]",
     points: [
       "Conduct online exams",
@@ -1135,6 +1650,104 @@ const mainFeatures = [
       "Result generation",
       "Student performance reports"
     ]
+  }
+];
+
+// Panels data removed to keep workspace clean
+
+const whyChooseUsData = [
+  "Easy to use interface",
+  "Complete school automation",
+  "Separate role-based panels",
+  "Secure data management",
+  "Online & offline support",
+  "Real-time communication",
+  "Smart attendance tracking",
+  "Scalable for any school size"
+];
+
+const getLinkHref = (link: string) => {
+  switch (link) {
+    case "Modules": return "/modules";
+    case "Contact": return "/contact";
+    case "About Us": return "https://h-techsolutions.in/aboutus";
+    case "Service": return "https://h-techsolutions.in/service";
+    case "Gallery": return "https://h-techsolutions.in/gallery";
+    default: return "#";
+  }
+};
+
+const footerLinks = [
+  {
+    title: "Product",
+    links: ["Modules", "Pricing", "Integrations", "Changelog"]
+  },
+  {
+    title: "Company",
+    links: ["About Us", "Service", "Gallery", "Blog", "Contact"]
+  }
+];
+
+const fallbackModules = [
+  { label: "Online & Offline Admissions", iconName: "GraduationCap" },
+  { label: "Smart Fee Collection", iconName: "DollarSign" },
+  { label: "Dynamic Timetable Planner", iconName: "Calendar" },
+  { label: "Classroom Homework", iconName: "BookOpen" },
+  { label: "Online Examination Desk", iconName: "Award" },
+  { label: "Real-time Progress Reports", iconName: "TrendingUp" },
+  { label: "GPS Attendance Tracking", iconName: "Shield" },
+  { label: "Instant Announcement System", iconName: "Bell" }
+];
+
+const fallbackBadges = [
+  { label: "Trusted by 500+ Schools", iconName: "Star" },
+  { label: "ISO 27001 Secure Data", iconName: "CheckCircle2" },
+  { label: "99.9% Cloud Uptime", iconName: "Rocket" },
+  { label: "Dedicated Guardian App", iconName: "Users" },
+  { label: "Encrypted Database Logs", iconName: "Shield" },
+  { label: "24/7 Priority Support Desk", iconName: "Heart" },
+  { label: "AI Powered Report Cards", iconName: "Sparkles" },
+  { label: "SRS Compliance Approved", iconName: "BookMarked" }
+];
+
+const slideVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 150 : -150,
+    opacity: 0
+  }),
+  center: {
+    zIndex: 1,
+    x: 0,
+    opacity: 1
+  },
+  exit: (direction: number) => ({
+    zIndex: 0,
+    x: direction < 0 ? 150 : -150,
+    opacity: 0
+  })
+};
+
+const fallbackTestimonials = [
+  {
+    name: "Rajesh Sharma",
+    role: "Principal, Apex International School",
+    content: "VidyaSanchalan simplified our complete admission and fee management process, saving our staff hundreds of hours.",
+    rating: 5,
+    image: "/testimonial-1.jpg"
+  },
+  {
+    name: "Sunita Deshmukh",
+    role: "Parent of Class IX Student",
+    content: "Parents can now easily track student performance and attendance. The mobile app experience is absolutely seamless.",
+    rating: 5,
+    image: "/testimonial-2.jpg"
+  },
+  {
+    name: "Devendra Patel",
+    role: "Administration Trustee",
+    content: "The geo-attendance feature made staff management much easier, and the financial audit logs are completely transparent.",
+    rating: 5,
+    image: "/testimonial-3.jpg"
   }
 ];
 
@@ -1300,7 +1913,7 @@ const panelsData = [
         { label: "Upcoming Exams", value: "1", change: "Friday 10:00 AM" },
         { label: "Average GPA Score", value: "A+", change: "Top 5% in class" }
       ],
-      previewText: "Timetable viewer widget, assignment upload form, exam console panel, and progress report dashboard."
+      previewText: "Timetable viewer widget, assignment uploader form, exam console panel, and progress report dashboard."
     }
   },
   {
@@ -1332,54 +1945,3 @@ const panelsData = [
   }
 ];
 
-const whyChooseUsData = [
-  {
-    title: "Easy to use interface",
-    description: "Experience a dual-tone, intuitive design with a zero-learning-curve dashboard specifically optimized for administrators, teachers, and parents alike."
-  },
-  {
-    title: "Complete school automation",
-    description: "From student admissions and dynamic fee structures to classroom attendance, timetable allocation, and report cards—everything runs fully automated in one hub."
-  },
-  {
-    title: "Separate role-based panels",
-    description: "Seven completely isolated dashboards (Trustee, Principal, Clerk, Fee, Teacher, Student, Parent) ensure focused workflows, strict privacy, and distraction-free operation."
-  },
-  {
-    title: "Secure data management",
-    description: "Your school database is protected using modern end-to-end encryption protocols, regular automated backups, and strict role-based access permissions."
-  },
-  {
-    title: "Online & offline support",
-    description: "Enable seamless digital gateway payment options for online ease while maintaining fully synchronized cash, cheque, and manual fee desk logs."
-  },
-  {
-    title: "Real-time communication",
-    description: "Keep everyone in the loop with instant push notifications, integrated SMS notifications, prompt announcements, and automated attendance/grade alerts."
-  },
-  {
-    title: "Smart attendance tracking",
-    description: "Features precise, fraud-proof GPS geo-fenced mobile attendance check-ins for administrators and quick digital rolls for classroom teachers."
-  },
-  {
-    title: "Scalable for any school size",
-    description: "Designed on an ultra-modern modular architecture that scales effortlessly from single-campus institutes to sprawling multi-branch education trusts."
-  }
-];
-
-const footerLinks = [
-  {
-    title: "Product",
-    links: ["Modules", "Pricing", "Integrations", "Changelog"]
-  },
-  {
-    title: "Company",
-    links: ["About Us", "Blog", "Careers", "Press", "Contact"]
-  },
-  {
-    title: "Support",
-    links: ["Documentation", "Help Center", "Community", "Status", "Privacy"]
-  }
-];
-
-  

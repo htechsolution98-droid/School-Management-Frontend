@@ -11,7 +11,7 @@ import {
     updateAcademicYearForPrincipal,
     deleteAcademicYearForPrincipal,
     type AcademicYear,
-} from "@/lib/forms";
+} from "@/lib/principal";
 
 // ─── MONTHS ───────────────────────────────────────────────────────────────────
 const MONTHS = [
@@ -102,11 +102,19 @@ function AcademicYearModal({
 }) {
     const [startYear, setStartYear] = useState(editing?.start_year ?? new Date().getFullYear());
     const [endYear, setEndYear] = useState(editing?.end_year ?? new Date().getFullYear() + 1);
+    const [openDropdown, setOpenDropdown] = useState<"start" | "end" | null>(null);
 
     const [startMonth, setStartMonth] = useState(editing?.start_month ?? 4);
     const [endMonth, setEndMonth] = useState(editing?.end_month ?? 3);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const close = () => setOpenDropdown(null);
+        document.addEventListener("mousedown", close);
+        return () => document.removeEventListener("mousedown", close);
+    }, []);
+
 
     const handleSave = async () => {
         if (!startYear || !endYear) { setError("Start year and end year are required."); return; }
@@ -199,29 +207,58 @@ function AcademicYearModal({
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
+                        {/* Start Month */}
+                        <div className="relative">
                             <label className="block text-xs font-bold text-gray-600 mb-1.5">Start Month</label>
-                            <select
-                                value={startMonth}
-                                onChange={(e) => setStartMonth(Number(e.target.value))}
-                                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white"
+                            <button
+                                type="button"
+                                onClick={() => setOpenDropdown(openDropdown === "start" ? null : "start")}
+                                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 bg-white flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-indigo-300"
                             >
-                                {MONTHS.map((m) => (
-                                    <option key={m.value} value={m.value}>{m.label}</option>
-                                ))}
-                            </select>
+                                <span>{MONTHS.find(m => m.value === startMonth)?.label}</span>
+                                <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === "start" ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                            </button>
+                            {openDropdown === "start" && (
+                                <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                                    {MONTHS.map(m => (
+                                        <button
+                                            key={m.value}
+                                            type="button"
+                                            onClick={() => { setStartMonth(m.value); setOpenDropdown(null); }}
+                                            className={`w-full text-left px-4 py-2.5 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors ${startMonth === m.value ? "bg-indigo-50 text-indigo-700 font-bold" : "text-gray-700"}`}
+                                        >
+                                            {m.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
-                        <div>
+
+                        {/* End Month */}
+                        <div className="relative">
                             <label className="block text-xs font-bold text-gray-600 mb-1.5">End Month</label>
-                            <select
-                                value={endMonth}
-                                onChange={(e) => setEndMonth(Number(e.target.value))}
-                                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-white"
+                            <button
+                                type="button"
+                                onClick={() => setOpenDropdown(openDropdown === "end" ? null : "end")}
+                                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 bg-white flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-indigo-300"
                             >
-                                {MONTHS.map((m) => (
-                                    <option key={m.value} value={m.value}>{m.label}</option>
-                                ))}
-                            </select>
+                                <span>{MONTHS.find(m => m.value === endMonth)?.label}</span>
+                                <svg className={`w-4 h-4 text-gray-400 transition-transform ${openDropdown === "end" ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                            </button>
+                            {openDropdown === "end" && (
+                                <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                                    {MONTHS.map(m => (
+                                        <button
+                                            key={m.value}
+                                            type="button"
+                                            onClick={() => { setEndMonth(m.value); setOpenDropdown(null); }}
+                                            className={`w-full text-left px-4 py-2.5 text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors ${endMonth === m.value ? "bg-indigo-50 text-indigo-700 font-bold" : "text-gray-700"}`}
+                                        >
+                                            {m.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
 

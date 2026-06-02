@@ -24,80 +24,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { fetchWithAuth } from "@/lib/auth";
-import { API_BASE_URL } from "@/lib/config";
+import {
+  getSchoolList,
+  saveRazorpayData,
+  updateRazorpayData,
+  deleteRazorpayData,
+  getRazorpayList,
+} from "@/lib/superadmin";
+import type { RazorpaySchool, RazorpayRecord } from "@/types";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface School {
-  id: number;
-  name: string;
-}
-
-interface RazorpayRecord {
-  id?: number;
-  school: number;
-  razorpay_key_id: string;
-  razorpay_secret_key: string;
-  school_name?: string;
-}
-
-// ─── API helpers ──────────────────────────────────────────────────────────────
-
-async function getSchoolList(): Promise<School[]> {
-  const res = await fetchWithAuth(`${API_BASE_URL}/schoollist/`);
-  if (!res.ok) throw new Error("Failed to fetch schools");
-  const data = await res.json();
-  return Array.isArray(data) ? data : (data.results ?? []);
-}
-
-async function saveRazorpayData(payload: Omit<RazorpayRecord, "id" | "school_name">): Promise<RazorpayRecord> {
-  const res = await fetchWithAuth(`${API_BASE_URL}/razardata/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    let msg = "Failed to save credentials";
-    try {
-      const err = await res.json();
-      msg = err?.detail || err?.message || msg;
-    } catch {}
-    throw new Error(msg);
-  }
-  return res.json();
-}
-
-async function updateRazorpayData(id: number, payload: Omit<RazorpayRecord, "id" | "school_name">): Promise<RazorpayRecord> {
-  const res = await fetchWithAuth(`${API_BASE_URL}/razardata/${id}/`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    let msg = "Failed to update credentials";
-    try {
-      const err = await res.json();
-      msg = err?.detail || err?.message || msg;
-    } catch {}
-    throw new Error(msg);
-  }
-  return res.json();
-}
-
-async function deleteRazorpayData(id: number): Promise<void> {
-  const res = await fetchWithAuth(`${API_BASE_URL}/razardata/${id}/`, {
-    method: "DELETE",
-  });
-  if (!res.ok) throw new Error("Failed to delete credentials");
-}
-
-async function getRazorpayList(): Promise<RazorpayRecord[]> {
-  const res = await fetchWithAuth(`${API_BASE_URL}/razardata/`);
-  if (!res.ok) throw new Error("Failed to fetch Razorpay records");
-  const data = await res.json();
-  return Array.isArray(data) ? data : (data.results ?? []);
-}
 
 // ─── Masked secret display ────────────────────────────────────────────────────
 
@@ -112,7 +47,7 @@ function MaskedField({ value, label }: { value: string; label: string }) {
       {value && (
         <button
           onClick={() => setShow((v) => !v)}
-          className="text-slate-300 hover:text-slate-600 transition-colors opacity-0 group-hover:opacity-100"
+          className={`transition-colors ${show ? "text-[#4F46E5]" : "text-slate-400 hover:text-slate-600"}`}
         >
           {show ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
         </button>
@@ -129,7 +64,7 @@ function SchoolSelect({
   onChange,
   disabled,
 }: {
-  schools: School[];
+  schools: RazorpaySchool[];
   value: number | "";
   onChange: (id: number) => void;
   disabled?: boolean;
@@ -201,7 +136,7 @@ function CredentialForm({
   onSuccess,
   onCancel,
 }: {
-  schools: School[];
+  schools: RazorpaySchool[];
   existing?: RazorpayRecord;
   existingRecords: RazorpayRecord[];
   onSuccess: () => void;
@@ -401,7 +336,7 @@ function DeleteModal({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function RazorpayCredentialsPage() {
-  const [schools, setSchools] = useState<School[]>([]);
+  const [schools, setSchools] = useState<RazorpaySchool[]>([]);
   const [records, setRecords] = useState<RazorpayRecord[]>([]);
   const [isFetching, setIsFetching] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
@@ -535,7 +470,7 @@ export default function RazorpayCredentialsPage() {
       </AnimatePresence>
 
       {/* ── Stats row ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {[
           { label: "Total Schools", value: schools.length, icon: Building2, color: "text-slate-600", bg: "bg-slate-50", border: "border-slate-200" },
           { label: "Configured", value: records.length, icon: ShieldCheck, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-200" },
@@ -561,8 +496,8 @@ export default function RazorpayCredentialsPage() {
 
       {/* ── Table ── */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
+        <div className="overflow-x-auto -mx-0">
+          <table className="w-full text-sm text-left min-w-[600px]">
             <thead className="bg-gray-50 text-gray-500 font-medium border-b border-gray-100 text-xs uppercase tracking-wider">
               <tr>
                 <th className="px-6 py-4">School</th>
@@ -632,21 +567,22 @@ export default function RazorpayCredentialsPage() {
 
                     {/* Actions */}
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="flex items-center gap-2">
                         <button
                           onClick={() => {
                             setEditingRecord(record);
                             setIsAdding(false);
                             window.scrollTo({ top: 0, behavior: "smooth" });
                           }}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-[#4F46E5] hover:text-white hover:border-[#4F46E5] transition-all"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all border-[#4F46E5] text-[#4F46E5] sm:border-gray-200 sm:text-gray-600 hover:bg-[#4F46E5] hover:text-white hover:border-[#4F46E5] active:bg-[#4F46E5] active:text-white active:border-[#4F46E5]"
                         >
                           <Edit3 className="h-3.5 w-3.5" />
                           Edit
                         </button>
                         <button
                           onClick={() => setDeletingRecord(record)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all border-red-400 text-red-500 sm:border-gray-200 sm:text-gray-600 hover:bg-red-500 hover:text-white hover:border-red-500 active:bg-red-500 active:text-white active:border-red-500"
+
                         >
                           <X className="h-3.5 w-3.5" />
                           Delete

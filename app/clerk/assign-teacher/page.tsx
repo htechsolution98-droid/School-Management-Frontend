@@ -16,11 +16,13 @@ import {
   getSubjects,
   getTeachers,
   assignClass,
-  type Division,
-  type Subject,
-  type Teacher,
-  type AssignClassPayload,
-} from "@/lib/forms";
+} from "@/lib/clerk";
+import type {
+  AssignClassPayload,
+  Division,
+  Subject,
+  Teacher,
+} from "@/types/clerk";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {

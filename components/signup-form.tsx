@@ -91,14 +91,14 @@ export function SignupForm() {
         animate="visible"
         className="mb-8"
       >
-        <h1 className="text-3xl font-bold text-[#0F172A] mb-2">
+        <h1 className="text-3xl font-extrabold text-[#1D496C] mb-2">
           Create an account
         </h1>
         <p className="text-[#64748B] text-sm">
           Already have an account?{" "}
           <Link
             href="/login"
-            className="font-semibold text-[#4F46E5] hover:text-[#3730A3] transition-colors underline underline-offset-2"
+            className="font-bold text-[#FFA600] hover:text-[#ED6708] transition-colors underline underline-offset-2"
           >
             Sign in instead
           </Link>
@@ -117,7 +117,7 @@ export function SignupForm() {
         >
           <Label
             htmlFor="identifier"
-            className="text-sm font-semibold text-[#374151]"
+            className="text-sm font-bold text-[#1D496C]"
           >
             Email address or Mobile number
           </Label>
@@ -126,13 +126,13 @@ export function SignupForm() {
             (identifier.length > 0 && !/^\d+$/.test(identifier[0])) ? (
               <Mail
                 className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors duration-200 ${
-                  focused === "identifier" ? "text-[#4F46E5]" : "text-[#94A3B8]"
+                  focused === "identifier" ? "text-[#FFA600]" : "text-[#94A3B8]"
                 }`}
               />
             ) : (
               <Phone
                 className={`absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors duration-200 ${
-                  focused === "identifier" ? "text-[#4F46E5]" : "text-[#94A3B8]"
+                  focused === "identifier" ? "text-[#FFA600]" : "text-[#94A3B8]"
                 }`}
               />
             )}
@@ -145,7 +145,7 @@ export function SignupForm() {
               onChange={(e) => setIdentifier(e.target.value)}
               onFocus={() => setFocused("identifier")}
               onBlur={() => setFocused(null)}
-              className="pl-10 h-12 rounded-xl border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#CBD5E1] shadow-sm focus:border-[#4F46E5] focus:ring-2 focus:ring-[#4F46E5]/20 transition-all duration-200"
+              className="pl-10 h-12 rounded-xl border-[#E2E8F0] bg-white text-[#0F172A] placeholder:text-[#CBD5E1] shadow-sm focus:border-[#FFA600] focus:ring-2 focus:ring-[#FFA600]/20 transition-all duration-200"
             />
           </div>
         </motion.div>
@@ -157,7 +157,7 @@ export function SignupForm() {
             animate={{ opacity: 1 }}
             className="text-center"
           >
-            <p className="text-sm font-medium text-red-500">{error}</p>
+            <p className="text-sm font-semibold text-red-500">{error}</p>
           </motion.div>
         )}
 
@@ -172,7 +172,7 @@ export function SignupForm() {
           <Button
             type="submit"
             disabled={isLoading}
-            className="group relative w-full h-12 rounded-xl bg-gradient-to-r from-[#4F46E5] to-[#6D28D9] text-white font-semibold text-sm shadow-lg shadow-indigo-200 hover:shadow-indigo-300 hover:from-[#4338CA] hover:to-[#5B21B6] active:scale-[0.98] transition-all duration-200 disabled:opacity-70"
+            className="group relative w-full h-12 rounded-xl bg-gradient-to-r from-[#1D496C] via-[#285E89] to-[#429CE4] text-white font-bold text-sm shadow-lg shadow-[#1D496C]/10 hover:shadow-xl hover:from-[#153957] hover:to-[#2e7ca8] active:scale-[0.98] transition-all duration-200 disabled:opacity-70"
           >
             <AnimatePresence mode="wait" initial={false}>
               {isLoading ? (
@@ -214,9 +214,9 @@ export function SignupForm() {
         {["Secure OTP", "Privacy Protected", "Instant Access"].map((badge) => (
           <span
             key={badge}
-            className="flex items-center gap-1.5 text-[10px] font-medium text-[#94A3B8] uppercase tracking-wider"
+            className="flex items-center gap-1.5 text-[10px] font-bold text-[#94A3B8] uppercase tracking-wider"
           >
-            <span className="h-1.5 w-1.5 rounded-full bg-[#34D399] inline-block" />
+            <span className="h-1.5 w-1.5 rounded-full bg-[#6A7626] inline-block" />
             {badge}
           </span>
         ))}
