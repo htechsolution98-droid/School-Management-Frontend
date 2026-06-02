@@ -9,6 +9,7 @@ const LandingSettingsSchema = new Schema({
   heroSubtitle: { type: String, default: "Complete Smart School Management System" },
   heroDescription: { type: String, default: "Manage the complete school journey — from student admission to leaving certificate — with powerful digital panels for Trustees, Principals, Clerks, Teachers, Students, and Guardians." },
   heroImage: { type: String, default: "/sms hero.jpg" },
+  heroImages: { type: [String], default: ["/sms hero.jpg"] },
   satisfactionRate: { type: Number, default: 99.8 },
   stats: [
     {
@@ -32,6 +33,7 @@ const LandingSettingsSchema = new Schema({
   aboutDescription: { type: String, default: "VidhyaSanchalan is an advanced school ERP and management system designed to simplify daily school operations. It helps schools manage admissions, fees, staff, attendance, examinations, homework, reports, announcements, and student progress through separate role-based panels." },
   aboutQuote: { type: String, default: "The system supports both online and offline processes and provides transparency between school staff, students, and parents." },
   aboutImage: { type: String, default: "/about sms.jpg" },
+  aboutImages: { type: [String], default: ["/about sms.jpg"] },
   aboutHighlights: [
     {
       title: { type: String, required: true },
@@ -43,9 +45,17 @@ const LandingSettingsSchema = new Schema({
   whyTitleHighlight: { type: String, default: "revolution" },
   whyPills: { type: [String], default: ["100% Free Forever", "Instant Insights", "Limitless Scale"] },
   whyImageMain: { type: String, default: "/why chooseus.jpeg" },
+  whyImagesMain: { type: [String], default: ["/why chooseus.jpeg"] },
   whyImageLeft: { type: String, default: "/why choose us.jpg" },
   whyImageBottomLeft: { type: String, default: "/progress report.jpeg" },
   whyImageBottomRight: { type: String, default: "/admission (1).jpg" },
+  whyCollageCards: [
+    {
+      label: { type: String, required: true },
+      image: { type: String, required: true },
+      position: { type: String, enum: ["behind-left", "bottom-left", "bottom-right"], required: true }
+    }
+  ],
   mobileScreens: [
     {
       title: { type: String, required: true },
@@ -100,7 +110,8 @@ const LandingSettingsSchema = new Schema({
       desc: { type: String, required: true },
       points: [{ type: String }],
       color: { type: String, default: "from-[#429CE4] to-[#1D496C]" },
-      accent: { type: String, default: "text-[#429CE4] bg-white/10 border-[#429CE4]/20" }
+      accent: { type: String, default: "text-[#429CE4] bg-white/10 border-[#429CE4]/20" },
+      image: { type: String }
     }
   ],
   mobileInfrastructure: [
@@ -189,7 +200,12 @@ if (mongoose.models.LandingSettings) {
     !schemaPaths.mobileTabs ||
     !schemaPaths.modulesHeroTags ||
     !schemaPaths.modulesHeroImage ||
-    !schemaPaths.modulesGridCards
+    !schemaPaths.modulesGridCards ||
+    !schemaPaths.heroImages ||
+    !schemaPaths.aboutImages ||
+    !schemaPaths.whyImagesMain ||
+    !schemaPaths.whyCollageCards ||
+    !schemaPaths.moduleScreens
   ) {
     delete mongoose.models.LandingSettings;
   }

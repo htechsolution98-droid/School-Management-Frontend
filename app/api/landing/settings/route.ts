@@ -37,6 +37,7 @@ export async function PUT(request: Request) {
         settings.heroDescription = body.heroDescription;
         settings.satisfactionRate = body.satisfactionRate;
         if (body.heroImage !== undefined) settings.heroImage = body.heroImage;
+        if (body.heroImages !== undefined) settings.heroImages = body.heroImages;
         if (body.stats) settings.stats = body.stats;
         if (body.whyChooseUs) settings.whyChooseUs = body.whyChooseUs;
         // About Section fields
@@ -46,6 +47,7 @@ export async function PUT(request: Request) {
         if (body.aboutDescription !== undefined) settings.aboutDescription = body.aboutDescription;
         if (body.aboutQuote !== undefined) settings.aboutQuote = body.aboutQuote;
         if (body.aboutImage !== undefined) settings.aboutImage = body.aboutImage;
+        if (body.aboutImages !== undefined) settings.aboutImages = body.aboutImages;
         if (body.aboutHighlights !== undefined) settings.aboutHighlights = body.aboutHighlights;
 
         // Why Choose Us fields
@@ -54,9 +56,11 @@ export async function PUT(request: Request) {
         if (body.whyTitleHighlight !== undefined) settings.whyTitleHighlight = body.whyTitleHighlight;
         if (body.whyPills !== undefined) settings.whyPills = body.whyPills;
         if (body.whyImageMain !== undefined) settings.whyImageMain = body.whyImageMain;
+        if (body.whyImagesMain !== undefined) settings.whyImagesMain = body.whyImagesMain;
         if (body.whyImageLeft !== undefined) settings.whyImageLeft = body.whyImageLeft;
         if (body.whyImageBottomLeft !== undefined) settings.whyImageBottomLeft = body.whyImageBottomLeft;
         if (body.whyImageBottomRight !== undefined) settings.whyImageBottomRight = body.whyImageBottomRight;
+        if (body.whyCollageCards !== undefined) settings.whyCollageCards = body.whyCollageCards;
 
         // Mobile Ecosystem fields
         if (body.mobileScreens !== undefined) settings.mobileScreens = body.mobileScreens;

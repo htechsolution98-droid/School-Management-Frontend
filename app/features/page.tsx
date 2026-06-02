@@ -188,6 +188,7 @@ export default function FeaturesPage() {
                 points: tab.points || [],
                 color: tab.color,
                 accent: tab.accent,
+                image: tab.image,
               };
               ids.push(tab.tabId);
             });
@@ -250,14 +251,16 @@ export default function FeaturesPage() {
   // Dynamic appScreens list based on loaded tabIds and content
   const appScreens = tabIds.map((tabId, idx) => {
     const tabData = tabsContent[tabId] || {};
-    let img = "/mobile-2.png";
-    if (tabId === "student") img = "/mobile-1.png";
-    else if (tabId === "parent") img = "/mobile-2.png";
-    else if (tabId === "teacher") img = "/mobile-3.png";
-    else {
-      // Custom tab uses rotating images
-      const imgIdx = (idx % 3) + 1;
-      img = `/mobile-${imgIdx}.png`;
+    let img = tabData.image;
+    if (!img) {
+      if (tabId === "student") img = "/mobile-1.png";
+      else if (tabId === "parent") img = "/mobile-2.png";
+      else if (tabId === "teacher") img = "/mobile-3.png";
+      else {
+        // Custom tab uses rotating images
+        const imgIdx = (idx % 3) + 1;
+        img = `/mobile-${imgIdx}.png`;
+      }
     }
 
     return {
@@ -318,8 +321,7 @@ export default function FeaturesPage() {
                 <span className="absolute -bottom-1 left-0 h-0.5 w-full bg-gradient-to-r from-[#285E89] to-[#FFA600]"></span>
               </Link>
               <Link href="/modules" className="text-sm font-medium text-slate-600 transition-colors hover:text-[#FFA600]">Modules</Link>
-              <Link href="/#why-choose-us" className="text-sm font-medium text-slate-600 transition-colors hover:text-[#FFA600]">Why Choose Us</Link>
-              <Link href="/contact" className="text-sm font-medium text-slate-600 transition-colors hover:text-[#FFA600]">Contact</Link>
+              <Link href="/contact" className="text-sm font-medium text-slate-600 transition-colors hover:text-[#FFA600]">Contact Us</Link>
             </nav>
 
             {/* Action Buttons */}
@@ -365,8 +367,7 @@ export default function FeaturesPage() {
             <Link href="/" className="block text-sm font-medium text-slate-600 py-2 hover:text-[#FFA600]" onClick={() => setIsMenuOpen(false)}>Home</Link>
             <Link href="/features" className="block text-sm font-bold text-[#285E89] py-2 hover:text-[#FFA600]" onClick={() => setIsMenuOpen(false)}>Features</Link>
             <Link href="/modules" className="block text-sm font-medium text-slate-600 py-2 hover:text-[#FFA600]" onClick={() => setIsMenuOpen(false)}>Modules</Link>
-            <Link href="/#why-choose-us" className="block text-sm font-medium text-slate-600 py-2 hover:text-[#FFA600]" onClick={() => setIsMenuOpen(false)}>Why Choose Us</Link>
-            <Link href="/contact" className="block text-sm font-medium text-slate-600 py-2 hover:text-[#FFA600]" onClick={() => setIsMenuOpen(false)}>Contact</Link>
+            <Link href="/contact" className="block text-sm font-medium text-slate-600 py-2 hover:text-[#FFA600]" onClick={() => setIsMenuOpen(false)}>Contact Us</Link>
             <div className="border-t border-slate-100 pt-3 flex flex-col gap-2">
               <Button variant="outline" className="w-full text-slate-600 border-slate-200 hover:bg-slate-50 bg-transparent" asChild>
                 <Link href="/login" onClick={() => setIsMenuOpen(false)}>Sign In</Link>
@@ -490,11 +491,11 @@ export default function FeaturesPage() {
 
                 {/* Underglow shadow */}
                 <div className="absolute bottom-[30px] w-[240px] h-[40px] bg-[#429CE4]/20 blur-3xl rounded-full -z-10"></div>
-
-                {appScreens.map((screen, idx) => {
-                  // Calculate offsets relative to the sliderIndex
+                 {appScreens.map((screen, idx) => {
                   const total = appScreens.length;
-                  const diff = (idx - sliderIndex + total) % total;
+                  let diff = idx - sliderIndex;
+                  if (diff > total / 2) diff -= total;
+                  if (diff < -total / 2) diff += total;
 
                   let scale = 0.8;
                   let zIndex = 10;
@@ -509,20 +510,27 @@ export default function FeaturesPage() {
                     opacity = 1.0;
                     rotate = 0;
                     translateX = "0px";
-                  } else if (diff === 1 || diff === -2) {
+                  } else if (diff === 1 || (total === 2 && diff === -1)) {
                     // Right Slide
                     scale = 0.82;
                     zIndex = 20;
                     opacity = 0.65;
                     rotate = 5;
                     translateX = "110px";
-                  } else {
+                  } else if (diff === -1) {
                     // Left Slide
                     scale = 0.82;
                     zIndex = 20;
                     opacity = 0.65;
                     rotate = -5;
                     translateX = "-110px";
+                  } else {
+                    // Hidden Slide (for total > 3)
+                    scale = 0.6;
+                    zIndex = 0;
+                    opacity = 0;
+                    rotate = 0;
+                    translateX = "0px";
                   }
 
                   return (

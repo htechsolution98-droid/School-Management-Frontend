@@ -55,6 +55,7 @@ export default function AdminDashboard() {
   const [heroDescription, setHeroDescription] = useState("Manage the complete school journey — from student admission to leaving certificate — with powerful digital panels for Trustees, Principals, Clerks, Teachers, Students, and Guardians.");
   const [satisfactionRate, setSatisfactionRate] = useState(99.8);
   const [heroImage, setHeroImage] = useState("/sms hero.jpg");
+  const [heroImages, setHeroImages] = useState<string[]>([]);
   const [imagePreview, setImagePreview] = useState("/sms hero.jpg");
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -95,6 +96,8 @@ export default function AdminDashboard() {
           const img = settingsData.settings.heroImage || "/sms hero.jpg";
           setHeroImage(img);
           setImagePreview(img);
+          const imgs = settingsData.settings.heroImages || [img];
+          setHeroImages(imgs);
           if (settingsData.settings.aboutHighlights) {
             aboutHighlightsCount = settingsData.settings.aboutHighlights.length;
           }
@@ -185,6 +188,7 @@ export default function AdminDashboard() {
           heroDescription,
           satisfactionRate,
           heroImage,
+          heroImages,
         }),
       });
 
@@ -230,6 +234,7 @@ export default function AdminDashboard() {
       const data = await res.json();
 
       if (data.success) {
+        setHeroImages((prev) => [...prev, data.url]);
         setHeroImage(data.url);
         setImagePreview(data.url);
         toast.success("Hero image uploaded! Click Save to apply to the homepage.");
@@ -248,6 +253,7 @@ export default function AdminDashboard() {
 
   const handleRemoveImage = () => {
     setHeroImage("/sms hero.jpg");
+    setHeroImages(["/sms hero.jpg"]);
     setImagePreview("/sms hero.jpg");
     toast.success("Hero image reset to default. Click Save to apply.");
   };
@@ -581,12 +587,12 @@ export default function AdminDashboard() {
                     <img
                       src={imagePreview}
                       alt="Hero mockup preview"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover rounded-2xl"
                       onError={(e) => {
                         e.currentTarget.src = "/sms hero.jpg";
                       }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3 pointer-events-none">
                       <span className="text-[10px] font-bold text-white/80 truncate">{heroImage}</span>
                     </div>
                   </div>
@@ -594,6 +600,48 @@ export default function AdminDashboard() {
                     <Monitor className="h-3.5 w-3.5 text-slate-400" />
                     <span className="text-[10px] text-slate-400 font-medium">Displays in the homepage laptop/tablet frame mockup</span>
                   </div>
+
+                  {/* Multiple Images List */}
+                  {heroImages.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                      <Label className="text-xs font-bold text-slate-500 flex items-center gap-1">
+                        Active Slider Images ({heroImages.length})
+                      </Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {heroImages.map((imgUrl, idx) => (
+                          <div key={idx} className="relative group aspect-[16/10] rounded-xl overflow-hidden border border-slate-200 bg-slate-100">
+                            <img
+                              src={imgUrl}
+                              alt={`Hero preview ${idx + 1}`}
+                              className="w-full h-full object-cover cursor-pointer rounded-xl"
+                              onClick={() => {
+                                setHeroImage(imgUrl);
+                                setImagePreview(imgUrl);
+                              }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = heroImages.filter((_, i) => i !== idx);
+                                setHeroImages(updated);
+                                if (heroImage === imgUrl && updated.length > 0) {
+                                  setHeroImage(updated[updated.length - 1]);
+                                  setImagePreview(updated[updated.length - 1]);
+                                }
+                                toast.success("Image removed from slider list. Click Save to persist.");
+                              }}
+                              className="absolute top-1 right-1 h-5 w-5 bg-rose-500 text-white rounded-full flex items-center justify-center shadow-md hover:bg-rose-600 transition-colors"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                            <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-[8px] text-white text-center py-0.5 font-bold truncate">
+                              Image {idx + 1}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Upload Action Panel */}

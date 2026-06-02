@@ -33,6 +33,53 @@ export async function POST() {
         { label: "Teachers", target: 5, suffix: "K+", iconName: "BookOpen" },
         { label: "Parents", target: 100, suffix: "K+", iconName: "Heart" },
       ],
+      mobileTabs: [
+        {
+          tabId: "student",
+          badge: "Student Application",
+          title: "Learn Smarter, Grow Faster",
+          desc: "Designed to keep students organized, motivated, and engaged.",
+          points: [
+            "Homework Tracker",
+            "Online Examination",
+            "Student Timetable",
+            "Academic Analytics"
+          ],
+          color: "from-[#429CE4] to-[#1D496C]",
+          accent: "text-[#429CE4] bg-white/10 border-[#429CE4]/20",
+          image: "/mobile-1.png"
+        },
+        {
+          tabId: "parent",
+          badge: "Parent Companion App",
+          title: "Your Child's Progress, In Your Pocket",
+          desc: "Stay intimately connected with your child's educational journey.",
+          points: [
+            "Real-Time Geo-Attendance",
+            "Digital Fee Desk",
+            "Direct Parent-Teacher Chats",
+            "Comprehensive Report Cards"
+          ],
+          color: "from-[#FFA600] to-[#ED6708]",
+          accent: "text-[#FFA600] bg-white/10 border-[#FFA600]/20",
+          image: "/mobile-2.png"
+        },
+        {
+          tabId: "teacher",
+          badge: "Teacher Dashboard",
+          title: "Focus on Teaching, Automate the Rest",
+          desc: "Powerful admin tools in the palm of your hand.",
+          points: [
+            "Geo-Fenced Biometric Attendance",
+            "Mobile Grading Engine",
+            "Broadcaster Bulletin",
+            "Substitution Alerts"
+          ],
+          color: "from-[#6A7626] to-[#4F581D]",
+          accent: "text-[#E4FF4C] bg-white/10 border-white/20",
+          image: "/mobile-3.png"
+        }
+      ],
       whyChooseUs: [
         {
           title: "Innovation at our core",
