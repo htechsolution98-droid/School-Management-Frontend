@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import {
@@ -21,6 +21,10 @@ import {
   Smartphone,
   Cpu,
   CheckSquare,
+  ImageIcon,
+  Upload,
+  Monitor,
+  X,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -50,6 +54,11 @@ export default function AdminDashboard() {
   const [heroSubtitle, setHeroSubtitle] = useState("Complete Smart School Management System");
   const [heroDescription, setHeroDescription] = useState("Manage the complete school journey — from student admission to leaving certificate — with powerful digital panels for Trustees, Principals, Clerks, Teachers, Students, and Guardians.");
   const [satisfactionRate, setSatisfactionRate] = useState(99.8);
+  const [heroImage, setHeroImage] = useState("/sms hero.jpg");
+  const [heroImages, setHeroImages] = useState<string[]>([]);
+  const [imagePreview, setImagePreview] = useState("/sms hero.jpg");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Connection & seeding flags
   const [isDbConnected, setIsDbConnected] = useState(false);
@@ -84,6 +93,11 @@ export default function AdminDashboard() {
           setHeroSubtitle(settingsData.settings.heroSubtitle || "");
           setHeroDescription(settingsData.settings.heroDescription || "");
           setSatisfactionRate(settingsData.settings.satisfactionRate || 99.8);
+          const img = settingsData.settings.heroImage || "/sms hero.jpg";
+          setHeroImage(img);
+          setImagePreview(img);
+          const imgs = settingsData.settings.heroImages || [img];
+          setHeroImages(imgs);
           if (settingsData.settings.aboutHighlights) {
             aboutHighlightsCount = settingsData.settings.aboutHighlights.length;
           }
@@ -173,6 +187,8 @@ export default function AdminDashboard() {
           heroSubtitle,
           heroDescription,
           satisfactionRate,
+          heroImage,
+          heroImages,
         }),
       });
 
@@ -188,6 +204,58 @@ export default function AdminDashboard() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Invalid file type. Use JPG, PNG, WebP, or GIF.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image too large. Max size is 5MB.");
+      return;
+    }
+
+    // Show local preview immediately
+    const localUrl = URL.createObjectURL(file);
+    setImagePreview(localUrl);
+
+    setIsUploadingImage(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("context", "hero");
+
+      const res = await fetch("/api/landing/upload", { method: "POST", body: form });
+      const data = await res.json();
+
+      if (data.success) {
+        setHeroImages((prev) => [...prev, data.url]);
+        setHeroImage(data.url);
+        setImagePreview(data.url);
+        toast.success("Hero image uploaded! Click Save to apply to the homepage.");
+      } else {
+        toast.error(data.message || "Upload failed");
+        setImagePreview(heroImage); // revert preview
+      }
+    } catch {
+      toast.error("Upload error. Please try again.");
+      setImagePreview(heroImage); // revert preview
+    } finally {
+      setIsUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setHeroImage("/sms hero.jpg");
+    setHeroImages(["/sms hero.jpg"]);
+    setImagePreview("/sms hero.jpg");
+    toast.success("Hero image reset to default. Click Save to apply.");
   };
 
   const handleSeedDatabase = async () => {
@@ -494,6 +562,156 @@ export default function AdminDashboard() {
                 placeholder="e.g. Manage the complete school journey — from student admission to leaving certificate..."
                 className="rounded-xl border-slate-200 focus:border-[#429CE4] focus:ring-[#429CE4] leading-relaxed"
               />
+            </div>
+
+            {/* Hero Mockup Image Uploader */}
+            <div className="space-y-3 pt-4 border-t border-slate-100">
+              <Label className="text-sm font-bold text-slate-600 flex items-center gap-2">
+                <ImageIcon className="h-4 w-4 text-[#429CE4]" />
+                Main Hero Mockup Image
+              </Label>
+              <p className="text-xs text-slate-400">
+                Upload the primary showcase mockup image displayed on the right-hand side of the homepage hero section.
+              </p>
+
+              <div className="flex flex-col lg:flex-row gap-6 items-start mt-2">
+                {/* Image Preview Panel */}
+                <div className="relative w-full lg:w-64 flex-shrink-0">
+                  <div className="relative rounded-2xl overflow-hidden border-2 border-slate-200 bg-slate-900 aspect-[16/10] group shadow-inner">
+                    {isUploadingImage && (
+                      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-900/80 backdrop-blur-sm">
+                        <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#429CE4] border-t-transparent mb-2"></div>
+                        <span className="text-xs font-bold text-white">Uploading...</span>
+                      </div>
+                    )}
+                    <img
+                      src={imagePreview}
+                      alt="Hero mockup preview"
+                      className="w-full h-full object-cover rounded-2xl"
+                      onError={(e) => {
+                        e.currentTarget.src = "/sms hero.jpg";
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3 pointer-events-none">
+                      <span className="text-[10px] font-bold text-white/80 truncate">{heroImage}</span>
+                    </div>
+                  </div>
+                  <div className="mt-2 flex items-center gap-1.5">
+                    <Monitor className="h-3.5 w-3.5 text-slate-400" />
+                    <span className="text-[10px] text-slate-400 font-medium">Displays in the homepage laptop/tablet frame mockup</span>
+                  </div>
+
+                  {/* Multiple Images List */}
+                  {heroImages.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                      <Label className="text-xs font-bold text-slate-500 flex items-center gap-1">
+                        Active Slider Images ({heroImages.length})
+                      </Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {heroImages.map((imgUrl, idx) => (
+                          <div key={idx} className="relative group aspect-[16/10] rounded-xl overflow-hidden border border-slate-200 bg-slate-100">
+                            <img
+                              src={imgUrl}
+                              alt={`Hero preview ${idx + 1}`}
+                              className="w-full h-full object-cover cursor-pointer rounded-xl"
+                              onClick={() => {
+                                setHeroImage(imgUrl);
+                                setImagePreview(imgUrl);
+                              }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = heroImages.filter((_, i) => i !== idx);
+                                setHeroImages(updated);
+                                if (heroImage === imgUrl && updated.length > 0) {
+                                  setHeroImage(updated[updated.length - 1]);
+                                  setImagePreview(updated[updated.length - 1]);
+                                }
+                                toast.success("Image removed from slider list. Click Save to persist.");
+                              }}
+                              className="absolute top-1 right-1 h-5 w-5 bg-rose-500 text-white rounded-full flex items-center justify-center shadow-md hover:bg-rose-600 transition-colors"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                            <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-[8px] text-white text-center py-0.5 font-bold truncate">
+                              Image {idx + 1}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Upload Action Panel */}
+                <div className="flex-1 w-full space-y-4">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                    className="hidden"
+                    onChange={handleFileSelect}
+                  />
+
+                  <div
+                    onClick={() => !isUploadingImage && fileInputRef.current?.click()}
+                    className={`
+                      relative border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all
+                      ${isUploadingImage
+                        ? "border-[#429CE4]/40 bg-[#429CE4]/5 cursor-wait"
+                        : "border-slate-200 hover:border-[#429CE4]/60 hover:bg-[#429CE4]/5 active:scale-[0.99]"
+                      }
+                    `}
+                  >
+                    <div className="flex flex-col items-center gap-3">
+                      <div className={`h-12 w-12 rounded-xl flex items-center justify-center ${isUploadingImage ? "bg-[#429CE4]/10" : "bg-slate-100"}`}>
+                        {isUploadingImage ? (
+                          <RefreshCw className="h-5 w-5 text-[#429CE4] animate-spin" />
+                        ) : (
+                          <Upload className="h-5 w-5 text-slate-400" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-slate-700">
+                          {isUploadingImage ? "Uploading image..." : "Click or drag to upload new mockup image"}
+                        </p>
+                        <p className="text-xs text-slate-400 mt-1">JPG, PNG, WebP, GIF — max 5MB</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    <Button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploadingImage}
+                      className="rounded-xl bg-[#429CE4] hover:bg-[#1D496C] text-white font-bold shadow-md shadow-[#429CE4]/20"
+                    >
+                      <Upload className="mr-2 h-4 w-4" />
+                      {isUploadingImage ? "Uploading..." : "Choose Image"}
+                    </Button>
+                    {heroImage !== "/sms hero.jpg" && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleRemoveImage}
+                        className="rounded-xl border-slate-200 text-rose-500 hover:border-rose-200 hover:bg-rose-50 font-bold"
+                      >
+                        <X className="mr-2 h-4 w-4" />
+                        Reset to Default
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="rounded-xl bg-amber-50 border border-amber-100 px-4 py-3 flex items-start gap-2">
+                    <Sparkles className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
+                    <p className="text-xs text-amber-700 font-medium">
+                      After selecting and uploading your mockup image, click <strong>"Save Copy Settings"</strong> below to persist your changes dynamically.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="flex justify-end pt-4 border-t border-slate-100">

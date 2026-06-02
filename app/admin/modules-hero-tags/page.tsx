@@ -21,6 +21,8 @@ import {
   Upload,
   Monitor,
   Sparkles,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,9 +51,10 @@ export default function ModulesHeroTagsPage() {
   const [isDbConnected, setIsDbConnected] = useState(false);
   const editInputRef = useRef<HTMLInputElement>(null);
 
-  // Image state
-  const [heroImage, setHeroImage] = useState(DEFAULT_IMAGE);
-  const [imagePreview, setImagePreview] = useState(DEFAULT_IMAGE);
+  // Multiple Mockup Images state
+  const [moduleScreens, setModuleScreens] = useState<string[]>([DEFAULT_IMAGE]);
+  const [heroImage, setHeroImage] = useState(DEFAULT_IMAGE); // Reference fallback
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -65,6 +68,15 @@ export default function ModulesHeroTagsPage() {
     }
   }, [editingIdx]);
 
+  // Autoplay mockup slideshow in the admin live preview
+  useEffect(() => {
+    if (moduleScreens.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentSlideIndex((prev) => (prev + 1) % moduleScreens.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [moduleScreens]);
+
   const loadTags = async () => {
     setIsLoading(true);
     try {
@@ -74,74 +86,118 @@ export default function ModulesHeroTagsPage() {
         setIsDbConnected(true);
         const loaded = data.settings?.modulesHeroTags;
         setTags(Array.isArray(loaded) && loaded.length > 0 ? loaded : DEFAULT_TAGS);
+        
         const img = data.settings?.modulesHeroImage || DEFAULT_IMAGE;
         setHeroImage(img);
-        setImagePreview(img);
+
+        const screens = data.settings?.moduleScreens;
+        if (Array.isArray(screens) && screens.length > 0) {
+          setModuleScreens(screens);
+        } else {
+          setModuleScreens([img]);
+        }
+        setCurrentSlideIndex(0);
       } else {
         setIsDbConnected(false);
         setTags(DEFAULT_TAGS);
+        setModuleScreens([DEFAULT_IMAGE]);
       }
     } catch {
       setIsDbConnected(false);
       setTags(DEFAULT_TAGS);
+      setModuleScreens([DEFAULT_IMAGE]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // ── Image Upload ─────────────────────────────────────────────────────────
+  // ── Multiple Image Upload ─────────────────────────────────────────────────
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
-    if (!allowedTypes.includes(file.type)) {
-      toast.error("Invalid file type. Use JPG, PNG, WebP, or GIF.");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image too large. Max size is 5MB.");
-      return;
-    }
-
-    // Show local preview immediately
-    const localUrl = URL.createObjectURL(file);
-    setImagePreview(localUrl);
+    const uploadedUrls: string[] = [];
 
     setIsUploadingImage(true);
     try {
-      const form = new FormData();
-      form.append("file", file);
-      form.append("context", "modules-hero");
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!allowedTypes.includes(file.type)) {
+          toast.error(`Invalid type for ${file.name}. Use JPG, PNG, WebP, or GIF.`);
+          continue;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+          toast.error(`${file.name} is too large. Max 5MB.`);
+          continue;
+        }
 
-      const res = await fetch("/api/landing/upload", { method: "POST", body: form });
-      const data = await res.json();
+        const form = new FormData();
+        form.append("file", file);
+        form.append("context", "modules-hero");
 
-      if (data.success) {
-        setHeroImage(data.url);
-        setImagePreview(data.url);
-        toast.success("Image uploaded! Click Save to apply to the website.");
-      } else {
-        toast.error(data.message || "Upload failed");
-        setImagePreview(heroImage); // revert preview
+        const res = await fetch("/api/landing/upload", { method: "POST", body: form });
+        const data = await res.json();
+
+        if (data.success) {
+          uploadedUrls.push(data.url);
+        } else {
+          toast.error(data.message || `Upload failed for ${file.name}`);
+        }
+      }
+
+      if (uploadedUrls.length > 0) {
+        setModuleScreens((prev) => {
+          // If first item is the default placeholder and we upload a new one, replace it
+          const filterDefault = prev.length === 1 && prev[0] === DEFAULT_IMAGE ? [] : prev;
+          const updated = [...filterDefault, ...uploadedUrls];
+          setCurrentSlideIndex(updated.length - uploadedUrls.length);
+          return updated;
+        });
+        toast.success(`Uploaded ${uploadedUrls.length} mockup image(s). Click Save to persist.`);
       }
     } catch {
       toast.error("Upload error. Please try again.");
-      setImagePreview(heroImage); // revert preview
     } finally {
       setIsUploadingImage(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
-  const handleRemoveImage = () => {
-    setHeroImage(DEFAULT_IMAGE);
-    setImagePreview(DEFAULT_IMAGE);
-    toast.success("Image reset to default. Click Save to apply.");
+  const handleRemoveImageIndex = (idxToRemove: number) => {
+    if (moduleScreens.length <= 1) {
+      setModuleScreens([DEFAULT_IMAGE]);
+      setCurrentSlideIndex(0);
+      toast.success("Mockup reset to default image. Click Save to persist.");
+      return;
+    }
+    const updated = moduleScreens.filter((_, i) => i !== idxToRemove);
+    setModuleScreens(updated);
+    setCurrentSlideIndex((prev) => {
+      if (prev >= updated.length) return updated.length - 1;
+      return prev;
+    });
+    toast.success("Image removed from list. Click Save to persist.");
   };
 
-  // ── Tags operations ───────────────────────────────────────────────────────
-  const saveTags = async (tagList: string[], imageUrl?: string) => {
+  const handleMoveImageLeft = (idx: number) => {
+    if (idx === 0) return;
+    const u = [...moduleScreens];
+    [u[idx - 1], u[idx]] = [u[idx], u[idx - 1]];
+    setModuleScreens(u);
+    setCurrentSlideIndex(idx - 1);
+  };
+
+  const handleMoveImageRight = (idx: number) => {
+    if (idx === moduleScreens.length - 1) return;
+    const u = [...moduleScreens];
+    [u[idx], u[idx + 1]] = [u[idx + 1], u[idx]];
+    setModuleScreens(u);
+    setCurrentSlideIndex(idx + 1);
+  };
+
+  // ── Tags & Multiple Slider Images Saving ──────────────────────────────────
+  const saveTags = async (tagList: string[], screensList: string[]) => {
     setIsSaving(true);
     try {
       const res = await fetch("/api/landing/settings", {
@@ -149,14 +205,18 @@ export default function ModulesHeroTagsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           modulesHeroTags: tagList,
-          modulesHeroImage: imageUrl ?? heroImage,
+          modulesHeroImage: screensList[0] || DEFAULT_IMAGE,
+          moduleScreens: screensList,
         }),
       });
       const data = await res.json();
       if (data.success) {
-        toast.success("Modules hero settings saved successfully!");
+        toast.success("Modules settings saved successfully!");
         setTags(tagList);
-        if (imageUrl) setHeroImage(imageUrl);
+        setModuleScreens(screensList);
+        if (screensList.length > 0) {
+          setHeroImage(screensList[0]);
+        }
       } else {
         toast.error(data.message || "Failed to save");
       }
@@ -244,59 +304,90 @@ export default function ModulesHeroTagsPage() {
         </div>
       </div>
 
-      {/* ── HERO IMAGE UPLOAD ───────────────────────────────────────────────── */}
+      {/* ── HERO SLIDER IMAGES UPLOAD ───────────────────────────────────────── */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
         <div className="bg-gradient-to-r from-[#8B5CF6]/5 to-[#429CE4]/5 border-b border-slate-100 px-6 py-4">
           <h3 className="text-sm font-black text-slate-700 uppercase tracking-wider flex items-center gap-2">
             <ImageIcon className="h-4 w-4 text-[#8B5CF6]" />
-            Hero Mockup Image
+            Hero Mockup Slider Images
           </h3>
-          <p className="text-xs text-slate-400 mt-1">Upload the screenshot/mockup displayed in the laptop frame on the right side of the modules hero section</p>
+          <p className="text-xs text-slate-400 mt-1">Upload and manage the screenshots/mockups displayed in the laptop mockup slider inside the modules hero section.</p>
         </div>
 
         <div className="p-6">
-          <div className="flex flex-col lg:flex-row gap-6 items-start">
-            {/* Preview */}
-            <div className="relative w-full lg:w-64 flex-shrink-0">
-              <div className="relative rounded-2xl overflow-hidden border-2 border-slate-200 bg-slate-900 aspect-[16/10] group">
-                {isUploadingImage && (
-                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-900/80 backdrop-blur-sm">
-                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#8B5CF6] border-t-transparent mb-2"></div>
-                    <span className="text-xs font-bold text-white">Uploading...</span>
+          <div className="flex flex-col lg:flex-row gap-8 items-start">
+            {/* Live mockup preview frame (Left Column) */}
+            <div className="relative w-full lg:w-72 flex-shrink-0">
+              <div className="relative rounded-2xl overflow-hidden border-2 border-slate-200 bg-slate-950 p-1.5 aspect-[16/10] shadow-md group">
+                <div className="flex items-center gap-1.5 px-3 py-1 border-b border-white/5 bg-slate-900/40 rounded-t-xl">
+                  <div className="w-2 h-2 rounded-full bg-red-500/80"></div>
+                  <div className="w-2 h-2 rounded-full bg-yellow-500/80"></div>
+                  <div className="w-2 h-2 rounded-full bg-green-500/80"></div>
+                </div>
+
+                <div className="relative aspect-[16/10] overflow-hidden bg-slate-900 rounded-b-xl">
+                  {isUploadingImage && (
+                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-slate-900/80 backdrop-blur-sm">
+                      <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#8B5CF6] border-t-transparent mb-2"></div>
+                      <span className="text-xs font-bold text-white">Uploading...</span>
+                    </div>
+                  )}
+                  <img
+                    src={moduleScreens[currentSlideIndex] || DEFAULT_IMAGE}
+                    alt="Mockup preview"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = DEFAULT_IMAGE;
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                    <span className="text-[10px] font-bold text-white/80 truncate">
+                      {moduleScreens[currentSlideIndex] || DEFAULT_IMAGE}
+                    </span>
                   </div>
-                )}
-                <img
-                  src={imagePreview}
-                  alt="Hero mockup preview"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src = DEFAULT_IMAGE;
-                  }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
-                  <span className="text-[10px] font-bold text-white/80 truncate">{heroImage}</span>
+
+                  {/* Dot navigation indicators */}
+                  {moduleScreens.length > 1 && (
+                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-20 bg-slate-950/60 px-2 py-0.5 rounded-full border border-white/10 backdrop-blur-sm">
+                      {moduleScreens.map((_, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setCurrentSlideIndex(idx)}
+                          className={`h-1.5 rounded-full transition-all duration-300 ${
+                            idx === currentSlideIndex 
+                              ? "bg-[#FFA600] w-3" 
+                              : "bg-white/40 hover:bg-white w-1.5"
+                          }`}
+                          aria-label={`Go to slide ${idx + 1}`}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
-              <div className="mt-2 flex items-center gap-1.5">
+              <div className="mt-2 flex items-center gap-1.5 pl-1">
                 <Monitor className="h-3.5 w-3.5 text-slate-400" />
-                <span className="text-[10px] text-slate-400 font-medium">Displays inside laptop frame mockup</span>
+                <span className="text-[10px] text-slate-400 font-medium">Previewing slide #{currentSlideIndex + 1}</span>
               </div>
             </div>
 
-            {/* Upload controls */}
-            <div className="flex-1 space-y-4">
+            {/* Upload & Management Area (Right Column) */}
+            <div className="flex-1 w-full space-y-6">
               <input
                 ref={fileInputRef}
                 type="file"
+                multiple
                 accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
                 className="hidden"
                 onChange={handleFileSelect}
               />
 
+              {/* Drag/Click Zone */}
               <div
                 onClick={() => !isUploadingImage && fileInputRef.current?.click()}
                 className={`
-                  relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all
+                  relative border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all
                   ${isUploadingImage
                     ? "border-[#8B5CF6]/40 bg-[#8B5CF6]/5 cursor-wait"
                     : "border-slate-200 hover:border-[#8B5CF6]/60 hover:bg-[#8B5CF6]/5 active:scale-[0.99]"
@@ -304,7 +395,7 @@ export default function ModulesHeroTagsPage() {
                 `}
               >
                 <div className="flex flex-col items-center gap-3">
-                  <div className={`h-12 w-12 rounded-xl flex items-center justify-center ${isUploadingImage ? "bg-[#8B5CF6]/10" : "bg-slate-100"}`}>
+                  <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${isUploadingImage ? "bg-[#8B5CF6]/10" : "bg-slate-100"}`}>
                     {isUploadingImage ? (
                       <RefreshCw className="h-5 w-5 text-[#8B5CF6] animate-spin" />
                     ) : (
@@ -313,14 +404,73 @@ export default function ModulesHeroTagsPage() {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-slate-700">
-                      {isUploadingImage ? "Uploading image..." : "Click to upload new image"}
+                      {isUploadingImage ? "Uploading files..." : "Click to select mockup image(s)"}
                     </p>
-                    <p className="text-xs text-slate-400 mt-1">JPG, PNG, WebP, GIF — max 5MB</p>
+                    <p className="text-xs text-slate-400 mt-1">JPG, PNG, WebP, GIF — max 5MB (Multiple uploads allowed)</p>
                   </div>
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-3">
+              {/* Slider Images Grid */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-black text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <ImageIcon className="h-3.5 w-3.5 text-slate-400" />
+                  Slider Images ({moduleScreens.length})
+                </h4>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {moduleScreens.map((url, index) => (
+                    <div
+                      key={`${url}-${index}`}
+                      className={`relative group rounded-xl overflow-hidden border-2 bg-slate-50 p-1.5 transition-all cursor-pointer flex flex-col justify-between
+                        ${currentSlideIndex === index ? "border-[#8B5CF6] shadow-sm bg-[#8B5CF6]/5" : "border-slate-100 hover:border-slate-200"}`}
+                      onClick={() => setCurrentSlideIndex(index)}
+                    >
+                      <div className="aspect-[16/10] rounded-lg overflow-hidden bg-slate-200 relative">
+                        <img src={url} alt={`Slide ${index + 1}`} className="w-full h-full object-cover select-none pointer-events-none" />
+                        <div className="absolute top-1 left-1 bg-black/60 backdrop-blur-sm text-[9px] font-black text-white px-1.5 py-0.5 rounded">
+                          Slide {index + 1}
+                        </div>
+                      </div>
+                      
+                      {/* Controls row */}
+                      <div className="flex items-center justify-between mt-2 pt-1 border-t border-slate-100/60">
+                        <div className="flex gap-0.5">
+                          <button
+                            type="button"
+                            disabled={index === 0}
+                            onClick={(e) => { e.stopPropagation(); handleMoveImageLeft(index); }}
+                            className="h-5 w-5 flex items-center justify-center rounded text-slate-400 hover:text-[#8B5CF6] hover:bg-slate-100 disabled:opacity-20 disabled:pointer-events-none transition-colors"
+                            title="Move Left"
+                          >
+                            <ChevronLeft className="h-3.5 w-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={index === moduleScreens.length - 1}
+                            onClick={(e) => { e.stopPropagation(); handleMoveImageRight(index); }}
+                            className="h-5 w-5 flex items-center justify-center rounded text-slate-400 hover:text-[#8B5CF6] hover:bg-slate-100 disabled:opacity-20 disabled:pointer-events-none transition-colors"
+                            title="Move Right"
+                          >
+                            <ChevronRight className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                        
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); handleRemoveImageIndex(index); }}
+                          className="h-5 w-5 flex items-center justify-center rounded text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors"
+                          title="Delete Image"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Upload actions */}
+              <div className="flex flex-wrap gap-3 pt-2">
                 <Button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
@@ -328,13 +478,17 @@ export default function ModulesHeroTagsPage() {
                   className="rounded-xl bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-bold shadow-md shadow-[#8B5CF6]/20"
                 >
                   <Upload className="mr-2 h-4 w-4" />
-                  {isUploadingImage ? "Uploading..." : "Choose Image"}
+                  {isUploadingImage ? "Uploading..." : "Upload Image(s)"}
                 </Button>
-                {heroImage !== DEFAULT_IMAGE && (
+                {(moduleScreens.length > 1 || moduleScreens[0] !== DEFAULT_IMAGE) && (
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={handleRemoveImage}
+                    onClick={() => {
+                      setModuleScreens([DEFAULT_IMAGE]);
+                      setCurrentSlideIndex(0);
+                      toast.success("Images reset to defaults. Click Save to apply.");
+                    }}
                     className="rounded-xl border-slate-200 text-rose-500 hover:border-rose-200 hover:bg-rose-50 font-bold"
                   >
                     <X className="mr-2 h-4 w-4" />
@@ -346,7 +500,7 @@ export default function ModulesHeroTagsPage() {
               <div className="rounded-xl bg-amber-50 border border-amber-100 px-4 py-3 flex items-start gap-2">
                 <Sparkles className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
                 <p className="text-xs text-amber-700 font-medium">
-                  After uploading, click <strong>"Save to Database"</strong> below to push the new image live to the public Modules page.
+                  After managing your slider images, click <strong>"Save to Database"</strong> below to push the new slider configuration live to the public modules section.
                 </p>
               </div>
             </div>
@@ -476,7 +630,7 @@ export default function ModulesHeroTagsPage() {
           {/* Save button */}
           <div className="flex flex-wrap gap-3">
             <Button
-              onClick={() => saveTags(tags, heroImage)}
+              onClick={() => saveTags(tags, moduleScreens)}
               disabled={isSaving || tags.length === 0}
               className="rounded-xl bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] text-white font-bold px-6 py-5 shadow-lg shadow-[#8B5CF6]/20 hover:opacity-90 transition-all"
             >
@@ -547,17 +701,51 @@ export default function ModulesHeroTagsPage() {
                 <div className="relative">
                   <div className="rounded-xl overflow-hidden bg-slate-950/80 border border-white/10 shadow-2xl">
                     <div className="flex items-center gap-1 px-3 py-1.5 border-b border-white/5 bg-slate-900/40">
-                      <div className="w-2 h-2 rounded-full bg-red-500/80"></div>
-                      <div className="w-2 h-2 rounded-full bg-yellow-500/80"></div>
-                      <div className="w-2 h-2 rounded-full bg-green-500/80"></div>
+                      <div className="w-2.5 h-2.5 rounded-full bg-red-500/80"></div>
+                      <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80"></div>
+                      <div className="w-2.5 h-2.5 rounded-full bg-green-500/80"></div>
                     </div>
-                    <div className="aspect-[16/10] overflow-hidden bg-slate-900">
-                      <img
-                        src={imagePreview}
-                        alt="Mockup"
-                        className="w-full h-full object-cover"
-                        onError={(e) => { e.currentTarget.src = DEFAULT_IMAGE; }}
-                      />
+                    <div className="aspect-[16/10] overflow-hidden bg-slate-900 relative flex items-center justify-center">
+                      <AnimatePresence mode="wait">
+                        {moduleScreens.length > 0 && moduleScreens[currentSlideIndex] ? (
+                          <motion.img 
+                            key={currentSlideIndex}
+                            src={moduleScreens[currentSlideIndex]} 
+                            alt="Mockup preview"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 1.05 }}
+                            transition={{ duration: 0.5 }}
+                            onError={(e) => { e.currentTarget.src = DEFAULT_IMAGE; }}
+                            className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
+                          />
+                        ) : (
+                          <img 
+                            src={DEFAULT_IMAGE} 
+                            alt="Mockup fallback"
+                            className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
+                          />
+                        )}
+                      </AnimatePresence>
+
+                      {/* Dots indicator overlays in live preview */}
+                      {moduleScreens.length > 1 && (
+                        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20 bg-slate-950/60 px-3 py-1 rounded-full border border-white/10 backdrop-blur-sm">
+                          {moduleScreens.map((_, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => setCurrentSlideIndex(idx)}
+                              className={`h-1.5 rounded-full transition-all duration-300 ${
+                                idx === currentSlideIndex 
+                                  ? "bg-[#FFA600] w-3.5 animate-pulse" 
+                                  : "bg-white/40 hover:bg-white w-1.5"
+                              }`}
+                              aria-label={`Go to slide ${idx + 1}`}
+                            />
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                   {isUploadingImage && (
@@ -587,10 +775,10 @@ export default function ModulesHeroTagsPage() {
               How This Works
             </h4>
             <ul className="space-y-2 text-xs text-slate-600">
-              <li className="flex items-start gap-2"><span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-[#8B5CF6] shrink-0"></span><span><strong>Upload</strong> a mockup screenshot/image using the uploader above</span></li>
-              <li className="flex items-start gap-2"><span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-[#8B5CF6] shrink-0"></span><span><strong>Add / reorder / edit / delete</strong> checklist tags from the left panel</span></li>
-              <li className="flex items-start gap-2"><span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-[#8B5CF6] shrink-0"></span><span><strong>Preview</strong> updates in real time — image and tags together</span></li>
-              <li className="flex items-start gap-2"><span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-[#8B5CF6] shrink-0"></span><span><strong>Save to Database</strong> pushes both image & tags live to the website</span></li>
+              <li className="flex items-start gap-2"><span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-[#8B5CF6] shrink-0"></span><span><strong>Upload</strong> multiple mockup screenshots using the uploader above</span></li>
+              <li className="flex items-start gap-2"><span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-[#8B5CF6] shrink-0"></span><span><strong>Reorder</strong> slider screenshots by shifting them left/right, or delete them</span></li>
+              <li className="flex items-start gap-2"><span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-[#8B5CF6] shrink-0"></span><span><strong>Preview</strong> updates in real time — both checklist tags and the autoplaying mockup slider</span></li>
+              <li className="flex items-start gap-2"><span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-[#8B5CF6] shrink-0"></span><span><strong>Save to Database</strong> pushes tags and slider screenshots live to the Modules page</span></li>
             </ul>
           </div>
         </div>

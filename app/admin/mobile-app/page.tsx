@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Smartphone,
@@ -18,6 +18,8 @@ import {
   FileText,
   RotateCcw,
   Sparkles,
+  Upload,
+  Loader2,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,6 +36,7 @@ interface MobileTab {
   points: string[];
   color: string;
   accent: string;
+  image?: string;
 }
 
 const PRESET_THEMES = [
@@ -82,7 +85,8 @@ const DEFAULT_SEEDS: MobileTab[] = [
       "Academic Analytics"
     ],
     color: "from-[#429CE4] to-[#1D496C]",
-    accent: "text-[#429CE4] bg-white/10 border-[#429CE4]/20"
+    accent: "text-[#429CE4] bg-white/10 border-[#429CE4]/20",
+    image: "/mobile-1.png"
   },
   {
     tabId: "parent",
@@ -96,7 +100,8 @@ const DEFAULT_SEEDS: MobileTab[] = [
       "Comprehensive Report Cards"
     ],
     color: "from-[#FFA600] to-[#ED6708]",
-    accent: "text-[#FFA600] bg-white/10 border-[#FFA600]/20"
+    accent: "text-[#FFA600] bg-white/10 border-[#FFA600]/20",
+    image: "/mobile-2.png"
   },
   {
     tabId: "teacher",
@@ -110,7 +115,8 @@ const DEFAULT_SEEDS: MobileTab[] = [
       "Substitution Alerts"
     ],
     color: "from-[#6A7626] to-[#4F581D]",
-    accent: "text-[#E4FF4C] bg-white/10 border-white/20"
+    accent: "text-[#E4FF4C] bg-white/10 border-white/20",
+    image: "/mobile-3.png"
   }
 ];
 
@@ -131,6 +137,9 @@ export default function MobileAppRolesManager() {
   const [desc, setDesc] = useState("");
   const [points, setPoints] = useState<string[]>([""]);
   const [selectedThemeIndex, setSelectedThemeIndex] = useState(0);
+  const [image, setImage] = useState("");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadSettings();
@@ -167,6 +176,7 @@ export default function MobileAppRolesManager() {
     setDesc("");
     setPoints([""]);
     setSelectedThemeIndex(0);
+    setImage("");
     setIsOpen(true);
   };
 
@@ -177,12 +187,43 @@ export default function MobileAppRolesManager() {
     setTitle(tab.title);
     setDesc(tab.desc);
     setPoints(tab.points?.length ? tab.points : [""]);
+    setImage(tab.image || "");
     
     // Attempt to match existing theme
     const themeIdx = PRESET_THEMES.findIndex(t => t.color === tab.color);
     setSelectedThemeIndex(themeIdx >= 0 ? themeIdx : 0);
     
     setIsOpen(true);
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingImage(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("context", "mobile-app");
+
+      const res = await fetch("/api/landing/upload", {
+        method: "POST",
+        body: form,
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setImage(data.url);
+        toast.success("Screenshot uploaded successfully!");
+      } else {
+        toast.error(data.message || "Upload failed");
+      }
+    } catch {
+      toast.error("Upload error. Please try again.");
+    } finally {
+      setIsUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   };
 
   const handleAddPointField = () => setPoints([...points, ""]);
@@ -255,6 +296,7 @@ export default function MobileAppRolesManager() {
       points: filteredPoints,
       color: theme.color,
       accent: theme.accent,
+      image,
     };
 
     let updatedTabs = [...mobileTabs];
@@ -415,9 +457,15 @@ export default function MobileAppRolesManager() {
                         }`}
                       >
                         <div className="flex items-center gap-3">
-                          <div className={`h-8 w-8 rounded-lg bg-gradient-to-r ${tab.color} shrink-0 flex items-center justify-center text-white text-[10px] font-black uppercase`}>
-                            {tab.tabId.substring(0, 2)}
-                          </div>
+                          {tab.image ? (
+                            <div className="h-10 w-7 rounded overflow-hidden border border-slate-200 bg-slate-900 shrink-0 shadow-sm flex items-center justify-center">
+                              <img src={tab.image} alt={tab.badge} className="h-full w-full object-cover" />
+                            </div>
+                          ) : (
+                            <div className={`h-8 w-8 rounded-lg bg-gradient-to-r ${tab.color} shrink-0 flex items-center justify-center text-white text-[10px] font-black uppercase`}>
+                              {tab.tabId.substring(0, 2)}
+                            </div>
+                          )}
                           <div>
                             <div className="flex items-center gap-2">
                               <span className="font-extrabold text-sm text-slate-800 capitalize">{tab.tabId}</span>
@@ -527,12 +575,22 @@ export default function MobileAppRolesManager() {
                   <div className="absolute top-1.5 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-slate-800 rounded-full z-40"></div>
 
                   {/* Screen Content Wrapper */}
-                  <div className="w-full h-full rounded-[2.1rem] overflow-hidden bg-[#102d45] relative flex flex-col justify-between p-5 text-white select-none">
-                    {/* Background glow matching theme */}
-                    <div className={`absolute inset-0 bg-gradient-to-b ${activePreviewData.color} opacity-95 -z-10`} />
+                  <div className="w-full h-full rounded-[2.1rem] overflow-hidden bg-slate-900 relative flex flex-col justify-between p-5 text-white select-none">
+                    {activePreviewData.image ? (
+                      <>
+                        <img
+                          src={activePreviewData.image}
+                          alt={activePreviewData.title}
+                          className="w-full h-full object-cover absolute inset-0 pointer-events-none"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent"></div>
+                      </>
+                    ) : (
+                      <div className={`absolute inset-0 bg-gradient-to-b ${activePreviewData.color} opacity-95 -z-10`} />
+                    )}
 
                     {/* Top status bar mock */}
-                    <div className="flex justify-between items-center text-[10px] font-bold text-white/70 px-1 pt-1.5">
+                    <div className="flex justify-between items-center text-[10px] font-bold text-white/70 px-1 pt-1.5 z-10">
                       <span>9:41</span>
                       <div className="flex items-center gap-1">
                         <span className="h-2 w-2.5 rounded-sm bg-white/70"></span>
@@ -540,36 +598,42 @@ export default function MobileAppRolesManager() {
                       </div>
                     </div>
 
-                    {/* App badge & main details */}
-                    <div className="mt-8 space-y-4">
-                      <span className={`inline-block px-2.5 py-0.5 rounded-full border text-[9px] font-black tracking-wider uppercase ${activePreviewData.accent}`}>
-                        {activePreviewData.badge || "System App"}
-                      </span>
-                      <div>
-                        <h3 className="text-lg font-black leading-tight text-white">{activePreviewData.title}</h3>
-                        <p className="text-[11px] text-white/80 font-medium leading-relaxed mt-1.5">
-                          {activePreviewData.desc}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Highlights Points List */}
-                    <div className="flex-1 mt-6 overflow-y-auto pr-1 space-y-2 max-h-[170px] scrollbar-thin">
-                      {activePreviewData.points?.map((point, index) => (
-                        <div
-                          key={index}
-                          className="flex items-start gap-2 bg-white/5 border border-white/10 rounded-lg p-2 hover:bg-white/10 transition-colors"
-                        >
-                          <div className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-white/15 text-white mt-0.5">
-                            <CheckCircle2 className="h-3 w-3 stroke-[2.5]" />
+                    {!activePreviewData.image ? (
+                      <>
+                        {/* App badge & main details */}
+                        <div className="mt-8 space-y-4">
+                          <span className={`inline-block px-2.5 py-0.5 rounded-full border text-[9px] font-black tracking-wider uppercase ${activePreviewData.accent}`}>
+                            {activePreviewData.badge || "System App"}
+                          </span>
+                          <div>
+                            <h3 className="text-lg font-black leading-tight text-white">{activePreviewData.title}</h3>
+                            <p className="text-[11px] text-white/80 font-medium leading-relaxed mt-1.5">
+                              {activePreviewData.desc}
+                            </p>
                           </div>
-                          <span className="text-[10px] font-extrabold text-white leading-tight">{point}</span>
                         </div>
-                      ))}
-                    </div>
+
+                        {/* Highlights Points List */}
+                        <div className="flex-1 mt-6 overflow-y-auto pr-1 space-y-2 max-h-[170px] scrollbar-thin">
+                          {activePreviewData.points?.map((point, index) => (
+                            <div
+                              key={index}
+                              className="flex items-start gap-2 bg-white/5 border border-white/10 rounded-lg p-2 hover:bg-white/10 transition-colors"
+                            >
+                              <div className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-white/15 text-white mt-0.5">
+                                <CheckCircle2 className="h-3 w-3 stroke-[2.5]" />
+                              </div>
+                              <span className="text-[10px] font-extrabold text-white leading-tight">{point}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex-1" />
+                    )}
 
                     {/* Bottom home bar indicator */}
-                    <div className="w-full flex justify-center pb-0.5">
+                    <div className="w-full flex justify-center pb-0.5 z-10">
                       <div className="w-20 h-1 bg-white/30 rounded-full"></div>
                     </div>
                   </div>
@@ -679,6 +743,63 @@ export default function MobileAppRolesManager() {
                 </select>
                 {/* Theme Color Preview */}
                 <div className={`h-2.5 rounded-full bg-gradient-to-r ${PRESET_THEMES[selectedThemeIndex].color} mt-1`} />
+              </div>
+
+              {/* Image Upload */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-black text-slate-600">Mobile Screenshot (Optional)</Label>
+                <div className="flex items-center gap-4">
+                  {image ? (
+                    <div className="relative h-20 w-12 rounded-lg overflow-hidden border border-slate-200 bg-slate-900 group">
+                      <img
+                        src={image}
+                        alt="Screenshot preview"
+                        className="h-full w-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setImage("")}
+                        className="absolute inset-0 bg-black/55 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity duration-200"
+                        title="Remove image"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="h-20 w-12 rounded-lg border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-slate-400">
+                      <Smartphone className="h-5 w-5" />
+                    </div>
+                  )}
+                  <div className="flex-1 space-y-1">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploadingImage}
+                      className="rounded-xl border-slate-200 text-xs font-bold py-1.5 h-9"
+                    >
+                      {isUploadingImage ? (
+                        <>
+                          <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="mr-1.5 h-3.5 w-3.5" /> Upload Screenshot
+                        </>
+                      )}
+                    </Button>
+                    <p className="text-[10px] text-slate-400 leading-tight">
+                      Upload a custom app screen image. Default screenshots will be used if left blank.
+                    </p>
+                  </div>
+                </div>
               </div>
 
               {/* Points checklist */}

@@ -99,6 +99,9 @@ export default function LandingPage() {
   const [heroSubtitle, setHeroSubtitle] = useState("Complete Smart School Management System");
   const [heroDescription, setHeroDescription] = useState("Manage the complete school journey — from student admission to leaving certificate — with powerful digital panels for Trustees, Principals, Clerks, Teachers, Students, and Guardians.");
   const [satisfactionRate, setSatisfactionRate] = useState(99.8);
+  const [heroImage, setHeroImage] = useState("/sms hero.jpg");
+  const [heroImages, setHeroImages] = useState<string[]>(["/sms hero.jpg"]);
+  const [currentHeroIdx, setCurrentHeroIdx] = useState(0);
   const [stats, setStats] = useState([
     { label: "Schools", target: 500, suffix: "+", iconName: "GraduationCap" },
     { label: "Students", target: 50, suffix: "K+", iconName: "Users" },
@@ -132,9 +135,16 @@ export default function LandingPage() {
   const [whyPills, setWhyPills] = useState<string[]>(["100% Free Forever", "Instant Insights", "Limitless Scale"]);
 
   const [whyImageMain, setWhyImageMain] = useState("/why chooseus.jpeg");
+  const [whyImagesMain, setWhyImagesMain] = useState<string[]>(["/why chooseus.jpeg"]);
+  const [currentWhyIdx, setCurrentWhyIdx] = useState(0);
   const [whyImageLeft, setWhyImageLeft] = useState("/why choose us.jpg");
   const [whyImageBottomLeft, setWhyImageBottomLeft] = useState("/progress report.jpeg");
   const [whyImageBottomRight, setWhyImageBottomRight] = useState("/admission (1).jpg");
+  const [whyCollageCards, setWhyCollageCards] = useState<any[]>([
+    { label: "Smart Campus", image: "/why choose us.jpg", position: "behind-left" },
+    { label: "Analytics Panel", image: "/progress report.jpeg", position: "bottom-left" },
+    { label: "Admission Desk", image: "/admission (1).jpg", position: "bottom-right" }
+  ]);
 
   // About Section States
   const [aboutBadge, setAboutBadge] = useState("★ About VidhyaSanchalan");
@@ -143,6 +153,8 @@ export default function LandingPage() {
   const [aboutDescription, setAboutDescription] = useState("VidhyaSanchalan is an advanced school ERP and management system designed to simplify daily school operations. It helps schools manage admissions, fees, staff, attendance, examinations, homework, reports, announcements, and student progress through separate role-based panels.");
   const [aboutQuote, setAboutQuote] = useState("The system supports both online and offline processes and provides transparency between school staff, students, and parents.");
   const [aboutImage, setAboutImage] = useState("/about sms.jpg");
+  const [aboutImages, setAboutImages] = useState<string[]>(["/about sms.jpg"]);
+  const [currentAboutIdx, setCurrentAboutIdx] = useState(0);
   const [aboutHighlights, setAboutHighlights] = useState<any[]>([
     { title: "Transparency", desc: "For staff, students & parents" },
     { title: "Role-Based Access", desc: "Private secure panels" }
@@ -170,6 +182,12 @@ export default function LandingPage() {
           setHeroSubtitle(data.settings.heroSubtitle || "Complete Smart School Management System");
           setHeroDescription(data.settings.heroDescription || "");
           setSatisfactionRate(data.settings.satisfactionRate || 99.8);
+          if (data.settings.heroImage) setHeroImage(data.settings.heroImage);
+          if (data.settings.heroImages && data.settings.heroImages.length > 0) {
+            setHeroImages(data.settings.heroImages);
+          } else if (data.settings.heroImage) {
+            setHeroImages([data.settings.heroImage]);
+          }
           if (data.settings.stats && data.settings.stats.length > 0) {
             setStats(data.settings.stats);
           }
@@ -183,15 +201,34 @@ export default function LandingPage() {
             setWhyPills(data.settings.whyPills);
           }
           if (data.settings.whyImageMain) setWhyImageMain(data.settings.whyImageMain);
+          if (data.settings.whyImagesMain && data.settings.whyImagesMain.length > 0) {
+            setWhyImagesMain(data.settings.whyImagesMain);
+          } else if (data.settings.whyImageMain) {
+            setWhyImagesMain([data.settings.whyImageMain]);
+          }
           if (data.settings.whyImageLeft) setWhyImageLeft(data.settings.whyImageLeft);
           if (data.settings.whyImageBottomLeft) setWhyImageBottomLeft(data.settings.whyImageBottomLeft);
           if (data.settings.whyImageBottomRight) setWhyImageBottomRight(data.settings.whyImageBottomRight);
+          if (data.settings.whyCollageCards && data.settings.whyCollageCards.length > 0) {
+            setWhyCollageCards(data.settings.whyCollageCards);
+          } else {
+            setWhyCollageCards([
+              { label: "Smart Campus", image: data.settings.whyImageLeft || "/why choose us.jpg", position: "behind-left" },
+              { label: "Analytics Panel", image: data.settings.whyImageBottomLeft || "/progress report.jpeg", position: "bottom-left" },
+              { label: "Admission Desk", image: data.settings.whyImageBottomRight || "/admission (1).jpg", position: "bottom-right" }
+            ]);
+          }
           if (data.settings.aboutBadge) setAboutBadge(data.settings.aboutBadge);
           if (data.settings.aboutTitle) setAboutTitle(data.settings.aboutTitle);
           if (data.settings.aboutTitleHighlight) setAboutTitleHighlight(data.settings.aboutTitleHighlight);
           if (data.settings.aboutDescription) setAboutDescription(data.settings.aboutDescription);
           if (data.settings.aboutQuote) setAboutQuote(data.settings.aboutQuote);
           if (data.settings.aboutImage) setAboutImage(data.settings.aboutImage);
+          if (data.settings.aboutImages && data.settings.aboutImages.length > 0) {
+            setAboutImages(data.settings.aboutImages);
+          } else if (data.settings.aboutImage) {
+            setAboutImages([data.settings.aboutImage]);
+          }
           if (data.settings.aboutHighlights && data.settings.aboutHighlights.length > 0) {
             setAboutHighlights(data.settings.aboutHighlights);
           }
@@ -230,6 +267,30 @@ export default function LandingPage() {
       })
       .catch((err) => console.log("Failed to fetch testimonials from DB, using fallback", err));
   }, []);
+
+  useEffect(() => {
+    if (heroImages.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentHeroIdx((prev) => (prev + 1) % heroImages.length);
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [heroImages]);
+
+  useEffect(() => {
+    if (aboutImages.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentAboutIdx((prev) => (prev + 1) % aboutImages.length);
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [aboutImages]);
+
+  useEffect(() => {
+    if (whyImagesMain.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentWhyIdx((prev) => (prev + 1) % whyImagesMain.length);
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [whyImagesMain]);
 
   const toggleCardPoints = (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -373,13 +434,18 @@ export default function LandingPage() {
             </div>
 
             <nav className="hidden md:flex items-center gap-8">
-              {["Features", "Modules", "Contact"].map((item) => (
+              {[
+                { name: "Home", href: "/" },
+                { name: "Features", href: "/features" },
+                { name: "Modules", href: "/modules" },
+                { name: "Contact Us", href: "/contact" },
+              ].map((item) => (
                 <Link
-                  key={item}
-                  href={item === "Features" ? "/features" : item === "Modules" ? "/modules" : item === "Contact" ? "/contact" : `#${item.toLowerCase()}`}
+                  key={item.name}
+                  href={item.href}
                   className="group relative text-sm font-medium text-white/90 transition-colors hover:text-[#FFA600]"
                 >
-                  {item}
+                  {item.name}
                   <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-gradient-to-r from-[#FFA600] to-[#ED6708] transition-all group-hover:w-full"></span>
                 </Link>
               ))}
@@ -566,14 +632,43 @@ export default function LandingPage() {
                 }}
                 className="relative overflow-hidden rounded-[2.5rem] border-4 border-white bg-slate-100 shadow-2xl shadow-slate-900/10 hover:shadow-slate-900/20 transition-shadow duration-500 max-w-[480px] w-full aspect-[4/3] flex items-center justify-center group"
               >
-                <img
-                  src="/sms hero.jpg"
-                  alt="VidhyaSanchalan Smart School Management"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                />
+                <AnimatePresence mode="wait">
+                  <motion.img
+                    key={currentHeroIdx}
+                    src={heroImages[currentHeroIdx] || "/sms hero.jpg"}
+                    alt="VidhyaSanchalan Smart School Management"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 1.05 }}
+                    transition={{ duration: 0.6 }}
+                    className="absolute inset-0 w-full h-full object-cover rounded-[2.2rem] group-hover:scale-105 transition-transform duration-700 ease-out"
+                  />
+                </AnimatePresence>
 
                 {/* Decorative glass overlay elements */}
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/20 via-transparent to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/20 via-transparent to-transparent pointer-events-none"></div>
+
+                {/* Dots indicator overlays inside the frame */}
+                {heroImages.length > 1 && (
+                  <div className="absolute bottom-[5.5rem] left-1/2 -translate-x-1/2 flex gap-1.5 z-20 bg-slate-950/60 px-3 py-1 rounded-full border border-white/10 backdrop-blur-sm">
+                    {heroImages.map((_, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCurrentHeroIdx(idx);
+                        }}
+                        className={`h-1.5 w-1.5 rounded-full transition-all duration-300 ${
+                          idx === currentHeroIdx 
+                            ? "bg-[#FFA600] scale-125 w-3.5" 
+                            : "bg-white/40 hover:bg-white"
+                        }`}
+                        aria-label={`Go to slide ${idx + 1}`}
+                      />
+                    ))}
+                  </div>
+                )}
 
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8 }}
@@ -706,13 +801,42 @@ export default function LandingPage() {
                 }}
                 className="relative overflow-hidden rounded-[2.5rem] border-4 border-white bg-slate-100 shadow-2xl shadow-slate-900/10 max-w-[480px] w-full aspect-[4/3] flex items-center justify-center group"
               >
-                <img 
-                  src={aboutImage} 
-                  alt={aboutTitle} 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                />
+                <AnimatePresence mode="wait">
+                  <motion.img
+                    key={currentAboutIdx}
+                    src={aboutImages[currentAboutIdx] || "/about sms.jpg"}
+                    alt={aboutTitle}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 1.05 }}
+                    transition={{ duration: 0.6 }}
+                    className="absolute inset-0 w-full h-full object-cover rounded-[2.2rem] group-hover:scale-105 transition-transform duration-700 ease-out"
+                  />
+                </AnimatePresence>
+
+                {/* Dots indicator overlays inside the frame */}
+                {aboutImages.length > 1 && (
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-20 bg-slate-950/60 px-3 py-1 rounded-full border border-white/10 backdrop-blur-sm">
+                    {aboutImages.map((_, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCurrentAboutIdx(idx);
+                        }}
+                        className={`h-1.5 w-1.5 rounded-full transition-all duration-300 ${
+                          idx === currentAboutIdx 
+                            ? "bg-[#FFA600] scale-125 w-3.5" 
+                            : "bg-white/40 hover:bg-white"
+                        }`}
+                        aria-label={`Go to slide ${idx + 1}`}
+                      />
+                    ))}
+                  </div>
+                )}
                 
-                <div className="absolute top-4 left-4 backdrop-blur-md bg-white/80 border border-white/20 px-3 py-1.5 rounded-full shadow-sm">
+                <div className="absolute top-4 left-4 backdrop-blur-md bg-white/80 border border-white/20 px-3 py-1.5 rounded-full shadow-sm z-20">
                   <span className="text-xs font-bold text-[#1D496C] flex items-center gap-1.5">
                     <span className="h-2 w-2 rounded-full bg-[#FFA600]"></span>
                     ERP System
@@ -863,24 +987,6 @@ export default function LandingPage() {
                     </button>
                   )}
                 </div>
-
-                {/* Subtle bottom highlights indicator */}
-                <div className={`mt-6 pt-4 border-t flex items-center justify-between text-xs font-bold transition-colors ${activeFeatureIdx === index
-                  ? (index === 3
-                    ? "border-[#1D496C]/25 text-[#1D496C]"
-                    : "border-white/20 text-white")
-                  : "border-slate-100 text-[#1D496C] group-hover:border-white/20 group-hover:text-white"
-                  }`}>
-                  <span className={`${activeFeatureIdx === index ? (index === 3 ? "text-[#1D496C]" : "text-white/95") : "text-[#6A7626] group-hover:text-white/90"}`}>Advanced Module</span>
-                  <div className={`h-5 w-5 rounded-full flex items-center justify-center transition-colors ${activeFeatureIdx === index
-                    ? (index === 3
-                      ? "bg-[#1D496C]/10 text-[#1D496C]"
-                      : "bg-white/20 text-white")
-                    : "bg-slate-50 group-hover:bg-white/20 group-hover:text-white"
-                    }`}>
-                    <ArrowRight className="h-3 w-3" />
-                  </div>
-                </div>
               </div>
             ))}
           </div>
@@ -904,25 +1010,32 @@ export default function LandingPage() {
               <div className="relative w-full max-w-[340px] sm:max-w-[420px] aspect-square flex items-center justify-center group">
                 
                 {/* Behind-Left Image Card */}
-                <motion.div
-                  initial={{ opacity: 0, x: -30, y: -20, rotate: -6 }}
-                  whileInView={{ opacity: 1, x: 0, y: 0, rotate: -4 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.8, delay: 0.2 }}
-                  className="absolute left-[-1.5rem] md:left-[-3rem] top-[1.5rem] w-[180px] sm:w-[220px] bg-white border border-slate-100 shadow-2xl rounded-3xl p-1.5 sm:p-2 z-10 hidden xs:block transition-all duration-300 hover:rotate-[-2deg] hover:scale-105"
-                >
-                  <div className="relative overflow-hidden rounded-2xl aspect-[4/3] bg-slate-100">
-                    <img 
-                      src={whyImageLeft} 
-                      alt="Modern Classroom" 
-                      className="w-full h-full object-cover" 
-                    />
-                    <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-md px-2 py-0.5 rounded-full text-[9px] font-black text-[#5D3FD3]">
-                      Smart Campus
-                    </div>
-                  </div>
-                </motion.div>
-                {/* Main Card (Image only, clean rounded card) */}
+                {(() => {
+                  const card = whyCollageCards.find(c => c.position === "behind-left");
+                  if (!card) return null;
+                  return (
+                    <motion.div
+                      initial={{ opacity: 0, x: -30, y: -20, rotate: -6 }}
+                      whileInView={{ opacity: 1, x: 0, y: 0, rotate: -4 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.8, delay: 0.2 }}
+                      className="absolute left-[-1.5rem] md:left-[-3rem] top-[1.5rem] w-[180px] sm:w-[220px] bg-white border border-slate-100 shadow-2xl rounded-3xl p-1.5 sm:p-2 z-10 hidden xs:block transition-all duration-300 hover:rotate-[-2deg] hover:scale-105"
+                    >
+                      <div className="relative overflow-hidden rounded-2xl aspect-[4/3] bg-slate-100">
+                        <img 
+                          src={card.image} 
+                          alt={card.label} 
+                          className="w-full h-full object-cover rounded-2xl" 
+                        />
+                        <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-md px-2 py-0.5 rounded-full text-[9px] font-black text-[#5D3FD3]">
+                          {card.label}
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })()}
+
+                {/* Main Card (Slideshow and Dot indicators with scale fix) */}
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   whileInView={{ opacity: 1, scale: 1 }}
@@ -930,19 +1043,48 @@ export default function LandingPage() {
                   transition={{ duration: 0.8 }}
                   className="relative w-[280px] sm:w-[320px] aspect-square rounded-[2rem] shadow-2xl border border-slate-100 bg-white flex items-center justify-center overflow-visible z-20 transition-all duration-300 hover:scale-[1.02]"
                 >
-                  <div className="w-full h-full rounded-[2rem] overflow-hidden">
-                    <img
-                      src={whyImageMain}
-                      alt="Laptop and Mobile Dashboard Mockup"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-all duration-700 ease-out"
-                    />
+                  <div className="w-full h-full rounded-[2rem] overflow-hidden relative">
+                    <AnimatePresence mode="wait">
+                      <motion.img
+                        key={currentWhyIdx}
+                        src={whyImagesMain[currentWhyIdx] || "/why chooseus.jpeg"}
+                        alt="Laptop and Mobile Dashboard Mockup"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 1.05 }}
+                        transition={{ duration: 0.6 }}
+                        className="absolute inset-0 w-full h-full object-cover rounded-[2rem] group-hover:scale-105 transition-transform duration-700 ease-out"
+                      />
+                    </AnimatePresence>
                   </div>
+
+                  {/* Dots indicator overlays inside the frame */}
+                  {whyImagesMain.length > 1 && (
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-30 bg-slate-950/60 px-3 py-1 rounded-full border border-white/10 backdrop-blur-sm">
+                      {whyImagesMain.map((_, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setCurrentWhyIdx(idx);
+                          }}
+                          className={`h-1.5 w-1.5 rounded-full transition-all duration-300 ${
+                            idx === currentWhyIdx
+                              ? "bg-[#FFA600] scale-125 w-3.5"
+                              : "bg-white/40 hover:bg-white"
+                          }`}
+                          aria-label={`Go to slide ${idx + 1}`}
+                        />
+                      ))}
+                    </div>
+                  )}
 
                   {/* Floating User Satisfaction Badge */}
                   <motion.div
                     animate={{ y: [0, -6, 0] }}
                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute bottom-[2rem] right-[-1.5rem] sm:right-[-3rem] bg-white border border-slate-100 shadow-2xl rounded-2xl p-3 sm:p-4 flex items-center gap-3 z-30 transition-transform duration-500 hover:translate-x-2"
+                    className="absolute bottom-[2rem] right-[-1.5rem] sm:right-[-3rem] bg-white border border-slate-100 shadow-2xl rounded-2xl p-3 sm:p-4 flex items-center gap-3 z-35 transition-transform duration-500 hover:translate-x-2"
                   >
                     <div className="h-10 w-10 rounded-xl bg-slate-950 text-white flex items-center justify-center text-xl shrink-0 shadow-lg shadow-slate-950/20">
                       😊
@@ -955,44 +1097,56 @@ export default function LandingPage() {
                 </motion.div>
 
                 {/* Bottom-Left Image Card */}
-                <motion.div
-                  initial={{ opacity: 0, x: -20, y: 30, rotate: 4 }}
-                  whileInView={{ opacity: 1, x: 0, y: 0, rotate: 2 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.8, delay: 0.3 }}
-                  className="absolute left-[-2rem] md:left-[-3.5rem] bottom-[-1.5rem] w-[170px] sm:w-[200px] bg-white border border-slate-100 shadow-2xl rounded-3xl p-1.5 sm:p-2 z-30 hidden xs:block transition-all duration-300 hover:rotate-[0deg] hover:scale-105"
-                >
-                  <div className="relative overflow-hidden rounded-2xl aspect-[4/3] bg-slate-100">
-                    <img 
-                      src={whyImageBottomLeft} 
-                      alt="Student Analytics" 
-                      className="w-full h-full object-cover" 
-                    />
-                    <div className="absolute bottom-2 right-2 bg-slate-900/90 backdrop-blur-md px-2 py-0.5 rounded-full text-[9px] font-black text-white">
-                      Analytics Panel
-                    </div>
-                  </div>
-                </motion.div>
+                {(() => {
+                  const card = whyCollageCards.find(c => c.position === "bottom-left");
+                  if (!card) return null;
+                  return (
+                    <motion.div
+                      initial={{ opacity: 0, x: -20, y: 30, rotate: 2 }}
+                      whileInView={{ opacity: 1, x: 0, y: 0, rotate: 2 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.8, delay: 0.3 }}
+                      className="absolute left-[-2rem] md:left-[-3.5rem] bottom-[-1.5rem] w-[170px] sm:w-[200px] bg-white border border-slate-100 shadow-2xl rounded-3xl p-1.5 sm:p-2 z-30 hidden xs:block transition-all duration-300 hover:rotate-[0deg] hover:scale-105"
+                    >
+                      <div className="relative overflow-hidden rounded-2xl aspect-[4/3] bg-slate-100">
+                        <img 
+                          src={card.image} 
+                          alt={card.label} 
+                          className="w-full h-full object-cover rounded-2xl" 
+                        />
+                        <div className="absolute bottom-2 right-2 bg-slate-900/90 backdrop-blur-md px-2 py-0.5 rounded-full text-[9px] font-black text-white">
+                          {card.label}
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })()}
 
-                {/* Bottom-Right Image Card (One More Image Card!) */}
-                <motion.div
-                  initial={{ opacity: 0, x: 20, y: 20, rotate: -4 }}
-                  whileInView={{ opacity: 1, x: 0, y: 0, rotate: -2 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.8, delay: 0.4 }}
-                  className="absolute right-[-2.5rem] bottom-[-2.5rem] w-[150px] sm:w-[180px] bg-white border border-slate-100 shadow-2xl rounded-3xl p-1.5 sm:p-2 z-30 hidden xs:block transition-all duration-300 hover:rotate-[0deg] hover:scale-105"
-                >
-                  <div className="relative overflow-hidden rounded-2xl aspect-[4/3] bg-slate-100">
-                    <img 
-                      src={whyImageBottomRight} 
-                      alt="Admission Desk" 
-                      className="w-full h-full object-cover" 
-                    />
-                    <div className="absolute bottom-2 left-2 bg-[#5D3FD3]/90 backdrop-blur-md px-2 py-0.5 rounded-full text-[9px] font-black text-white">
-                      Admission Desk
-                    </div>
-                  </div>
-                </motion.div>
+                {/* Bottom-Right Image Card */}
+                {(() => {
+                  const card = whyCollageCards.find(c => c.position === "bottom-right");
+                  if (!card) return null;
+                  return (
+                    <motion.div
+                      initial={{ opacity: 0, x: 20, y: 20, rotate: -2 }}
+                      whileInView={{ opacity: 1, x: 0, y: 0, rotate: -2 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.8, delay: 0.4 }}
+                      className="absolute right-[-2.5rem] bottom-[-2.5rem] w-[150px] sm:w-[180px] bg-white border border-slate-100 shadow-2xl rounded-3xl p-1.5 sm:p-2 z-30 hidden xs:block transition-all duration-300 hover:rotate-[0deg] hover:scale-105"
+                    >
+                      <div className="relative overflow-hidden rounded-2xl aspect-[4/3] bg-slate-100">
+                        <img 
+                          src={card.image} 
+                          alt={card.label} 
+                          className="w-full h-full object-cover rounded-2xl" 
+                        />
+                        <div className="absolute bottom-2 left-2 bg-[#5D3FD3]/90 backdrop-blur-md px-2 py-0.5 rounded-full text-[9px] font-black text-white">
+                          {card.label}
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })()}
 
                 {/* Floating Capsule Pills underneath */}
                 <div className="absolute bottom-[-4.5rem] left-[1rem] sm:left-[3rem] md:left-0 flex flex-wrap gap-2 z-40 max-w-[340px]">

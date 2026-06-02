@@ -5,6 +5,10 @@
     "heroSubtitle": "Complete Smart School Management System",
     "heroDescription": "Manage the complete school journey — from student admission to leaving certificate — with powerful digital panels for Trustees, Principals, Clerks, Teachers, Students, and Guardians.",
     "satisfactionRate": 99.8,
+    "heroImage": "/sms hero.jpg",
+    "heroImages": [
+      "/sms hero.jpg"
+    ],
     "stats": [
       {
         "label": "Schools",
@@ -33,10 +37,10 @@
     ],
     "whyChooseUs": [
       {
-        "title": "Innovation at our core add",
+        "title": "Innovation at our core",
         "description": "VidyaSanchalan stands as the vanguard of school-management solutions, consistently pioneering the integration of next-generation technologies that redefine educational administration worldwide.",
         "iconName": "Lightbulb",
-        "color": "text-[#285E89] bg-[#285E89]/10 border-[#285E89]/20"
+        "color": "text-[#5D3FD3]"
       },
       {
         "title": "Simplifying complexity",
@@ -51,18 +55,129 @@
         "color": "text-[#FFA600]"
       }
     ],
-    "isSeeded": true,
-    "aboutBadge": "★ About VidhyaSanchalan ",
+    "aboutBadge": "★ About VidhyaSanchalan",
     "aboutTitle": "One Platform for Complete School Management",
     "aboutTitleHighlight": "Complete School",
-    "aboutDescription": "VidhyaSanchalan is an advanced school ERP and management system designed to simplify daily school operations.",
+    "aboutDescription": "VidhyaSanchalan is an advanced school ERP and management system designed to simplify daily school operations. It helps schools manage admissions, fees, staff, attendance, examinations, homework, reports, announcements, and student progress through separate role-based panels.",
     "aboutQuote": "The system supports both online and offline processes and provides transparency between school staff, students, and parents.",
     "aboutImage": "/about sms.jpg",
-    "aboutHighlights": [],
-    "capabilitiesBadge": "🛠️ Technical Capabilities",
-    "capabilitiesTitle": "State-of-the-Art Mobile Infrastructure",
-    "capabilitiesDesc": "Built on powerful core frameworks delivering high uptime, fast transactions, and seamless device sync.",
-    "mobileCapabilities": [],
+    "aboutImages": [
+      "/about sms.jpg"
+    ],
+    "aboutHighlights": [
+      {
+        "title": "Transparency",
+        "desc": "For staff, students & parents"
+      },
+      {
+        "title": "Role-Based Access",
+        "desc": "Private secure panels"
+      }
+    ],
+    "whyBadge": "Why Choose Us?",
+    "whyTitle": "VidyaSanchalan is a revolution in education management",
+    "whyTitleHighlight": "revolution",
+    "whyPills": [
+      "100% Free Forever",
+      "Instant Insights",
+      "Limitless Scale"
+    ],
+    "whyImageMain": "/why chooseus.jpeg",
+    "whyImagesMain": [
+      "/why chooseus.jpeg"
+    ],
+    "whyImageLeft": "/why choose us.jpg",
+    "whyImageBottomLeft": "/progress report.jpeg",
+    "whyImageBottomRight": "/admission (1).jpg",
+    "whyCollageCards": [
+      {
+        "label": "Smart Campus",
+        "image": "/why choose us.jpg",
+        "position": "behind-left"
+      },
+      {
+        "label": "Analytics Panel",
+        "image": "/progress report.jpeg",
+        "position": "bottom-left"
+      },
+      {
+        "label": "Admission Desk",
+        "image": "/admission (1).jpg",
+        "position": "bottom-right"
+      }
+    ],
+    "mobileScreens": [
+      {
+        "title": "Student Portal UI",
+        "image": "/mobile-1.png",
+        "description": "Direct access to homework schedules, exam tables, marksheet analytics, and virtual classrooms."
+      },
+      {
+        "title": "Parent Companion UI",
+        "image": "/mobile-2.png",
+        "description": "Instant notifications for attendance alerts, online fee invoice payments, and teacher chat boards."
+      },
+      {
+        "title": "Teacher Administration UI",
+        "image": "/mobile-3.png",
+        "description": "Smart geo-fenced attendance registration, digital grading interfaces, and rapid notice distributions."
+      }
+    ],
+    "mobileStudent": {
+      "badge": "Student Application",
+      "title": "Learn Smarter, Grow Faster",
+      "desc": "Designed to keep students organized, motivated, and engaged.",
+      "points": [
+        "Homework Tracker",
+        "Online Examination",
+        "Student Timetable",
+        "Academic Analytics"
+      ]
+    },
+    "mobileParent": {
+      "badge": "Parent Companion App",
+      "title": "Your Child's Progress, In Your Pocket",
+      "desc": "Stay intimately connected with your child's educational journey.",
+      "points": [
+        "Real-Time Geo-Attendance",
+        "Digital Fee Desk",
+        "Direct Parent-Teacher Chats",
+        "Comprehensive Report Cards"
+      ]
+    },
+    "mobileTeacher": {
+      "badge": "Teacher Dashboard",
+      "title": "Focus on Teaching, Automate the Rest",
+      "desc": "Powerful admin tools in the palm of your hand.",
+      "points": [
+        "Geo-Fenced Biometric Attendance",
+        "Mobile Grading Engine",
+        "Broadcaster Bulletin",
+        "Substitution Alerts"
+      ]
+    },
+    "mobileCapabilities": [
+      {
+        "title": "Bank-Grade Encryption",
+        "desc": "All financial data and API transactions are locked under high-strength TLS protocols ensuring completely secure fees transactions.",
+        "iconName": "Lock"
+      },
+      {
+        "title": "Offline Operations Mode",
+        "desc": "Never lose school data inside poor networks. The application synchronizes critical homework and logs directly from local cashiers.",
+        "iconName": "Wifi"
+      },
+      {
+        "title": "Instant Broadcaster Alerts",
+        "desc": "Integrated micro-sockets delivery engine providing notifications the exact millisecond announcements go active.",
+        "iconName": "Bell"
+      },
+      {
+        "title": "Biometric & Geo-location",
+        "desc": "Security tracking logs for teacher roll-call ensuring verifiable attendance entries using mobile GPS services.",
+        "iconName": "Fingerprint"
+      }
+    ],
     "moduleHeroBadge": "SMART SCHOOL ERP MODULES",
     "moduleHeroTitle": "Powerful Modules for Complete School Management",
     "moduleHeroDesc": "VidhyaSanchalan provides all essential school management modules in one powerful platform — from admissions and fees to attendance, examinations, homework, reports, and parent communication.",
@@ -76,88 +191,9 @@
       "Progress Reports",
       "Parent & Student Panels"
     ],
-    "mobileTabs": [
-      {
-        "tabId": "student",
-        "badge": "Student Application",
-        "title": "Learn Smarter, Grow Faster",
-        "desc": "Designed to keep students organized, motivated, and engaged.",
-        "points": [
-          "Homework Tracker",
-          "Online Examination",
-          "Student Timetable",
-          "Academic Analytics"
-        ],
-        "color": "from-[#429CE4] to-[#1D496C]",
-        "accent": "text-[#429CE4] bg-white/10 border-[#429CE4]/20"
-      },
-      {
-        "tabId": "parent",
-        "badge": "Parent Companion App",
-        "title": "Your Child's Progress, In Your Pocket",
-        "desc": "Stay intimately connected with your child's educational journey.",
-        "points": [
-          "Real-Time Geo-Attendance",
-          "Digital Fee Desk",
-          "Direct Parent-Teacher Chats",
-          "Comprehensive Report Cards"
-        ],
-        "color": "from-[#FFA600] to-[#ED6708]",
-        "accent": "text-[#FFA600] bg-white/10 border-[#FFA600]/20"
-      },
-      {
-        "tabId": "teacher",
-        "badge": "Teacher Dashboard",
-        "title": "Focus on Teaching, Automate the Rest",
-        "desc": "Powerful admin tools in the palm of your hand.",
-        "points": [
-          "Geo-Fenced Biometric Attendance",
-          "Mobile Grading Engine",
-          "Broadcaster Bulletin",
-          "Substitution Alerts"
-        ],
-        "color": "from-[#6A7626] to-[#4F581D]",
-        "accent": "text-[#E4FF4C] bg-white/10 border-white/20"
-      }
-    ],
-    "mobileInfrastructure": [
-      {
-        "title": "Bank-Grade Encryption",
-        "desc": "All financial data and API transactions are locked under high-strength TLS protocols ensuring completely secure fees transactions.",
-        "iconName": "Lock",
-        "hoverBg": "hover:bg-[#429CE4] hover:border-[#429CE4] hover:shadow-xl hover:shadow-[#429CE4]/20"
-      },
-      {
-        "title": "Offline Operations Mode",
-        "desc": "Never lose school data inside poor networks. The application synchronizes critical homework and logs directly from local cashiers.",
-        "iconName": "Wifi",
-        "hoverBg": "hover:bg-[#6A7626] hover:border-[#6A7626] hover:shadow-xl hover:shadow-[#6A7626]/20"
-      },
-      {
-        "title": "Instant Broadcaster Alerts",
-        "desc": "Integrated micro-sockets delivery engine providing notifications the exact millisecond announcements go active.",
-        "iconName": "Bell",
-        "hoverBg": "hover:bg-[#ED6708] hover:border-[#ED6708] hover:shadow-xl hover:shadow-[#ED6708]/20"
-      },
-      {
-        "title": "Biometric & Geo-location",
-        "desc": "Security tracking logs for teacher roll-call ensuring verifiable attendance entries using mobile GPS services.",
-        "iconName": "Fingerprint",
-        "hoverBg": "hover:bg-[#FFA600] hover:border-[#FFA600] hover:shadow-xl hover:shadow-[#FFA600]/20"
-      }
-    ],
-    "modulesHeroTags": [
-      "Admission Management",
-      "Fee Management",
-      "Attendance & Geo Tracking",
-      "Homework & Assignments",
-      "Timetable Management",
-      "Online Examination",
-      "Progress Reports",
-      "Parent & Student Panels"
-    ],
     "moduleScreens": [
-      "/moduleg.jpeg"
+      "/uploads/modules-hero-1780384711030.png",
+      "/uploads/modules-hero-1780384716815.png"
     ],
     "gridModules": [
       {
@@ -245,13 +281,109 @@
         ]
       }
     ],
-    "modulesHeroImage": "/moduleg.jpeg",
+    "isSeeded": true,
+    "mobileTabs": [
+      {
+        "tabId": "student",
+        "badge": "Student Application",
+        "title": "Learn Smarter, Grow Faster",
+        "desc": "Designed to keep students organized, motivated, and engaged.",
+        "points": [
+          "Homework Tracker",
+          "Online Examination",
+          "Student Timetable",
+          "Academic Analytics"
+        ],
+        "color": "from-[#429CE4] to-[#1D496C]",
+        "accent": "text-[#429CE4] bg-white/10 border-[#429CE4]/20",
+        "image": "/mobile-1.png"
+      },
+      {
+        "tabId": "parent",
+        "badge": "Parent Companion App",
+        "title": "Your Child's Progress, In Your Pocket",
+        "desc": "Stay intimately connected with your child's educational journey.",
+        "points": [
+          "Real-Time Geo-Attendance",
+          "Digital Fee Desk",
+          "Direct Parent-Teacher Chats",
+          "Comprehensive Report Cards"
+        ],
+        "color": "from-[#FFA600] to-[#ED6708]",
+        "accent": "text-[#FFA600] bg-white/10 border-[#FFA600]/20",
+        "image": "/mobile-2.png"
+      },
+      {
+        "tabId": "teacher",
+        "badge": "Teacher Dashboard",
+        "title": "Focus on Teaching, Automate the Rest",
+        "desc": "Powerful admin tools in the palm of your hand.",
+        "points": [
+          "Geo-Fenced Biometric Attendance",
+          "Mobile Grading Engine",
+          "Broadcaster Bulletin",
+          "Substitution Alerts"
+        ],
+        "color": "from-[#6A7626] to-[#4F581D]",
+        "accent": "text-[#E4FF4C] bg-white/10 border-white/20",
+        "image": "/mobile-3.png"
+      },
+      {
+        "tabId": "sdfsdf",
+        "badge": "asdasdasd",
+        "title": "asdsad",
+        "desc": "asdsad",
+        "points": [
+          "asdadsa"
+        ],
+        "color": "from-[#FFA600] to-[#ED6708]",
+        "accent": "text-[#FFA600] bg-white/10 border-[#FFA600]/20",
+        "image": "/uploads/mobile-app-1780383452860.png"
+      }
+    ],
+    "mobileInfrastructure": [
+      {
+        "title": "Bank-Grade Encryption",
+        "desc": "All financial data and API transactions are locked under high-strength TLS protocols ensuring completely secure fees transactions.",
+        "iconName": "Lock",
+        "hoverBg": "hover:bg-[#429CE4] hover:border-[#429CE4] hover:shadow-xl hover:shadow-[#429CE4]/20"
+      },
+      {
+        "title": "Offline Operations Mode",
+        "desc": "Never lose school data inside poor networks. The application synchronizes critical homework and logs directly from local cashiers.",
+        "iconName": "Wifi",
+        "hoverBg": "hover:bg-[#6A7626] hover:border-[#6A7626] hover:shadow-xl hover:shadow-[#6A7626]/20"
+      },
+      {
+        "title": "Instant Broadcaster Alerts",
+        "desc": "Integrated micro-sockets delivery engine providing notifications the exact millisecond announcements go active.",
+        "iconName": "Bell",
+        "hoverBg": "hover:bg-[#ED6708] hover:border-[#ED6708] hover:shadow-xl hover:shadow-[#ED6708]/20"
+      },
+      {
+        "title": "Biometric & Geo-location",
+        "desc": "Security tracking logs for teacher roll-call ensuring verifiable attendance entries using mobile GPS services.",
+        "iconName": "Fingerprint",
+        "hoverBg": "hover:bg-[#FFA600] hover:border-[#FFA600] hover:shadow-xl hover:shadow-[#FFA600]/20"
+      }
+    ],
+    "modulesHeroTags": [
+      "Admission Management",
+      "Fee Management",
+      "Attendance & Geo Tracking",
+      "Homework & Assignments",
+      "Timetable Management",
+      "Online Examination",
+      "Progress Reports",
+      "Parent & Student Panels"
+    ],
+    "modulesHeroImage": "/uploads/modules-hero-1780384711030.png",
     "modulesGridCards": [
       {
         "title": "Student Dashboard",
         "emoji": "👨‍🎓",
         "iconName": "GraduationCap",
-        "desc": "Designed to keep students organized, motivated, academic-centric, and highly engaged. ",
+        "desc": "Designed to keep students organized, motivated, academic-centric, and highly engaged.",
         "points": [
           "Attendance percentage",
           "Academic performance analytics",
@@ -374,7 +506,6 @@
         "Student document management",
         "Admission approval system"
       ],
-      "image": "/admission (1).jpg",
       "order": 0
     },
     {
@@ -388,7 +519,6 @@
         "Monthly / Quarterly / Custom fee setup",
         "Fee receipt generation"
       ],
-      "image": "/fees (1).jpg",
       "order": 1
     },
     {
@@ -402,7 +532,6 @@
         "Teacher allocation",
         "Editable schedules"
       ],
-      "image": "/timetable (1).jpg",
       "order": 2
     },
     {
@@ -416,7 +545,6 @@
         "Subject-wise homework tracking",
         "Teacher to student communication"
       ],
-      "image": "/homework (1).jpg",
       "order": 3
     },
     {
@@ -431,7 +559,6 @@
         "Student performance analytics",
         "Guardian visibility panel"
       ],
-      "image": "/progress report.jpeg",
       "order": 4
     },
     {
@@ -445,7 +572,6 @@
         "Emergency alerts",
         "Event updates for students and parents"
       ],
-      "image": "/announcement.jpeg",
       "order": 5
     },
     {
@@ -458,7 +584,6 @@
         "Secure attendance monitoring",
         "Real-time attendance records"
       ],
-      "image": "/geo mapping.jpeg",
       "order": 6
     },
     {
@@ -472,7 +597,6 @@
         "Result generation",
         "Student performance reports"
       ],
-      "image": "/examination.jpeg",
       "order": 7
     }
   ],

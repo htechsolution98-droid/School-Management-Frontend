@@ -19,6 +19,7 @@ import {
   Target,
   TrendingUp,
   Upload,
+  Image as ImageIcon,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -57,32 +58,230 @@ export default function WhyChooseUsManager() {
   const [whyPills, setWhyPills] = useState<string[]>(["100% Free Forever", "Instant Insights", "Limitless Scale"]);
 
   const [whyImageMain, setWhyImageMain] = useState("/why chooseus.jpeg");
+  const [whyImagesMain, setWhyImagesMain] = useState<string[]>([]);
+  const [imagePreview, setImagePreview] = useState("/why chooseus.jpeg");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+
   const [whyImageLeft, setWhyImageLeft] = useState("/why choose us.jpg");
   const [whyImageBottomLeft, setWhyImageBottomLeft] = useState("/progress report.jpeg");
   const [whyImageBottomRight, setWhyImageBottomRight] = useState("/admission (1).jpg");
+  
+  // Collage Cards CRUD State
+  const [whyCollageCards, setWhyCollageCards] = useState<any[]>([]);
+  const [isCollageOpen, setIsCollageOpen] = useState(false);
+  const [editingCollageIndex, setEditingCollageIndex] = useState<number | null>(null);
+  const [collageLabel, setCollageLabel] = useState("");
+  const [collagePosition, setCollagePosition] = useState<"behind-left" | "bottom-left" | "bottom-right">("behind-left");
+  const [collageImage, setCollageImage] = useState("");
+  const [isUploadingCollageFile, setIsUploadingCollageFile] = useState(false);
 
   const fileInputMainRef = useRef<HTMLInputElement>(null);
-  const fileInputLeftRef = useRef<HTMLInputElement>(null);
-  const fileInputBottomLeftRef = useRef<HTMLInputElement>(null);
-  const fileInputBottomRightRef = useRef<HTMLInputElement>(null);
+  const fileInputCollageRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: "main" | "left" | "bottomLeft" | "bottomRight") => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error("Image must be under 2MB");
+
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Invalid file type. Use JPG, PNG, WebP, or GIF.");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64 = reader.result as string;
-      if (type === "main") setWhyImageMain(base64);
-      if (type === "left") setWhyImageLeft(base64);
-      if (type === "bottomLeft") setWhyImageBottomLeft(base64);
-      if (type === "bottomRight") setWhyImageBottomRight(base64);
-      toast.success("Image selected successfully! Remember to save settings below.");
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image too large. Max size is 5MB.");
+      return;
+    }
+
+    const localUrl = URL.createObjectURL(file);
+    setImagePreview(localUrl);
+    setIsUploadingImage(true);
+
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("context", "why-choose");
+
+      const res = await fetch("/api/landing/upload", { method: "POST", body: form });
+      const data = await res.json();
+
+      if (data.success) {
+        setWhyImagesMain((prev) => [...prev, data.url]);
+        setWhyImageMain(data.url);
+        setImagePreview(data.url);
+        toast.success("New mockup image uploaded and added to the slider list! Remember to Save copy settings below.");
+      } else {
+        toast.error(data.message || "Upload failed");
+        setImagePreview(whyImageMain);
+      }
+    } catch {
+      toast.error("Upload error. Please try again.");
+      setImagePreview(whyImageMain);
+    } finally {
+      setIsUploadingImage(false);
+      if (fileInputMainRef.current) fileInputMainRef.current.value = "";
+    }
+  };
+
+  const handleRemoveMainImage = (idxToRemove: number) => {
+    const updated = whyImagesMain.filter((_, idx) => idx !== idxToRemove);
+    setWhyImagesMain(updated);
+
+    if (whyImageMain === whyImagesMain[idxToRemove]) {
+      const fallback = updated.length > 0 ? updated[0] : "/why chooseus.jpeg";
+      setWhyImageMain(fallback);
+      setImagePreview(fallback);
+    }
+    toast.success("Image removed from slider list. Remember to Save Copy Settings.");
+  };
+
+  // Open dialog for new collage card
+  const handleOpenNewCollage = () => {
+    setEditingCollageIndex(null);
+    setCollageLabel("");
+    setCollagePosition("behind-left");
+    setCollageImage("");
+    setIsCollageOpen(true);
+  };
+
+  // Open dialog to edit collage card
+  const handleOpenEditCollage = (index: number) => {
+    const card = whyCollageCards[index];
+    setEditingCollageIndex(index);
+    setCollageLabel(card.label);
+    setCollagePosition(card.position);
+    setCollageImage(card.image);
+    setIsCollageOpen(true);
+  };
+
+  // Delete collage card
+  const handleDeleteCollageCard = async (index: number) => {
+    if (!confirm("Are you sure you want to delete this floating collage card?")) return;
+
+    const updated = whyCollageCards.filter((_, i) => i !== index);
+    setWhyCollageCards(updated);
+
+    setIsSaving(true);
+    try {
+      const res = await fetch("/api/landing/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          whyBadge,
+          whyTitle,
+          whyTitleHighlight,
+          whyPills,
+          whyImageMain,
+          whyImagesMain,
+          whyImageLeft,
+          whyImageBottomLeft,
+          whyImageBottomRight,
+          whyCollageCards: updated,
+          whyChooseUs: highlights,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success("Collage card deleted successfully!");
+      } else {
+        toast.error(data.message || "Delete failed");
+      }
+    } catch {
+      toast.error("Server connection error while deleting collage card");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Submit create or update collage card
+  const handleSubmitCollageCard = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!collageLabel.trim() || !collageImage.trim()) {
+      toast.error("Label and image upload are required for the collage card!");
+      return;
+    }
+
+    let updated = [...whyCollageCards];
+    const newCard = {
+      label: collageLabel.trim(),
+      image: collageImage,
+      position: collagePosition
     };
-    reader.readAsDataURL(file);
+
+    if (editingCollageIndex !== null) {
+      updated[editingCollageIndex] = newCard;
+    } else {
+      updated.push(newCard);
+    }
+
+    setIsSaving(true);
+    try {
+      const res = await fetch("/api/landing/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          whyBadge,
+          whyTitle,
+          whyTitleHighlight,
+          whyPills,
+          whyImageMain,
+          whyImagesMain,
+          whyImageLeft,
+          whyImageBottomLeft,
+          whyImageBottomRight,
+          whyCollageCards: updated,
+          whyChooseUs: highlights,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(editingCollageIndex !== null ? "Collage card updated!" : "Collage card added!");
+        setWhyCollageCards(updated);
+        setIsCollageOpen(false);
+      } else {
+        toast.error(data.message || "Failed to save collage card");
+      }
+    } catch {
+      toast.error("Server connection error while saving collage card");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCollageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Invalid file type. Use JPG, PNG, WebP, or GIF.");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image too large. Max size is 2MB.");
+      return;
+    }
+
+    setIsUploadingCollageFile(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("context", "why-choose");
+
+      const res = await fetch("/api/landing/upload", { method: "POST", body: form });
+      const data = await res.json();
+
+      if (data.success) {
+        setCollageImage(data.url);
+        toast.success("Card image uploaded successfully!");
+      } else {
+        toast.error(data.message || "Upload failed");
+      }
+    } catch {
+      toast.error("Upload error. Please try again.");
+    } finally {
+      setIsUploadingCollageFile(false);
+      if (fileInputCollageRef.current) fileInputCollageRef.current.value = "";
+    }
   };
 
   // Highlight Cards list states (whyChooseUs point highlights)
@@ -112,10 +311,22 @@ export default function WhyChooseUsManager() {
           setWhyTitle(data.settings.whyTitle || "VidyaSanchalan is a revolution in education management");
           setWhyTitleHighlight(data.settings.whyTitleHighlight || "revolution");
           setWhyPills(data.settings.whyPills && data.settings.whyPills.length > 0 ? data.settings.whyPills : ["100% Free Forever", "Instant Insights", "Limitless Scale"]);
-          setWhyImageMain(data.settings.whyImageMain || "/why chooseus.jpeg");
+          
+          const img = data.settings.whyImageMain || "/why chooseus.jpeg";
+          setWhyImageMain(img);
+          setImagePreview(img);
+          setWhyImagesMain(data.settings.whyImagesMain || [img]);
+
           setWhyImageLeft(data.settings.whyImageLeft || "/why choose us.jpg");
           setWhyImageBottomLeft(data.settings.whyImageBottomLeft || "/progress report.jpeg");
           setWhyImageBottomRight(data.settings.whyImageBottomRight || "/admission (1).jpg");
+
+          setWhyCollageCards(data.settings.whyCollageCards || [
+            { label: "Smart Campus", image: data.settings.whyImageLeft || "/why choose us.jpg", position: "behind-left" },
+            { label: "Analytics Panel", image: data.settings.whyImageBottomLeft || "/progress report.jpeg", position: "bottom-left" },
+            { label: "Admission Desk", image: data.settings.whyImageBottomRight || "/admission (1).jpg", position: "bottom-right" }
+          ]);
+
           setHighlights(data.settings.whyChooseUs || []);
         }
       } else {
@@ -148,9 +359,11 @@ export default function WhyChooseUsManager() {
           whyTitleHighlight,
           whyPills: filteredPills,
           whyImageMain,
+          whyImagesMain,
           whyImageLeft,
           whyImageBottomLeft,
           whyImageBottomRight,
+          whyCollageCards,
           whyChooseUs: highlights,
         }),
       });
@@ -222,6 +435,12 @@ export default function WhyChooseUsManager() {
           whyTitle,
           whyTitleHighlight,
           whyPills,
+          whyImageMain,
+          whyImagesMain,
+          whyImageLeft,
+          whyImageBottomLeft,
+          whyImageBottomRight,
+          whyCollageCards,
           whyChooseUs: updated,
         }),
       });
@@ -271,6 +490,12 @@ export default function WhyChooseUsManager() {
           whyTitle,
           whyTitleHighlight,
           whyPills,
+          whyImageMain,
+          whyImagesMain,
+          whyImageLeft,
+          whyImageBottomLeft,
+          whyImageBottomRight,
+          whyCollageCards,
           whyChooseUs: updated,
         }),
       });
@@ -421,70 +646,142 @@ export default function WhyChooseUsManager() {
                     </div>
                   </div>
                   {/* Collage File Inputs */}
-                  <input ref={fileInputMainRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, "main")} />
-                  <input ref={fileInputLeftRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, "left")} />
-                  <input ref={fileInputBottomLeftRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, "bottomLeft")} />
-                  <input ref={fileInputBottomRightRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, "bottomRight")} />
+                  <input ref={fileInputMainRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
 
-                  {/* Collage Images Grid */}
+                  {/* Main Collage Images Selector */}
                   <div className="space-y-3 pt-4 border-t border-slate-100">
-                    <div className="pb-1">
-                      <Label className="text-xs font-bold text-slate-600">Collage Graphic Images</Label>
-                      <p className="text-[10px] text-slate-400 mt-0.5">Upload custom images for the homepage graphic collage grid</p>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label className="text-xs font-bold text-slate-600">Collage Mockup Images ({whyImagesMain.length})</Label>
+                        <p className="text-[10px] text-slate-400 mt-0.5">Upload custom screenshots for the center slideshow</p>
+                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => fileInputMainRef.current?.click()}
+                        disabled={isUploadingImage}
+                        className="rounded-lg text-xs font-bold h-8 border-slate-200 flex items-center gap-1.5 bg-white hover:bg-slate-50"
+                      >
+                        <Upload className="h-3.5 w-3.5" /> {isUploadingImage ? "Uploading..." : "Upload Image"}
+                      </Button>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      {/* Main Card */}
-                      <div className="space-y-1.5">
-                        <Label className="text-[10px] font-bold text-slate-500 uppercase">1. Main Center Image</Label>
-                        <div className="flex items-center gap-2 border border-slate-100 p-2 rounded-xl bg-slate-50/50">
-                          <div className="h-10 w-14 rounded bg-slate-200 overflow-hidden flex items-center justify-center shrink-0 border border-slate-300">
-                            {whyImageMain ? <img src={whyImageMain} alt="Main" className="h-full w-full object-cover" /> : <Upload className="h-4 w-4 text-slate-400" />}
-                          </div>
-                          <Button type="button" size="sm" variant="outline" className="rounded-lg text-xs w-full py-1.5 h-8 font-bold" onClick={() => fileInputMainRef.current?.click()}>
-                            Upload
-                          </Button>
-                        </div>
-                      </div>
 
-                      {/* Left Behind Card */}
-                      <div className="space-y-1.5">
-                        <Label className="text-[10px] font-bold text-slate-500 uppercase">2. Behind-Left Image</Label>
-                        <div className="flex items-center gap-2 border border-slate-100 p-2 rounded-xl bg-slate-50/50">
-                          <div className="h-10 w-14 rounded bg-slate-200 overflow-hidden flex items-center justify-center shrink-0 border border-slate-300">
-                            {whyImageLeft ? <img src={whyImageLeft} alt="Left" className="h-full w-full object-cover" /> : <Upload className="h-4 w-4 text-slate-400" />}
-                          </div>
-                          <Button type="button" size="sm" variant="outline" className="rounded-lg text-xs w-full py-1.5 h-8 font-bold" onClick={() => fileInputLeftRef.current?.click()}>
-                            Upload
-                          </Button>
-                        </div>
+                    {whyImagesMain.length === 0 ? (
+                      <div className="text-center py-6 border border-dashed border-slate-200 rounded-xl text-slate-400 text-xs">
+                        No mockup screenshots uploaded.
                       </div>
+                    ) : (
+                      <div className="grid grid-cols-4 gap-2">
+                        {whyImagesMain.map((img, idx) => {
+                          const isPrimary = whyImageMain === img;
+                          return (
+                            <div
+                              key={idx}
+                              className={`relative group rounded-xl overflow-hidden border-2 aspect-video bg-slate-50 transition-all ${
+                                isPrimary ? "border-[#429CE4]" : "border-slate-100 hover:border-slate-300"
+                              }`}
+                            >
+                              <img
+                                src={img}
+                                alt={`Mockup slide ${idx + 1}`}
+                                className="w-full h-full object-cover cursor-pointer rounded-lg"
+                                onClick={() => {
+                                  setWhyImageMain(img);
+                                  setImagePreview(img);
+                                  toast.info("Selected as primary mockup image!");
+                                }}
+                              />
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6 bg-white/95 text-rose-600 hover:bg-rose-50 rounded-full"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveMainImage(idx);
+                                  }}
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
+                              {isPrimary && (
+                                <div className="absolute top-1 left-1 bg-[#429CE4] text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow-sm">
+                                  Cover
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
 
-                      {/* Bottom-Left Card */}
-                      <div className="space-y-1.5">
-                        <Label className="text-[10px] font-bold text-slate-500 uppercase">3. Bottom-Left Image</Label>
-                        <div className="flex items-center gap-2 border border-slate-100 p-2 rounded-xl bg-slate-50/50">
-                          <div className="h-10 w-14 rounded bg-slate-200 overflow-hidden flex items-center justify-center shrink-0 border border-slate-300">
-                            {whyImageBottomLeft ? <img src={whyImageBottomLeft} alt="Bottom Left" className="h-full w-full object-cover" /> : <Upload className="h-4 w-4 text-slate-400" />}
-                          </div>
-                          <Button type="button" size="sm" variant="outline" className="rounded-lg text-xs w-full py-1.5 h-8 font-bold" onClick={() => fileInputBottomLeftRef.current?.click()}>
-                            Upload
-                          </Button>
-                        </div>
+                  {/* Dynamic Floating Collage Cards CRUD */}
+                  <div className="space-y-4 pt-4 border-t border-slate-100">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label className="text-xs font-bold text-slate-600">Floating Collage Cards ({whyCollageCards.length})</Label>
+                        <p className="text-[10px] text-slate-400 mt-0.5">Manage the cards that float around the mockup graphic</p>
                       </div>
-
-                      {/* Bottom-Right Card */}
-                      <div className="space-y-1.5">
-                        <Label className="text-[10px] font-bold text-slate-500 uppercase">4. Bottom-Right Image</Label>
-                        <div className="flex items-center gap-2 border border-slate-100 p-2 rounded-xl bg-slate-50/50">
-                          <div className="h-10 w-14 rounded bg-slate-200 overflow-hidden flex items-center justify-center shrink-0 border border-slate-300">
-                            {whyImageBottomRight ? <img src={whyImageBottomRight} alt="Bottom Right" className="h-full w-full object-cover" /> : <Upload className="h-4 w-4 text-slate-400" />}
-                          </div>
-                          <Button type="button" size="sm" variant="outline" className="rounded-lg text-xs w-full py-1.5 h-8 font-bold" onClick={() => fileInputBottomRightRef.current?.click()}>
-                            Upload
-                          </Button>
-                        </div>
-                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="bg-[#429CE4] text-white hover:bg-[#1D496C] font-bold rounded-lg text-xs h-8 shadow-sm flex items-center gap-1.5"
+                        onClick={handleOpenNewCollage}
+                      >
+                        <Plus className="h-3.5 w-3.5" /> Add Collage Card
+                      </Button>
                     </div>
+
+                    {whyCollageCards.length === 0 ? (
+                      <div className="text-center py-8 border border-dashed border-slate-200 rounded-xl text-slate-400 text-xs">
+                        No floating cards added. Click "Add Collage Card" to create one.
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {whyCollageCards.map((card, idx) => (
+                          <div
+                            key={idx}
+                            className="flex items-center justify-between border border-slate-100 p-2.5 rounded-xl bg-white shadow-sm hover:shadow transition-shadow gap-3"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="h-10 w-14 rounded overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
+                                <img src={card.image} alt={card.label} className="h-full w-full object-cover rounded-md" />
+                              </div>
+                              <div>
+                                <h5 className="font-extrabold text-slate-800 text-xs">{card.label}</h5>
+                                <span className="text-[9px] uppercase tracking-wider font-bold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100 mt-0.5 inline-block">
+                                  {card.position}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="flex gap-1 shrink-0">
+                              <Button
+                                type="button"
+                                size="icon"
+                                variant="ghost"
+                                className="h-7 w-7 text-slate-500 hover:bg-slate-100 rounded-lg"
+                                onClick={() => handleOpenEditCollage(idx)}
+                              >
+                                <Edit2 className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                type="button"
+                                size="icon"
+                                variant="ghost"
+                                className="h-7 w-7 text-rose-600 hover:bg-rose-50 rounded-lg"
+                                onClick={() => handleDeleteCollageCard(idx)}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex justify-end pt-4 border-t border-slate-100">
@@ -569,6 +866,47 @@ export default function WhyChooseUsManager() {
                     ))}
                   </div>
                 )}
+
+                {/* Live Collage Layout Preview */}
+                <div className="border border-slate-100 rounded-xl bg-slate-50/50 p-4 shadow-inner relative overflow-hidden mt-6">
+                  <div className="flex items-center gap-2 mb-3 text-xs">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
+                    <span className="text-slate-500 font-bold tracking-wider uppercase text-[9px]">Collage Mockup Preview</span>
+                  </div>
+                  <div className="relative border border-slate-100 bg-white rounded-xl p-3 flex flex-col gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-14 w-20 rounded bg-slate-100 overflow-hidden flex items-center justify-center shrink-0 border border-slate-200">
+                        {whyImageMain ? (
+                          <img src={whyImageMain} alt="Main mockup" className="h-full w-full object-cover rounded-md" />
+                        ) : (
+                          <ImageIcon className="h-5 w-5 text-slate-300" />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-[#5D3FD3] bg-[#5D3FD3]/10 px-2 py-0.5 rounded-full">
+                          {whyBadge}
+                        </span>
+                        <h5 className="font-extrabold text-[#1D496C] text-xs mt-1.5 truncate">
+                          {whyTitle}
+                        </h5>
+                      </div>
+                    </div>
+                    {whyCollageCards.length > 0 && (
+                      <div className="space-y-1.5 border-t border-slate-50 pt-2 text-[10px] text-slate-500 font-semibold">
+                        <p className="text-[9px] uppercase tracking-wider text-slate-400 font-extrabold mb-1">Active Collage Cards</p>
+                        <div className="grid grid-cols-3 gap-2">
+                          {whyCollageCards.map((c, idx) => (
+                            <div key={idx} className="border border-slate-100 bg-slate-50 rounded p-1.5 flex flex-col gap-1 items-center text-center">
+                              <img src={c.image} alt={c.label} className="h-6 w-9 object-cover rounded" />
+                              <span className="font-black text-slate-700 truncate w-full">{c.label}</span>
+                              <span className="text-[8px] text-[#5D3FD3] uppercase">{c.position.split("-")[1] || c.position}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
 
                 {/* Live Preview Capsule tags */}
                 <div className="border border-slate-100 rounded-xl bg-slate-50/50 p-4 shadow-inner relative overflow-hidden mt-6">
@@ -685,6 +1023,102 @@ export default function WhyChooseUsManager() {
                   className="bg-[#429CE4] text-white hover:bg-[#1D496C] font-bold rounded-xl"
                 >
                   {isSaving ? "Saving..." : editingIndex !== null ? "Update Benefit" : "Add Benefit"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Dynamic Collage Card Modal */}
+      {isCollageOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
+          <div className="relative w-full max-w-md rounded-2xl border border-slate-100 bg-white p-6 shadow-2xl overflow-y-auto max-h-[90vh]">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-4 top-4 text-slate-400 hover:text-slate-900 rounded-full"
+              onClick={() => setIsCollageOpen(false)}
+            >
+              <X className="h-5 w-5" />
+            </Button>
+
+            <div className="mb-6">
+              <h3 className="text-lg font-black text-slate-800">
+                {editingCollageIndex !== null ? "Edit Collage Card" : "Add Collage Card"}
+              </h3>
+              <p className="text-xs text-slate-400 mt-1">
+                Configure card floating position, label text, and upload custom image
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmitCollageCard} className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="collageLabel" className="text-sm font-bold text-slate-600">
+                  Card Label Text
+                </Label>
+                <Input
+                  id="collageLabel"
+                  value={collageLabel}
+                  onChange={(e) => setCollageLabel(e.target.value)}
+                  placeholder="e.g. Smart Campus"
+                  className="rounded-xl border-slate-200"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="collagePosition" className="text-sm font-bold text-slate-600 font-semibold text-xs">
+                  Layout Floating Position
+                </Label>
+                <select
+                  id="collagePosition"
+                  value={collagePosition}
+                  onChange={(e) => setCollagePosition(e.target.value as any)}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm focus:border-[#429CE4] focus:ring-1 focus:ring-[#429CE4]"
+                >
+                  <option value="behind-left">Behind-Left Position</option>
+                  <option value="bottom-left">Bottom-Left Position</option>
+                  <option value="bottom-right">Bottom-Right Position</option>
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-sm font-bold text-slate-600">Card Screenshot Image</Label>
+                <div className="flex items-center gap-3">
+                  <input
+                    ref={fileInputCollageRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleCollageFileChange}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => fileInputCollageRef.current?.click()}
+                    className="rounded-xl border-slate-200 w-full text-xs font-bold text-slate-600 flex items-center justify-center gap-2"
+                  >
+                    <Upload className="h-4 w-4" />
+                    Choose Image from Device
+                  </Button>
+                </div>
+                {collageImage && (
+                  <div className="mt-3 relative h-28 rounded-xl overflow-hidden border border-slate-100 bg-slate-50">
+                    <img src={collageImage} alt="Card preview" className="w-full h-full object-cover rounded-xl animate-fadeIn" />
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end gap-3 border-t border-slate-100 pt-4 mt-6">
+                <Button type="button" variant="outline" onClick={() => setIsCollageOpen(false)} className="rounded-xl">
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSaving || isUploadingCollageFile}
+                  className="bg-[#429CE4] text-white hover:bg-[#1D496C] font-bold rounded-xl"
+                >
+                  {isSaving ? "Saving..." : editingCollageIndex !== null ? "Update Card" : "Add Card"}
                 </Button>
               </div>
             </form>

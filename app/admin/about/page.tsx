@@ -40,6 +40,9 @@ export default function AboutManager() {
     "The system supports both online and offline processes and provides transparency between school staff, students, and parents."
   );
   const [aboutImage, setAboutImage] = useState("/about sms.jpg");
+  const [aboutImages, setAboutImages] = useState<string[]>([]);
+  const [imagePreview, setImagePreview] = useState("/about sms.jpg");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   // About Highlights CRUD list state
   const [highlights, setHighlights] = useState<{ title: string; desc: string }[]>([]);
@@ -53,20 +56,62 @@ export default function AboutManager() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Convert selected file to base64
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error("Image must be under 2MB");
+
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Invalid file type. Use JPG, PNG, WebP, or GIF.");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64 = reader.result as string;
-      setAboutImage(base64);
-      toast.success("Image selected successfully! Remember to save settings below.");
-    };
-    reader.readAsDataURL(file);
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image too large. Max size is 5MB.");
+      return;
+    }
+
+    // Show local preview immediately
+    const localUrl = URL.createObjectURL(file);
+    setImagePreview(localUrl);
+
+    setIsUploadingImage(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("context", "about");
+
+      const res = await fetch("/api/landing/upload", { method: "POST", body: form });
+      const data = await res.json();
+
+      if (data.success) {
+        setAboutImages((prev) => [...prev, data.url]);
+        setAboutImage(data.url);
+        setImagePreview(data.url);
+        toast.success("New about image uploaded and added to the slider list! Remember to Save settings below.");
+      } else {
+        toast.error(data.message || "Upload failed");
+        setImagePreview(aboutImage); // revert preview
+      }
+    } catch {
+      toast.error("Upload error. Please try again.");
+      setImagePreview(aboutImage); // revert preview
+    } finally {
+      setIsUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleRemoveAboutImage = (indexToRemove: number) => {
+    const updatedImages = aboutImages.filter((_, idx) => idx !== indexToRemove);
+    setAboutImages(updatedImages);
+    
+    // If the image we are removing is the current active cover image, update it.
+    if (aboutImage === aboutImages[indexToRemove]) {
+      const fallback = updatedImages.length > 0 ? updatedImages[0] : "/about sms.jpg";
+      setAboutImage(fallback);
+      setImagePreview(fallback);
+    }
+    toast.success("Image removed from slider list. Remember to Save settings.");
   };
 
   useEffect(() => {
@@ -92,7 +137,10 @@ export default function AboutManager() {
             data.settings.aboutQuote ||
               "The system supports both online and offline processes and provides transparency between school staff, students, and parents."
           );
-          setAboutImage(data.settings.aboutImage || "/about sms.jpg");
+          const img = data.settings.aboutImage || "/about sms.jpg";
+          setAboutImage(img);
+          setImagePreview(img);
+          setAboutImages(data.settings.aboutImages || [img]);
           setHighlights(data.settings.aboutHighlights || []);
         }
       } else {
@@ -124,6 +172,7 @@ export default function AboutManager() {
           aboutDescription,
           aboutQuote,
           aboutImage,
+          aboutImages,
           aboutHighlights: highlights,
         }),
       });
@@ -176,6 +225,7 @@ export default function AboutManager() {
           aboutDescription,
           aboutQuote,
           aboutImage,
+          aboutImages,
           aboutHighlights: updatedHighlights,
         }),
       });
@@ -222,6 +272,7 @@ export default function AboutManager() {
           aboutDescription,
           aboutQuote,
           aboutImage,
+          aboutImages,
           aboutHighlights: updatedHighlights,
         }),
       });
@@ -333,6 +384,63 @@ export default function AboutManager() {
                       </div>
                       <p className="text-[10px] text-slate-400 mt-1 font-semibold">JPG, PNG, WebP — max 2MB</p>
                     </div>
+                  </div>
+
+                  {/* Slider Image Gallery */}
+                  <div className="space-y-2.5">
+                    <Label className="text-xs font-bold text-slate-600 flex items-center justify-between">
+                      <span>Slider Image Gallery ({aboutImages.length})</span>
+                      <span className="text-[10px] text-slate-400 font-normal italic">Click thumbnail to set as cover</span>
+                    </Label>
+                    {aboutImages.length === 0 ? (
+                      <div className="text-center py-6 border border-dashed border-slate-200 rounded-xl text-slate-400 text-xs">
+                        No images uploaded yet. Upload one above.
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-3 gap-2.5">
+                        {aboutImages.map((img, idx) => {
+                          const isPrimary = aboutImage === img;
+                          return (
+                            <div
+                              key={idx}
+                              className={`relative group rounded-xl overflow-hidden border-2 aspect-video bg-slate-50 transition-all ${
+                                isPrimary ? "border-[#429CE4]" : "border-slate-100 hover:border-slate-300"
+                              }`}
+                            >
+                              <img
+                                src={img}
+                                alt={`About slide ${idx + 1}`}
+                                className="w-full h-full object-cover cursor-pointer rounded-lg"
+                                onClick={() => {
+                                  setAboutImage(img);
+                                  setImagePreview(img);
+                                  toast.info("Selected as primary cover image!");
+                                }}
+                              />
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7 bg-white/95 text-rose-600 hover:bg-rose-50 rounded-full"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveAboutImage(idx);
+                                  }}
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
+                              {isPrimary && (
+                                <div className="absolute top-1 left-1 bg-[#429CE4] text-white text-[8px] font-bold px-1.5 py-0.5 rounded-md shadow-sm">
+                                  Cover
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-1.5">
@@ -487,7 +595,7 @@ export default function AboutManager() {
                   <div className="flex items-center gap-4 bg-white p-3 rounded-lg border border-slate-100 shadow-sm">
                     <div className="h-14 w-20 rounded-md bg-slate-100 overflow-hidden flex items-center justify-center shrink-0 border border-slate-200">
                       {aboutImage ? (
-                        <img src={aboutImage} alt="Preview" className="h-full w-full object-cover" />
+                        <img src={aboutImage} alt="Preview" className="h-full w-full object-cover rounded-md" />
                       ) : (
                         <ImageIcon className="h-5 w-5 text-slate-300" />
                       )}

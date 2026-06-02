@@ -18,6 +18,8 @@ const DEFAULT_DATA = {
     heroDescription:
       "Manage the complete school journey — from student admission to leaving certificate — with powerful digital panels for Trustees, Principals, Clerks, Teachers, Students, and Guardians.",
     satisfactionRate: 99.8,
+    heroImage: "/sms hero.jpg",
+    heroImages: ["/sms hero.jpg"],
     stats: [
       { label: "Schools",  target: 500, suffix: "+",   iconName: "GraduationCap" },
       { label: "Students", target: 50,  suffix: "K+",  iconName: "Users" },
@@ -50,6 +52,7 @@ const DEFAULT_DATA = {
     aboutDescription: "VidhyaSanchalan is an advanced school ERP and management system designed to simplify daily school operations. It helps schools manage admissions, fees, staff, attendance, examinations, homework, reports, announcements, and student progress through separate role-based panels.",
     aboutQuote: "The system supports both online and offline processes and provides transparency between school staff, students, and parents.",
     aboutImage: "/about sms.jpg",
+    aboutImages: ["/about sms.jpg"],
     aboutHighlights: [
       { title: "Transparency", desc: "For staff, students & parents" },
       { title: "Role-Based Access", desc: "Private secure panels" }
@@ -59,9 +62,15 @@ const DEFAULT_DATA = {
     whyTitleHighlight: "revolution",
     whyPills: ["100% Free Forever", "Instant Insights", "Limitless Scale"],
     whyImageMain: "/why chooseus.jpeg",
+    whyImagesMain: ["/why chooseus.jpeg"],
     whyImageLeft: "/why choose us.jpg",
     whyImageBottomLeft: "/progress report.jpeg",
     whyImageBottomRight: "/admission (1).jpg",
+    whyCollageCards: [
+      { label: "Smart Campus", image: "/why choose us.jpg", position: "behind-left" },
+      { label: "Analytics Panel", image: "/progress report.jpeg", position: "bottom-left" },
+      { label: "Admission Desk", image: "/admission (1).jpg", position: "bottom-right" }
+    ],
     mobileScreens: [
       {
         title: "Student Portal UI",
@@ -248,7 +257,8 @@ const DEFAULT_DATA = {
           "Academic Analytics"
         ],
         color: "from-[#429CE4] to-[#1D496C]",
-        accent: "text-[#429CE4] bg-white/10 border-[#429CE4]/20"
+        accent: "text-[#429CE4] bg-white/10 border-[#429CE4]/20",
+        image: "/mobile-1.png"
       },
       {
         tabId: "parent",
@@ -262,7 +272,8 @@ const DEFAULT_DATA = {
           "Comprehensive Report Cards"
         ],
         color: "from-[#FFA600] to-[#ED6708]",
-        accent: "text-[#FFA600] bg-white/10 border-[#FFA600]/20"
+        accent: "text-[#FFA600] bg-white/10 border-[#FFA600]/20",
+        image: "/mobile-2.png"
       },
       {
         tabId: "teacher",
@@ -276,7 +287,8 @@ const DEFAULT_DATA = {
           "Substitution Alerts"
         ],
         color: "from-[#6A7626] to-[#4F581D]",
-        accent: "text-[#E4FF4C] bg-white/10 border-white/20"
+        accent: "text-[#E4FF4C] bg-white/10 border-white/20",
+        image: "/mobile-3.png"
       }
     ],
     mobileInfrastructure: [
@@ -431,6 +443,20 @@ function readStore(): typeof DEFAULT_DATA {
         store.settings.mobileTabs = DEFAULT_DATA.settings.mobileTabs;
         mutated = true;
       }
+      if (store.settings.mobileTabs && Array.isArray(store.settings.mobileTabs)) {
+        store.settings.mobileTabs.forEach((tab: any, idx: number) => {
+          if (!tab.image) {
+            if (tab.tabId === "student") tab.image = "/mobile-1.png";
+            else if (tab.tabId === "parent") tab.image = "/mobile-2.png";
+            else if (tab.tabId === "teacher") tab.image = "/mobile-3.png";
+            else {
+              const imgIdx = (idx % 3) + 1;
+              tab.image = `/mobile-${imgIdx}.png`;
+            }
+            mutated = true;
+          }
+        });
+      }
       if (!store.settings.mobileInfrastructure) {
         store.settings.mobileInfrastructure = DEFAULT_DATA.settings.mobileInfrastructure;
         mutated = true;
@@ -439,8 +465,38 @@ function readStore(): typeof DEFAULT_DATA {
         store.settings.modulesHeroTags = DEFAULT_DATA.settings.modulesHeroTags;
         mutated = true;
       }
+      if (!store.settings.heroImage) {
+        store.settings.heroImage = DEFAULT_DATA.settings.heroImage;
+        mutated = true;
+      }
+      if (!store.settings.heroImages) {
+        store.settings.heroImages = [store.settings.heroImage || DEFAULT_DATA.settings.heroImage];
+        mutated = true;
+      }
       if (!store.settings.modulesHeroImage) {
         store.settings.modulesHeroImage = DEFAULT_DATA.settings.modulesHeroImage;
+        mutated = true;
+      }
+      if (!store.settings.moduleScreens) {
+        store.settings.moduleScreens = store.settings.modulesHeroImage
+          ? [store.settings.modulesHeroImage]
+          : DEFAULT_DATA.settings.moduleScreens;
+        mutated = true;
+      }
+      if (!store.settings.aboutImages) {
+        store.settings.aboutImages = [store.settings.aboutImage || DEFAULT_DATA.settings.aboutImage];
+        mutated = true;
+      }
+      if (!store.settings.whyImagesMain) {
+        store.settings.whyImagesMain = [store.settings.whyImageMain || DEFAULT_DATA.settings.whyImageMain || "/why chooseus.jpeg"];
+        mutated = true;
+      }
+      if (!store.settings.whyCollageCards) {
+        store.settings.whyCollageCards = [
+          { label: "Smart Campus", image: store.settings.whyImageLeft || DEFAULT_DATA.settings.whyImageLeft || "/why choose us.jpg", position: "behind-left" },
+          { label: "Analytics Panel", image: store.settings.whyImageBottomLeft || DEFAULT_DATA.settings.whyImageBottomLeft || "/progress report.jpeg", position: "bottom-left" },
+          { label: "Admission Desk", image: store.settings.whyImageBottomRight || DEFAULT_DATA.settings.whyImageBottomRight || "/admission (1).jpg", position: "bottom-right" }
+        ];
         mutated = true;
       }
       if (!store.settings.modulesGridCards) {

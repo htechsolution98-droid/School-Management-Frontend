@@ -309,8 +309,7 @@ export default function ModulesPage() {
                 Modules
                 <span className="absolute -bottom-1 left-0 h-0.5 w-full bg-gradient-to-r from-[#285E89] to-[#FFA600]"></span>
               </Link>
-              <Link href="/#why-choose-us" className="text-sm font-medium text-slate-600 transition-colors hover:text-[#FFA600]">Why Choose Us</Link>
-              <Link href="/contact" className="text-sm font-medium text-slate-600 transition-colors hover:text-[#FFA600]">Contact</Link>
+              <Link href="/contact" className="text-sm font-medium text-slate-600 transition-colors hover:text-[#FFA600]">Contact Us</Link>
             </nav>
 
             {/* Action Buttons */}
@@ -347,8 +346,7 @@ export default function ModulesPage() {
             <Link href="/" className="block text-sm font-medium text-slate-600 py-2 hover:text-[#FFA600]" onClick={() => setIsMenuOpen(false)}>Home</Link>
             <Link href="/features" className="block text-sm font-medium text-slate-600 py-2 hover:text-[#FFA600]" onClick={() => setIsMenuOpen(false)}>Features</Link>
             <Link href="/modules" className="block text-sm font-bold text-[#285E89] py-2 hover:text-[#FFA600]" onClick={() => setIsMenuOpen(false)}>Modules</Link>
-            <Link href="/#why-choose-us" className="block text-sm font-medium text-slate-600 py-2 hover:text-[#FFA600]" onClick={() => setIsMenuOpen(false)}>Why Choose Us</Link>
-            <Link href="/contact" className="block text-sm font-medium text-slate-600 py-2 hover:text-[#FFA600]" onClick={() => setIsMenuOpen(false)}>Contact</Link>
+            <Link href="/contact" className="block text-sm font-medium text-slate-600 py-2 hover:text-[#FFA600]" onClick={() => setIsMenuOpen(false)}>Contact Us</Link>
             <div className="border-t border-slate-100 pt-3 flex flex-col gap-2">
               <Button variant="outline" className="w-full text-slate-600 border-slate-200 hover:bg-slate-50 bg-transparent" asChild>
                 <Link href="/login" onClick={() => setIsMenuOpen(false)}>Sign In</Link>
