@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import emailjs from "@emailjs/browser";
 import {
   GraduationCap,
   ArrowRight,
@@ -33,12 +34,12 @@ export default function ContactPage() {
   const [activeFaqIdx, setActiveFaqIdx] = useState<number | null>(null);  // Form states
   const [formData, setFormData] = useState({
     fullName: "",
-    schoolName: "",
     email: "",
-    phone: "",
-    role: "Trustee",
-    strength: "",
-    module: "Complete ERP",
+    mobileNumber: "",
+    schoolName: "",
+    city: "",
+    state: "",
+    inquiryType: "General Inquiry",
     message: ""
   });
 
@@ -46,12 +47,36 @@ export default function ContactPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API request
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const serviceId = "service_ps6v4lo";
+      const templateId = "template_bkhyngf";
+      const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || "";
 
-    setIsLoading(false);
-    setIsSubmitted(true);
-    toast.success("Thank you! Our team will contact you shortly.");
+      // Send via EmailJS
+      await emailjs.send(
+        serviceId,
+        templateId,
+        {
+          fullName: formData.fullName,
+          email: formData.email,
+          mobileNumber: formData.mobileNumber,
+          schoolName: formData.schoolName,
+          city: formData.city,
+          state: formData.state,
+          inquiryType: formData.inquiryType,
+          message: formData.message,
+        },
+        publicKey
+      );
+
+      setIsSubmitted(true);
+      toast.success("Thank you! Our team will contact you shortly.");
+    } catch (error) {
+      console.error("EmailJS error:", error);
+      toast.error("Failed to submit inquiry. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -190,11 +215,10 @@ export default function ContactPage() {
                     initial={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                   >
-
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       {/* Full Name */}
                       <div className="space-y-1.5">
-                        <Label htmlFor="fullName" className="text-xs sm:text-sm font-bold text-[#1D496C]">Full Name</Label>
+                        <Label htmlFor="fullName" className="text-xs sm:text-sm font-bold text-[#1D496C]">Full Name *</Label>
                         <div className="relative">
                           <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-slate-400" />
                           <Input
@@ -209,9 +233,45 @@ export default function ContactPage() {
                         </div>
                       </div>
 
+                      {/* Email Address */}
+                      <div className="space-y-1.5">
+                        <Label htmlFor="email" className="text-xs sm:text-sm font-bold text-[#1D496C]">Email Address *</Label>
+                        <div className="relative">
+                          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-slate-400" />
+                          <Input
+                            id="email"
+                            type="email"
+                            required
+                            placeholder="Enter your email address"
+                            value={formData.email}
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            className="pl-10.5 h-12 rounded-xl border-slate-200 bg-white placeholder:text-slate-400 text-slate-800 shadow-sm focus:border-[#FFA600] focus:ring-2 focus:ring-[#FFA600]/10 transition-all"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      {/* Mobile Number */}
+                      <div className="space-y-1.5">
+                        <Label htmlFor="mobileNumber" className="text-xs sm:text-sm font-bold text-[#1D496C]">Mobile Number *</Label>
+                        <div className="relative">
+                          <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-slate-400" />
+                          <Input
+                            id="mobileNumber"
+                            type="tel"
+                            required
+                            placeholder="Enter your mobile number"
+                            value={formData.mobileNumber}
+                            onChange={(e) => setFormData({ ...formData, mobileNumber: e.target.value })}
+                            className="pl-10.5 h-12 rounded-xl border-slate-200 bg-white placeholder:text-slate-400 text-slate-800 shadow-sm focus:border-[#FFA600] focus:ring-2 focus:ring-[#FFA600]/10 transition-all"
+                          />
+                        </div>
+                      </div>
+
                       {/* School Name */}
                       <div className="space-y-1.5">
-                        <Label htmlFor="schoolName" className="text-xs sm:text-sm font-bold text-[#1D496C]">School Name</Label>
+                        <Label htmlFor="schoolName" className="text-xs sm:text-sm font-bold text-[#1D496C]">School Name *</Label>
                         <div className="relative">
                           <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-slate-400" />
                           <Input
@@ -228,90 +288,53 @@ export default function ContactPage() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                      {/* Email Address */}
+                      {/* City */}
                       <div className="space-y-1.5">
-                        <Label htmlFor="email" className="text-xs sm:text-sm font-bold text-[#1D496C]">Email Address</Label>
+                        <Label htmlFor="city" className="text-xs sm:text-sm font-bold text-[#1D496C]">City *</Label>
                         <div className="relative">
-                          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-slate-400" />
+                          <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-slate-400" />
                           <Input
-                            id="email"
-                            type="email"
+                            id="city"
+                            type="text"
                             required
-                            placeholder="Enter your email"
-                            value={formData.email}
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            placeholder="Enter your city"
+                            value={formData.city}
+                            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                             className="pl-10.5 h-12 rounded-xl border-slate-200 bg-white placeholder:text-slate-400 text-slate-800 shadow-sm focus:border-[#FFA600] focus:ring-2 focus:ring-[#FFA600]/10 transition-all"
                           />
                         </div>
                       </div>
 
-                      {/* Phone Number */}
+                      {/* State */}
                       <div className="space-y-1.5">
-                        <Label htmlFor="phone" className="text-xs sm:text-sm font-bold text-[#1D496C]">Phone Number</Label>
+                        <Label htmlFor="state" className="text-xs sm:text-sm font-bold text-[#1D496C]">State *</Label>
                         <div className="relative">
-                          <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-slate-400" />
+                          <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-slate-400" />
                           <Input
-                            id="phone"
-                            type="tel"
+                            id="state"
+                            type="text"
                             required
-                            placeholder="Enter your mobile number"
-                            value={formData.phone}
-                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                            className="pl-10.5 h-12 rounded-xl border-slate-200 bg-white placeholder:text-slate-400 text-slate-800 shadow-sm focus:border-[#FFA600] focus:ring-2 focus:ring-[#FFA600]/10 transition-all"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                      {/* Your Role Dropdown */}
-                      <div className="space-y-1.5">
-                        <Label htmlFor="role" className="text-xs sm:text-sm font-bold text-[#1D496C]">Your Role</Label>
-                        <div className="relative">
-                          <select
-                            id="role"
-                            value={formData.role}
-                            onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                            className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-white text-slate-800 shadow-sm focus:border-[#FFA600] focus:ring-2 focus:ring-[#FFA600]/10 transition-all appearance-none cursor-pointer text-sm font-medium"
-                          >
-                            {["Trustee", "Principal", "Clerk", "Teacher", "Other"].map((role) => (
-                              <option key={role} value={role}>{role}</option>
-                            ))}
-                          </select>
-                          <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
-                        </div>
-                      </div>
-
-                      {/* School Strength */}
-                      <div className="space-y-1.5">
-                        <Label htmlFor="strength" className="text-xs sm:text-sm font-bold text-[#1D496C]">School Strength</Label>
-                        <div className="relative">
-                          <Users className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-slate-400" />
-                          <Input
-                            id="strength"
-                            type="number"
-                            required
-                            placeholder="Number of students"
-                            value={formData.strength}
-                            onChange={(e) => setFormData({ ...formData, strength: e.target.value })}
+                            placeholder="Enter your state"
+                            value={formData.state}
+                            onChange={(e) => setFormData({ ...formData, state: e.target.value })}
                             className="pl-10.5 h-12 rounded-xl border-slate-200 bg-white placeholder:text-slate-400 text-slate-800 shadow-sm focus:border-[#FFA600] focus:ring-2 focus:ring-[#FFA600]/10 transition-all"
                           />
                         </div>
                       </div>
                     </div>
 
-                    {/* Interested Module Dropdown */}
+                    {/* Inquiry Type Dropdown */}
                     <div className="space-y-1.5">
-                      <Label htmlFor="module" className="text-xs sm:text-sm font-bold text-[#1D496C]">Interested Module</Label>
+                      <Label htmlFor="inquiryType" className="text-xs sm:text-sm font-bold text-[#1D496C]">Inquiry Type *</Label>
                       <div className="relative">
                         <select
-                          id="module"
-                          value={formData.module}
-                          onChange={(e) => setFormData({ ...formData, module: e.target.value })}
+                          id="inquiryType"
+                          value={formData.inquiryType}
+                          onChange={(e) => setFormData({ ...formData, inquiryType: e.target.value })}
                           className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-white text-slate-800 shadow-sm focus:border-[#FFA600] focus:ring-2 focus:ring-[#FFA600]/10 transition-all appearance-none cursor-pointer text-sm font-medium"
                         >
-                          {["Admission", "Fees", "Attendance", "Exam", "Complete ERP"].map((module) => (
-                            <option key={module} value={module}>{module}</option>
+                          {["General Inquiry", "Request a Demo", "Pricing & Quotation", "Support Request", "Other"].map((type) => (
+                            <option key={type} value={type}>{type}</option>
                           ))}
                         </select>
                         <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
@@ -320,7 +343,7 @@ export default function ContactPage() {
 
                     {/* Message Box */}
                     <div className="space-y-1.5">
-                      <Label htmlFor="message" className="text-xs sm:text-sm font-bold text-[#1D496C]">Message</Label>
+                      <Label htmlFor="message" className="text-xs sm:text-sm font-bold text-[#1D496C]">Message *</Label>
                       <div className="relative">
                         <MessageSquare className="absolute left-3.5 top-3.5 h-4.5 w-4.5 text-slate-400" />
                         <textarea
@@ -335,7 +358,7 @@ export default function ContactPage() {
                       </div>
                     </div>
 
-                    {/* Request a Demo Submit Button */}
+                    {/* Submit Button */}
                     <div className="pt-2">
                       <Button
                         type="submit"
@@ -345,11 +368,11 @@ export default function ContactPage() {
                         {isLoading ? (
                           <span className="flex items-center justify-center gap-2">
                             <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                            Processing Request…
+                            Submitting Inquiry…
                           </span>
                         ) : (
                           <span className="flex items-center justify-center gap-2">
-                            Request a Demo
+                            Submit Inquiry
                             <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
                           </span>
                         )}
@@ -369,14 +392,14 @@ export default function ContactPage() {
                     </div>
                     <h2 className="text-xl sm:text-2xl font-black text-[#1D496C]">Thank you!</h2>
                     <p className="text-sm font-semibold text-slate-500 max-w-sm leading-relaxed">
-                      Your demo request has been successfully registered. One of our educational coordinator will get in touch with you shortly at <span className="font-bold text-[#FFA600]">{formData.email}</span>.
+                      Your inquiry has been successfully sent. One of our coordinators will get in touch with you shortly at <span className="font-bold text-[#FFA600]">{formData.email}</span>.
                     </p>
                     <Button
                       onClick={() => setIsSubmitted(false)}
                       variant="outline"
                       className="mt-4 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50"
                     >
-                      Fill another request
+                      Send another inquiry
                     </Button>
                   </motion.div>
                 )}
