@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { AlertCircle, ArrowLeft, RefreshCw, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { API_BASE_URL } from "@/lib/config";
 
 export default function AdmissionRedirectPage({
   params,
@@ -18,9 +19,8 @@ export default function AdmissionRedirectPage({
   useEffect(() => {
     const fetchSchoolData = async () => {
       try {
-        const response = await fetch(
-          `https://school-management-system-sms-z8kv.onrender.com/api/admission/${uniqueLink}/`
-        );
+        const url = new URL(`/api/admission/${uniqueLink}/`, API_BASE_URL).toString();
+        const response = await fetch(url);
 
         const data = await response.json();
 
